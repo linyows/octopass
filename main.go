@@ -1,23 +1,8 @@
 package main
 
-import (
-	"os"
-
-	"github.com/codegangsta/cli"
-)
+import "os"
 
 func main() {
-
-	app := cli.NewApp()
-	app.Name = Name
-	app.Version = Version
-	app.Author = "linyows"
-	app.Email = ""
-	app.Usage = ""
-
-	app.Flags = GlobalFlags
-	app.Commands = Commands
-	app.CommandNotFound = CommandNotFound
-
-	app.Run(os.Args)
+	cli := &CLI{outStream: os.Stdout, errStream: os.Stderr}
+	os.Exit(cli.Run(os.Args))
 }
