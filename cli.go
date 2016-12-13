@@ -101,7 +101,11 @@ func (cli *CLI) Octopass(args []string) error {
 		cli.stdout("Arguments: %s", args)
 		username := args[0]
 		cli.stdout("Username: %s", username)
-		PublicKeys(username)
+		keys, err := PublicKeys(username)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(cli.outStream, strings.Join(keys, "\n"))
 
 		// for pam
 	} else {
