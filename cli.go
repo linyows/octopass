@@ -30,13 +30,13 @@ type Ops struct {
 }
 
 var usageText = `
-Usage: teamauth [options]
+Usage: octopass [options]
 Options:`
 
 var exampleText = `
 Example:
-  $ teamauth <github username> --organization github --team foo
-  $ echo <github token> | teamauth --config=/etc/teamauth.conf
+  $ octopass <github username> --organization github --team foo
+  $ echo <github token> | octopass --config=/etc/octopass.conf
 `
 
 // Run invokes the CLI with the given arguments.
