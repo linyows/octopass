@@ -10,14 +10,14 @@ import (
 func TestRun_versionFlag(t *testing.T) {
 	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
 	cli := &CLI{outStream: outStream, errStream: errStream}
-	args := strings.Split("./go-octopass -version", " ")
+	args := strings.Split("./octopass -version", " ")
 
 	status := cli.Run(args)
 	if status != ExitCodeOK {
 		t.Errorf("expected %d to eq %d", status, ExitCodeOK)
 	}
 
-	expected := fmt.Sprintf("go-octopass version %s", Version)
+	expected := fmt.Sprintf("octopass version %s", Version)
 	if !strings.Contains(errStream.String(), expected) {
 		t.Errorf("expected %q to eq %q", errStream.String(), expected)
 	}
@@ -26,7 +26,7 @@ func TestRun_versionFlag(t *testing.T) {
 func TestRun_tokenFlag(t *testing.T) {
 	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
 	cli := &CLI{outStream: outStream, errStream: errStream}
-	args := strings.Split("./go-octopass -token", " ")
+	args := strings.Split("./octopass -token", " ")
 
 	status := cli.Run(args)
 	_ = status
@@ -35,7 +35,7 @@ func TestRun_tokenFlag(t *testing.T) {
 func TestRun_versionFlag(t *testing.T) {
 	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
 	cli := &CLI{outStream: outStream, errStream: errStream}
-	args := strings.Split("./go-octopass -version", " ")
+	args := strings.Split("./octopass -version", " ")
 
 	status := cli.Run(args)
 	_ = status
@@ -44,7 +44,7 @@ func TestRun_versionFlag(t *testing.T) {
 func TestRun_verboseFlag(t *testing.T) {
 	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
 	cli := &CLI{outStream: outStream, errStream: errStream}
-	args := strings.Split("./go-octopass -verbose", " ")
+	args := strings.Split("./octopass -verbose", " ")
 
 	status := cli.Run(args)
 	_ = status
@@ -53,7 +53,7 @@ func TestRun_verboseFlag(t *testing.T) {
 func TestRun_configFlag(t *testing.T) {
 	outStream, errStream := new(bytes.Buffer), new(bytes.Buffer)
 	cli := &CLI{outStream: outStream, errStream: errStream}
-	args := strings.Split("./go-octopass -config", " ")
+	args := strings.Split("./octopass -config", " ")
 
 	status := cli.Run(args)
 	_ = status
