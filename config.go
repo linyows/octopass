@@ -1,33 +1,37 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/url"
-	"os"
+
+	"github.com/hashicorp/hcl"
 )
 
 // Config is the structure
-type Config struct {
-	Token    string
-	Endpoint *url.URL
+type config struct {
+	Endpoint     *url.URL
+	Token        string
+	Organization string
+	Team         string
 }
 
-var configInstance *Config
-
-// Conf returns Config singleton structure.
-func Conf() *Config {
-	if configInstance == nil {
-		configInstance = &Config{
-			Token:    os.Getenv("GITHUB_TOKEN"),
-			Endpoint: nil,
-		}
+// LoadConfig returns config
+func LoadConfig(path string) (*config, error) {
+	d, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading %s: %s", path, err)
 	}
 
-	return configInstance
-}
+	obj, err := hcl.Parse(string(d))
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing %s: %s", path, err)
+	}
 
-// Set sets endpoint
-func (c *Config) Set(endpoint string) *Config {
-	url, _ := url.Parse(endpoint)
-	c.Endpoint = url
-	return c
+	var result config
+	if err := hcl.DecodeObject(&result, obj); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

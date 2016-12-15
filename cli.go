@@ -18,16 +18,15 @@ const (
 
 // Options is structure
 type Options struct {
-	Belongs  string
-	Endpoint string
-	Debug    bool
-	Version  bool
+	Config  string
+	Debug   bool
+	Version bool
 }
 
 // CLI is the command line object
 type CLI struct {
 	outStream, errStream io.Writer
-	ops                  Options
+	opt                  Options
 }
 
 var usageText = `Usage: octopass [options]
@@ -39,13 +38,13 @@ SSHD AuthorizedKeysCommand:
   It is returns public-keys
   $ octopass <github username>
   With confirm whether it belongs to the team
-  $ octopass <github username> --belongs=foo/bar
+  $ octopass <github username> --config=/etc/octopass.conf
 
 PAM Exec:
   Authorize by token
   $ echo <github token> | env PAM_USER=<github username> octopass
   With confirm whether it belongs to the team
-  $ echo <github token> | env PAM_USER=<github username> octopass --belongs=foo/bar
+  $ echo <github token> | env PAM_USER=<github username> octopass --config=/etc/octopass.conf
 
 `
 
@@ -60,23 +59,22 @@ func (cli *CLI) Run(args []string) int {
 		fmt.Fprint(cli.outStream, exampleText)
 	}
 
-	f.StringVar(&cli.ops.Belongs, []string{"b", "-belongs"}, "", "organization/team on github")
-	f.StringVar(&cli.ops.Endpoint, []string{"e", "-endpoint"}, "", "github api endpoint")
-	f.BoolVar(&cli.ops.Debug, []string{"d", "-debug"}, false, "print log for debug")
-	f.BoolVar(&cli.ops.Version, []string{"v", "-version"}, false, "print the version and exit")
+	f.StringVar(&cli.opt.Config, []string{"c", "-config"}, "/etc/octopass.conf", "the path to the configuration file")
+	f.BoolVar(&cli.opt.Debug, []string{"d", "-debug"}, false, "print log for debug")
+	f.BoolVar(&cli.opt.Version, []string{"v", "-version"}, false, "print the version and exit")
 
 	if err := f.Parse(args[1:]); err != nil {
-		f.Usage()
 		return ExitCodeError
 	}
 
-	if cli.ops.Version {
+	if cli.opt.Version {
 		fmt.Fprintf(cli.outStream, "%s version %s\n", Name, Version)
 		return ExitCodeOK
 	}
 
 	res := ExitCodeOK
 	if err := cli.Octopass(f.Args()); err != nil {
+		cli.stderr("%#v", err)
 		res = ExitCodeError
 	}
 
@@ -85,16 +83,13 @@ func (cli *CLI) Run(args []string) int {
 
 // Octopass returns exit status
 func (cli *CLI) Octopass(args []string) error {
-	if cli.ops.Belongs != "" {
-		belongs := strings.Split(cli.ops.Belongs, "/")
-		org := belongs[0]
-		team := belongs[1]
-		cli.stdout("Github org/team: %s/%s", org, team)
+	username := ""
+
+	c, err := LoadConfig(cli.opt.Config)
+	if err != nil {
+		return err
 	}
-	if cli.ops.Endpoint != "" {
-		c := Conf()
-		c.Set(cli.ops.Endpoint)
-	}
+	o := NewOctopass(c, nil)
 
 	stat, err := os.Stdin.Stat()
 	if err != nil {
@@ -110,14 +105,20 @@ func (cli *CLI) Octopass(args []string) error {
 
 		cli.stdout("Got password from STDIN")
 		pw := strings.TrimSuffix(string(PWBytes), string("\x00"))
-		cli.stdout("PW: %s", pw)
+		username = os.Getenv("PAM_USER")
+		res, err := o.IsBasicAuthorized(username, pw)
+		if err != nil {
+			return err
+		}
+		cli.stdout("Username: %s", username)
+		cli.stdout("Basic Authentication: %t", res)
 
 		// for sshd
 	} else if len(args) > 0 {
 		cli.stdout("Arguments: %s", args)
-		username := args[0]
+		username = args[0]
 		cli.stdout("Username: %s", username)
-		keys, err := PublicKeys(username)
+		keys, err := o.GetUserKeys(username)
 		if err != nil {
 			return err
 		}
@@ -127,12 +128,20 @@ func (cli *CLI) Octopass(args []string) error {
 		cli.stderr("Arguments or STDIN required")
 	}
 
+	if c.Organization != "" && c.Team != "" && username != "" {
+		res, err := o.IsMember(username)
+		if err != nil {
+			return err
+		}
+		cli.stdout("Team Member: %t", res)
+	}
+
 	return nil
 }
 
 // Stdout
 func (cli *CLI) stdout(format string, a ...interface{}) {
-	if cli.ops.Debug {
+	if cli.opt.Debug {
 		fmt.Fprintln(cli.outStream, fmt.Sprintf(format, a...))
 	}
 }
