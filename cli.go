@@ -96,8 +96,24 @@ func (cli *CLI) Octopass(args []string) error {
 		c.Set(cli.ops.Endpoint)
 	}
 
-	// for sshd
-	if len(args) > 0 {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return err
+	}
+
+	if stat.Size() != 0 {
+		// for pam
+		PWBytes, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+
+		cli.stdout("Got password from STDIN")
+		pw := strings.TrimSuffix(string(PWBytes), string("\x00"))
+		cli.stdout("PW: %s", pw)
+
+		// for sshd
+	} else if len(args) > 0 {
 		cli.stdout("Arguments: %s", args)
 		username := args[0]
 		cli.stdout("Username: %s", username)
@@ -107,16 +123,8 @@ func (cli *CLI) Octopass(args []string) error {
 		}
 		fmt.Fprintln(cli.outStream, strings.Join(keys, "\n"))
 
-		// for pam
 	} else {
-		PWBytes, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			return err
-		}
-
-		cli.stdout("Got password from STDIN")
-		pw := strings.TrimSuffix(string(PWBytes), string("\x00"))
-		cli.stdout("PW: %s", pw)
+		cli.stderr("Arguments or STDIN required")
 	}
 
 	return nil
