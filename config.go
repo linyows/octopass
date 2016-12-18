@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"github.com/hashicorp/hcl"
@@ -13,18 +12,20 @@ type config struct {
 	Token        string
 	Organization string
 	Team         string
+	LogLevel     string
+	LogFile      string
 }
 
 // LoadConfig returns config
 func LoadConfig(path string) (*config, error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("[ERR] %s", err)
+		return nil, err
 	}
 
 	obj, err := hcl.Parse(string(d))
 	if err != nil {
-		return nil, fmt.Errorf("[ERR] %s", err)
+		return nil, err
 	}
 
 	var result config
@@ -33,4 +34,13 @@ func LoadConfig(path string) (*config, error) {
 	}
 
 	return &result, nil
+}
+
+// SetDefault sets default for config
+func (c *config) SetDefault() *config {
+	if c.LogLevel == "" {
+		c.LogLevel = "DEBUG"
+	}
+
+	return c
 }

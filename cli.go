@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	flag "github.com/linyows/mflag"
@@ -27,15 +28,18 @@ type CLI struct {
 	opt                  Options
 }
 
-var usageText = `Usage: octopass [options] <github username>
+var usageText = `Usage: octopass [options] <command> [args]
+
+Commands:
+  keys   get public keys for AuthorizedKeysCommand in sshd(8)
+  pam    authorize with github authentication for pam_exec(8)
 
 Options:`
 
 var exampleText = `
-SSHD AuthorizedKeysCommand:
-  $ octopass <github username>
-PAM Exec:
-  $ echo <github token> | env PAM_USER=<github username> octopass
+Examples:
+  $ octopass keys <user@github>
+  $ echo <token@github> | env PAM_USER=<user@github> octopass pam
 
 `
 
@@ -56,6 +60,17 @@ func (cli *CLI) Run(args []string) int {
 	if err := f.Parse(args[1:]); err != nil {
 		return ExitCodeError
 	}
+	parsedArgs := f.Args()
+
+	if len(parsedArgs) == 0 {
+		f.Usage()
+		return ExitCodeOK
+	}
+
+	if parsedArgs[0] != "keys" && parsedArgs[0] != "pam" {
+		fmt.Fprintf(cli.errStream, "invalid argument: %s\n", parsedArgs[0])
+		return ExitCodeError
+	}
 
 	if cli.opt.Version {
 		fmt.Fprintf(cli.outStream, "%s version %s\n", Name, Version)
@@ -67,10 +82,11 @@ func (cli *CLI) Run(args []string) int {
 		fmt.Fprintf(cli.errStream, "%s\n", err)
 		return ExitCodeError
 	}
+	c.SetDefault()
 
 	oct := NewOctopass(c, nil, cli)
-	if err := oct.Run(f.Args()); err != nil {
-		fmt.Fprintf(cli.errStream, "%s\n", err)
+	if err := oct.Run(parsedArgs); err != nil {
+		log.Print("[ERR] " + fmt.Sprintf("%s", err))
 		return ExitCodeError
 	}
 
