@@ -21,8 +21,21 @@ This is authenticated with the team on your organization in Github.
 Usage
 -----
 
-- PAM: pam_exec.so
-- SSHD: AuthorizedKeysCommand
+### keys command
+
+get public keys for AuthorizedKeysCommand in sshd(8)
+
+```sh
+$ octopass -t <token> keys <user@github>
+```
+
+### pam command
+
+authorize with github authentication for pam_exec(8)
+
+```sh
+$ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
+```
 
 Install
 -------
