@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"strings"
 
 	"github.com/hashicorp/hcl"
 )
@@ -12,8 +13,37 @@ type config struct {
 	Token        string
 	Organization string
 	Team         string
-	LogLevel     string
-	LogFile      string
+	Syslog       bool
+}
+
+// NewConfig creates config from Options
+func NewConfig(opt *Options) *config {
+	var org, team string
+
+	if opt.Belongs != "" {
+		b := strings.Split(opt.Belongs, "/")
+		org = b[0]
+		team = b[1]
+	}
+
+	c := &config{
+		Endpoint:     opt.Endpoint,
+		Token:        opt.Token,
+		Organization: org,
+		Team:         team,
+		Syslog:       opt.Syslog,
+	}
+
+	if opt.Config == "" {
+		return c
+	}
+
+	loadedConfig, err := LoadConfig(opt.Config)
+	if err != nil {
+		panic(err)
+	}
+
+	return loadedConfig.Merge(c)
 }
 
 // LoadConfig returns config
@@ -36,10 +66,22 @@ func LoadConfig(path string) (*config, error) {
 	return &result, nil
 }
 
-// SetDefault sets default for config
-func (c *config) SetDefault() *config {
-	if c.LogLevel == "" {
-		c.LogLevel = "DEBUG"
+// Merge merges config from base config
+func (c *config) Merge(c2 *config) *config {
+	if c2.Endpoint != "" {
+		c.Endpoint = c2.Endpoint
+	}
+	if c2.Token != "" {
+		c.Token = c2.Token
+	}
+	if c2.Organization != "" {
+		c.Organization = c2.Organization
+	}
+	if c2.Team != "" {
+		c.Team = c2.Team
+	}
+	if c.Syslog != c2.Syslog {
+		c.Syslog = c2.Syslog
 	}
 
 	return c

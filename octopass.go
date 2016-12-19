@@ -11,15 +11,36 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/hashicorp/logutils"
 	"golang.org/x/oauth2"
 )
 
 // Octopass struct.
 type Octopass struct {
 	Config *config
-	Client *github.Client
 	CLI    *CLI
+	Client *github.Client
+}
+
+// NewOctopass returns Octopass instance.
+func NewOctopass(c *config, cli *CLI, client *github.Client) *Octopass {
+	var logWriter io.Writer
+	if c.Syslog == false {
+		logWriter = cli.errStream
+	}
+
+	if err := SetupLogger(logWriter); err != nil {
+		panic(err)
+	}
+
+	if client == nil {
+		client = DefaultClient(c.Token, c.Endpoint)
+	}
+
+	return &Octopass{
+		Config: c,
+		CLI:    cli,
+		Client: client,
+	}
 }
 
 // DefaultClient returns default Octopass instance.
@@ -32,6 +53,7 @@ func DefaultClient(token string, endpoint string) *github.Client {
 	client := github.NewClient(tc)
 
 	if endpoint != "" {
+		log.Print("[DEBUG] " + fmt.Sprintf("Specified API endpoint: %s", endpoint))
 		url, _ := url.Parse(endpoint)
 		client.BaseURL = url
 	}
@@ -39,34 +61,28 @@ func DefaultClient(token string, endpoint string) *github.Client {
 	return client
 }
 
-// NewOctopass returns Octopass instance.
-func NewOctopass(c *config, client *github.Client, cli *CLI) *Octopass {
-	if client == nil {
-		client = DefaultClient(c.Token, c.Endpoint)
-	}
-
-	return &Octopass{
-		Config: c,
-		Client: client,
-		CLI:    cli,
-	}
-}
-
 // Run controls cli command.
 func (o *Octopass) Run(args []string) error {
-
-	if err := o.SetupLogger(); err != nil {
-		return err
-	}
-
-	u := ""
+	var u string
 
 	switch args[0] {
 	case "keys":
 		if len(args) == 0 {
-			return fmt.Errorf("user required")
+			return fmt.Errorf("User required")
 		}
 		u = args[1]
+		log.Print("[DEBUG] " + fmt.Sprintf("Keys request user: %s", u))
+
+		if o.isConfirmable() {
+			res, err := o.IsMember(u)
+			if err != nil {
+				return err
+			}
+			if res == false {
+				return errors.New("")
+			}
+		}
+
 		if err := o.OutputKeys(u); err != nil {
 			return err
 		}
@@ -79,56 +95,35 @@ func (o *Octopass) Run(args []string) error {
 		if stdin == false {
 			return fmt.Errorf("STDIN required")
 		}
-		u = os.Getenv("PAM_USER")
-		if u == "" {
+		if u = os.Getenv("PAM_USER"); u == "" {
 			return fmt.Errorf("PAM_USER required")
 		}
-		if err := o.AuthWithTokenFromSTDIN(u); err != nil {
-			return err
-		}
-	}
+		log.Print("[DEBUG] " + fmt.Sprintf("env PAM_USER: %s", u))
 
-	if o.Config.Organization != "" && o.Config.Team != "" && u != "" {
-		res, err := o.IsMember(u)
+		if o.isConfirmable() {
+			res, err := o.IsMember(u)
+			if err != nil {
+				return err
+			}
+			if res == false {
+				return errors.New("")
+			}
+		}
+
+		res, err := o.AuthWithTokenFromSTDIN(u)
 		if err != nil {
 			return err
 		}
 		if res == false {
-			return nil
+			return fmt.Errorf("Not authenticated")
 		}
 	}
 
 	return nil
 }
 
-// SetupLogger sets log setting
-func (o *Octopass) SetupLogger() error {
-	var writer io.Writer
-
-	if o.Config.LogFile == "" {
-		writer = os.Stderr
-	} else {
-		if !FileExists(o.Config.LogFile) {
-			CreateFile(o.Config.LogFile)
-		}
-
-		f, err := os.OpenFile(o.Config.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		writer = f
-	}
-
-	filter := &logutils.LevelFilter{
-		Levels:   []logutils.LogLevel{"DEBUG", "WARN", "ERR"},
-		MinLevel: logutils.LogLevel(o.Config.LogLevel),
-		Writer:   writer,
-	}
-
-	log.SetOutput(filter)
-
-	return nil
+func (o *Octopass) isConfirmable() bool {
+	return o.Config.Organization != "" && o.Config.Team != ""
 }
 
 // IsStdinGiven checks given stdin
@@ -157,29 +152,26 @@ func (o *Octopass) OutputKeys(u string) error {
 }
 
 // AuthWithTokenFromSTDIN authorize as basic-authentication on Github.
-func (o *Octopass) AuthWithTokenFromSTDIN(u string) error {
+func (o *Octopass) AuthWithTokenFromSTDIN(u string) (bool, error) {
 	PWBytes, err := ioutil.ReadAll(o.CLI.inStream)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	pw := strings.TrimSuffix(string(PWBytes), string("\x00"))
-	res, err := o.IsBasicAuthorized(u, pw)
-	if err != nil {
-		return err
-	}
-	if res == false {
-		return nil
-	}
+	res := o.IsBasicAuthorized(u, pw)
 
-	return nil
+	return res, nil
 }
 
 // IsMember checks if a user is a member of the specified team.
 func (o *Octopass) IsMember(u string) (bool, error) {
 	opt := &github.ListOptions{PerPage: 100}
 	teams, _, err := o.Client.Organizations.ListTeams(o.Config.Organization, opt)
+
 	if err != nil {
+		log.Print("[INFO] " + fmt.Sprintf(
+			"Organization \"%s\" team list error: %s", o.Config.Organization, err))
 		return false, err
 	}
 
@@ -190,12 +182,28 @@ func (o *Octopass) IsMember(u string) (bool, error) {
 			break
 		}
 	}
+
 	if teamID == nil {
-		return false, errors.New("Team is not exists")
+		log.Print("[INFO] " + fmt.Sprintf(
+			"\"%s/%s\" is not exists on github", o.Config.Organization, o.Config.Team))
+		return false, nil
 	}
 
-	member, _, err := o.Client.Organizations.IsTeamMember(*teamID, u)
-	return member, err
+	isMember, _, err := o.Client.Organizations.IsTeamMember(*teamID, u)
+
+	if err != nil {
+		return false, err
+	}
+
+	if isMember {
+		log.Print("[INFO] " + fmt.Sprintf(
+			"\"%s/%s\" includes: %s", o.Config.Organization, o.Config.Team, u))
+	} else {
+		log.Print("[INFO] " + fmt.Sprintf(
+			"\"%s/%s\" not includes: %s", o.Config.Organization, o.Config.Team, u))
+	}
+
+	return isMember, err
 }
 
 // GetUserKeys return public keys.
@@ -215,7 +223,7 @@ func (o *Octopass) GetUserKeys(u string) ([]string, error) {
 }
 
 // IsBasicAuthorized authorize to Github.
-func (o *Octopass) IsBasicAuthorized(u string, pw string) (bool, error) {
+func (o *Octopass) IsBasicAuthorized(u string, pw string) bool {
 	tp := github.BasicAuthTransport{
 		Username: strings.TrimSpace(u),
 		Password: strings.TrimSpace(pw),
@@ -224,7 +232,7 @@ func (o *Octopass) IsBasicAuthorized(u string, pw string) (bool, error) {
 	client := github.NewClient(tp.Client())
 
 	if o.Config.Endpoint != "" {
-		log.Print("[DEBUG] " + fmt.Sprintf("Specified API endpoint -- %s", o.Config.Endpoint))
+		log.Print("[DEBUG] " + fmt.Sprintf("Specified API endpoint as basic auth: %s", o.Config.Endpoint))
 		url, _ := url.Parse(o.Config.Endpoint)
 		client.BaseURL = url
 	}
@@ -232,9 +240,10 @@ func (o *Octopass) IsBasicAuthorized(u string, pw string) (bool, error) {
 	_, _, err := client.Users.Get("")
 
 	if err != nil {
-		log.Print("[DEBUG] " + fmt.Sprintf("Failed basic authentication -- %s", err))
-		return false, nil
+		log.Print("[INFO] " + fmt.Sprintf("Failed basic authentication -- %s", err))
+		return false
 	}
 
-	return true, nil
+	log.Print("[INFO] " + fmt.Sprintf("Passed basic-authentication user: %s", u))
+	return true
 }
