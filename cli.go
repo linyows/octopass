@@ -70,6 +70,11 @@ func (cli *CLI) Run(args []string) int {
 	}
 	parsedArgs := f.Args()
 
+	if opt.Version {
+		fmt.Fprintf(cli.outStream, "%s version %s\n", Name, Version)
+		return ExitCodeOK
+	}
+
 	if len(parsedArgs) == 0 {
 		f.Usage()
 		return ExitCodeOK
@@ -78,11 +83,6 @@ func (cli *CLI) Run(args []string) int {
 	if parsedArgs[0] != "keys" && parsedArgs[0] != "pam" {
 		fmt.Fprintf(cli.errStream, "invalid argument: %s\n", parsedArgs[0])
 		return ExitCodeError
-	}
-
-	if opt.Version {
-		fmt.Fprintf(cli.outStream, "%s version %s\n", Name, Version)
-		return ExitCodeOK
 	}
 
 	c := NewConfig(&opt)
