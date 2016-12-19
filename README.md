@@ -21,7 +21,7 @@ This is authenticated with the team on your organization in Github.
 Usage
 -----
 
-### keys command
+### Keys command
 
 get public keys for AuthorizedKeysCommand in sshd(8)
 
@@ -29,12 +29,29 @@ get public keys for AuthorizedKeysCommand in sshd(8)
 $ octopass -t <token> keys <user@github>
 ```
 
-### pam command
+#### SSHD Configuration
+
+```
+AuthorizedKeysCommand /usr/bin/octopass --config=/etc/octopass.conf keys %u
+AuthorizedKeysCommandUser root
+UsePAM yes
+PasswordAuthentication no
+```
+
+### Pam Command
 
 authorize with github authentication for pam_exec(8)
 
 ```sh
 $ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
+```
+
+#### PAM Configuration
+
+```
+#@include common-auth
+auth requisite pam_exec.so quiet expose_authtok log=/var/log/octopass.log /usr/bin/octopass --config=/etc/octopass.conf pam
+auth optional pam_unix.so not_set_pass use_first_pass nodelay
 ```
 
 Install
