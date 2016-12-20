@@ -37,7 +37,7 @@ func TestRun_helpFlag(t *testing.T) {
 
 Commands:
   keys   get public keys for AuthorizedKeysCommand in sshd(8)
-  pam    authorize with github authentication for pam_exec(8)
+  pam    authenticate with github for pam_exec(8)
 
 Options:
   -b, --belongs      organization/team on github

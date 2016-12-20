@@ -23,7 +23,7 @@ Usage
 
 ### Keys command
 
-get public keys for AuthorizedKeysCommand in sshd(8)
+Get public keys for AuthorizedKeysCommand in sshd(8)
 
 ```sh
 $ octopass -t <token> keys <user@github>
@@ -40,7 +40,7 @@ PasswordAuthentication no
 
 ### Pam Command
 
-authorize with github authentication for pam_exec(8)
+Authenticate with github for pam_exec(8)
 
 ```sh
 $ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
