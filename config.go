@@ -9,11 +9,12 @@ import (
 
 // Config is the structure
 type config struct {
-	Endpoint     string
-	Token        string
-	Organization string
-	Team         string
-	Syslog       bool
+	Endpoint        string
+	Token           string
+	Organization    string
+	Team            string
+	Syslog          bool
+	MembershipCheck bool
 }
 
 // NewConfig creates config from Options
@@ -27,11 +28,12 @@ func NewConfig(opt *Options) *config {
 	}
 
 	c := &config{
-		Endpoint:     opt.Endpoint,
-		Token:        opt.Token,
-		Organization: org,
-		Team:         team,
-		Syslog:       opt.Syslog,
+		Endpoint:        opt.Endpoint,
+		Token:           opt.Token,
+		Organization:    org,
+		Team:            team,
+		Syslog:          opt.Syslog,
+		MembershipCheck: true,
 	}
 
 	if opt.Config == "" {
@@ -82,6 +84,9 @@ func (c *config) Merge(c2 *config) *config {
 	}
 	if c.Syslog != c2.Syslog {
 		c.Syslog = c2.Syslog
+	}
+	if c.MembershipCheck != c2.MembershipCheck {
+		c.MembershipCheck = c2.MembershipCheck
 	}
 
 	return c

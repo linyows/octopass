@@ -123,7 +123,7 @@ func (o *Octopass) Run(args []string) error {
 }
 
 func (o *Octopass) isConfirmable() bool {
-	return o.Config.Organization != "" && o.Config.Team != ""
+	return o.Config.Organization != "" && o.Config.Team != "" && o.Config.MembershipCheck == true
 }
 
 // IsStdinGiven checks given stdin
