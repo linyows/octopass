@@ -12,6 +12,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ucl.h>
+
+#define NSS_OCTOPASS_LOCK() do { pthread_mutex_lock(&NSS_OCTOPASS_MUTEX); } while (0)
+#define NSS_OCTOPASS_UNLOCK() do { pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX); } while (0)
+#ifndef NSS_OCTOPASS_SCRIPT
+#define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
+#endif
 
 #define NSS_OCTOPASS_SERVER "api.github.com"
 #define NSS_OCTOPASS_PORT "443"

@@ -1,18 +1,15 @@
 #include "nss_octopass.h"
 
 static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
-#define NSS_OCTOPASS_LOCK()    do { pthread_mutex_lock(&NSS_OCTOPASS_MUTEX); } while (0)
-#define NSS_OCTOPASS_UNLOCK()  do { pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX); } while (0)
-
 static json_t *ent_json_root = NULL;
 static int ent_json_idx = 0;
 
-
 // -1 Failed to parse
 // -2 Buffer too small
-static int
-pack_group_struct(json_t *root, struct group *result, char *buffer, size_t buflen)
-{
+static int pack_group_struct(json_t *root,
+                             struct group *result,
+                             char *buffer,
+                             size_t buflen) {
 
     char *next_buf = buffer;
     size_t bufleft = buflen;
@@ -50,8 +47,7 @@ pack_group_struct(json_t *root, struct group *result, char *buffer, size_t bufle
     next_buf += (json_array_size(j_gr_mem) + 1) * sizeof(char *);
     bufleft  -= (json_array_size(j_gr_mem) + 1) * sizeof(char *);
 
-    for(int i = 0; i < json_array_size(j_gr_mem); i++)
-    {
+    for (int i = 0; i < json_array_size(j_gr_mem); i++) {
         j_member = json_array_get(j_gr_mem, i);
         if (!json_is_string(j_member)) return -1;
 
@@ -61,16 +57,12 @@ pack_group_struct(json_t *root, struct group *result, char *buffer, size_t bufle
 
         next_buf += strlen(result->gr_mem[i]) + 1;
         bufleft  -= strlen(result->gr_mem[i]) + 1;
-
     }
 
     return 0;
 }
 
-
-enum nss_status
-_nss_octopass_setgrent_locked(int stayopen)
-{
+enum nss_status _nss_octopass_setgrent_locked(int stayopen) {
     char url[512];
     json_t *json_root;
     json_error_t json_error;
@@ -99,11 +91,8 @@ _nss_octopass_setgrent_locked(int stayopen)
     return NSS_STATUS_SUCCESS;
 }
 
-
 // Called to open the group file
-enum nss_status
-_nss_octopass_setgrent(int stayopen)
-{
+enum nss_status _nss_octopass_setgrent(int stayopen) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_setgrent_locked(stayopen);
@@ -111,10 +100,7 @@ _nss_octopass_setgrent(int stayopen)
     return ret;
 }
 
-
-enum nss_status
-_nss_octopass_endgrent_locked(void)
-{
+enum nss_status _nss_octopass_endgrent_locked(void) {
     if (ent_json_root){
         while (ent_json_root->refcount > 0) json_decref(ent_json_root);
     }
@@ -123,11 +109,8 @@ _nss_octopass_endgrent_locked(void)
     return NSS_STATUS_SUCCESS;
 }
 
-
 // Called to close the group file
-enum nss_status
-_nss_octopass_endgrent(void)
-{
+enum nss_status _nss_octopass_endgrent(void) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_endgrent_locked();
@@ -135,10 +118,10 @@ _nss_octopass_endgrent(void)
     return ret;
 }
 
-
-enum nss_status
-_nss_octopass_getgrent_r_locked(struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrent_r_locked(struct group *result,
+                                                char *buffer,
+                                                size_t buflen,
+                                                int *errnop) {
     enum nss_status ret = NSS_STATUS_SUCCESS;
 
     if (ent_json_root == NULL) {
@@ -171,11 +154,8 @@ _nss_octopass_getgrent_r_locked(struct group *result, char *buffer, size_t bufle
     return NSS_STATUS_SUCCESS;
 }
 
-
 // Called to look up next entry in group file
-enum nss_status
-_nss_octopass_getgrent_r(struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrent_r(struct group *result, char *buffer, size_t buflen, int *errnop) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_getgrent_r_locked(result, buffer, buflen, errnop);
@@ -183,11 +163,12 @@ _nss_octopass_getgrent_r(struct group *result, char *buffer, size_t buflen, int 
     return ret;
 }
 
-
 // Find a group by gid
-enum nss_status
-_nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid,
+                                                struct group *result,
+                                                char *buffer,
+                                                size_t buflen,
+                                                int *errnop) {
     char url[512];
     json_t *json_root;
     json_error_t json_error;
@@ -226,10 +207,11 @@ _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, s
     return NSS_STATUS_SUCCESS;
 }
 
-
-enum nss_status
-_nss_octopass_getgrgid_r(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrgid_r(gid_t gid,
+                                         struct group *result,
+                                         char *buffer,
+                                         size_t buflen,
+                                         int *errnop) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_getgrgid_r_locked(gid, result, buffer, buflen, errnop);
@@ -237,10 +219,11 @@ _nss_octopass_getgrgid_r(gid_t gid, struct group *result, char *buffer, size_t b
     return ret;
 }
 
-
-enum nss_status
-_nss_octopass_getgrnam_r_locked(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrnam_r_locked(const char *name,
+                                                struct group *result,
+                                                char *buffer,
+                                                size_t buflen,
+                                                int *errnop) {
     char url[512];
     json_t *json_root;
     json_error_t json_error;
@@ -279,15 +262,15 @@ _nss_octopass_getgrnam_r_locked(const char *name, struct group *result, char *bu
     return NSS_STATUS_SUCCESS;
 }
 
-
 // Find a group by name
-enum nss_status
-_nss_octopass_getgrnam_r(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+enum nss_status _nss_octopass_getgrnam_r(const char *name,
+                                         struct group *result,
+                                         char *buffer,
+                                         size_t buflen,
+                                         int *errnop) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_getgrnam_r_locked(name, result, buffer, buflen, errnop);
     NSS_OCTOPASS_UNLOCK();
     return ret;
 }
-

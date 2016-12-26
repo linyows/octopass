@@ -1,14 +1,19 @@
 CC=gcc
 CFLAGS=-Wall -Wstrict-prototypes -Werror -fPIC -std=c99
-
 LD_SONAME=-Wl,-soname,libnss_octopass.so.2
 LIBRARY=libnss_octopass.so.2.0
 LINKS=libnss_octopass.so.2 libnss_octopass.so
+
+CFLAGS_TEST=-DNSS_OCTOPASS_SCRIPT=\"./nss-octopass\"
+LIBS=-lpthread
 
 DESTDIR=/
 PREFIX=$(DESTDIR)/usr
 LIBDIR=$(PREFIX)/lib
 BUILD=.libs
+
+SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
+VERSION=$(shell cat version)
 
 default: build
 build: nss_octopass
@@ -37,6 +42,10 @@ nss_octopass: nss_octopass_build_dir nss_octopass_services
 		$(BUILD)/nss_octopass-shadow.o \
         -lcurl -ljansson
 
+nss_octopass_test: $(SOURCE) nss_octopass_test.c nss_octopass.h
+	$(CC) $(CFLAGS) $(CFLAGS_TEST) $(LIBS) $(SOURCE) nss_octopass_test.c -o nss_octopass_test $(LIBS)
+	strip nss_octopass_test
+
 clean:
 	rm -rf $(BUILD)
 
@@ -45,4 +54,15 @@ install:
 	install $(BUILD)/$(LIBRARY) $(LIBDIR)
 	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done
 
-.PHONY: clean install nss_octopass_build_dir nss_octopass
+distclean: clean
+	rm -f *~ \#*
+
+dist:
+	rm -rf libnss-octopass-$(VERSION) libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION).tar.gz
+	mkdir libnss-octopass-$(VERSION)
+	cp $(SOURCES) libnss-octopass-$(VERSION)
+	tar cf libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION)
+	gzip -9 libnss-octopass-$(VERSION).tar
+rm -rf libnss-octopass-$(VERSION)
+
+.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean
