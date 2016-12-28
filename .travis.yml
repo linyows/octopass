@@ -7,3 +7,5 @@ script:
   - make cover
 after_script:
 - goveralls -coverprofile=coverage.out
+notifications:
+  slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
