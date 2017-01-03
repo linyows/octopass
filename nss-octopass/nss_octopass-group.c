@@ -155,7 +155,10 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result,
 }
 
 // Called to look up next entry in group file
-enum nss_status _nss_octopass_getgrent_r(struct group *result, char *buffer, size_t buflen, int *errnop) {
+enum nss_status _nss_octopass_getgrent_r(struct group *result,
+                                         char *buffer,
+                                         size_t buflen,
+                                         int *errnop) {
     enum nss_status ret;
     NSS_OCTOPASS_LOCK();
     ret = _nss_octopass_getgrent_r_locked(result, buffer, buflen, errnop);
