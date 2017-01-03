@@ -111,7 +111,8 @@ void load_config(struct config *con, char *filename) {
 void request(struct config *con,
              char *url,
              struct response *res) {
-  printf("Request URL: %s\n", url);
+  //printf("Request URL: %s\n", url);
+  syslog(LOG_INFO, "http get -- %s", url);
 
   char auth[64];
   sprintf(auth, "Authorization: token %s", con->token);
@@ -142,8 +143,9 @@ void request(struct config *con,
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
-    printf("status: %d\n", code);
-    printf("%lu bytes retrieved\n", (long)res->size);
+    syslog(LOG_INFO, "http status: %d -- %lu bytes retrieved", code, (long)res->size);
+    //printf("status: %d\n", code);
+    //printf("%lu bytes retrieved\n", (long)res->size);
     //printf("%s\n", res->data);
   }
 
@@ -163,7 +165,8 @@ int get_team_id(char *team, char *data) {
 
     if  (strcmp(team, t) == 0) {
       const json_int_t id = json_integer_value(json_object_get(data, "id"));
-      printf("%d: %s\n", id, team);
+      //printf("%d: %s\n", id, team);
+      syslog(LOG_INFO, "team_id/name: %d/%s", id, team);
       json_decref(root);
       return id;
     }
@@ -202,12 +205,16 @@ int main(int argc, char *args[]) {
   char auth[64];
   sprintf(auth, "Authorization: token %s", con.token);
 
-  printf("Endpoint: %s\n", con.endpoint);
-  printf("Token: %s\n", con.token);
-  printf("Org/Team: %s/%s\n", con.organization, con.team);
-  printf("Syslog: %d\n", con.syslog);
-  printf("UidStarts: %d\n", con.uid_starts);
-  printf("Gid: %d\n", con.gid);
+  if (con.syslog) {
+    const char* pg_name = "nss-octopass";
+    openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
+    syslog(LOG_INFO,
+      "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, uid_starts: %d, gid: %d, group_name: %s}",
+      con.endpoint, con.token,
+      con.organization, con.team,
+      con.syslog, con.uid_starts,
+      con.gid, con.group_name);
+  }
 
   // get team list
 
@@ -219,6 +226,9 @@ int main(int argc, char *args[]) {
 
   if (!res.data) {
     fprintf(stderr, "Request failure\n");
+    if (con.syslog) {
+      closelog();
+    }
     return 1;
   }
 
@@ -231,6 +241,9 @@ int main(int argc, char *args[]) {
 
   if (!res.data) {
     fprintf(stderr, "Request failure\n");
+    if (con.syslog) {
+      closelog();
+    }
     return 1;
   }
 
