@@ -1,85 +1,244 @@
 #include "nss_octopass.h"
 
-struct response {
-    char *data;
-    size_t pos;
+struct config {
+   char endpoint[MAXBUF];
+   char token[MAXBUF];
+   char organization[MAXBUF];
+   char team[MAXBUF];
+   char group_name[MAXBUF];
+   long timeout;
+   long uid_starts;
+   long gid;
+   bool syslog;
 };
 
-// Newer versions of Jansson have this but the version
-// on Ubuntu 12.04 don't, so make a wrapper.
-extern size_t j_strlen(json_t *str) {
-    return strlen(json_string_value(str));
+struct response {
+  char *data;
+  size_t size;
+};
+
+static size_t write_response_callback(void *contents,
+                                      size_t size,
+                                      size_t nmemb,
+                                      void *userp) {
+  size_t realsize = size * nmemb;
+  struct response *res = (struct response *)userp;
+
+  res->data = realloc(res->data, res->size + realsize + 1);
+  if (res->data == NULL) {
+    // out of memory!
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+
+  memcpy(&(res->data[res->size]), contents, realsize);
+  res->size += realsize;
+  res->data[res->size] = 0;
+
+  return realsize;
 }
 
-static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream) {
-    struct response *result = (struct response *)stream;
-    size_t required_len = result->pos + size * nmemb;
+void remove_quotes(char *s) {
+  if (s == NULL) {
+    return;
+  }
 
-    if (required_len >= NSS_OCTOPASS_INITIAL_BUFFER_SIZE - 1) {
-        if (required_len < NSS_OCTOPASS_MAX_BUFFER_SIZE) {
-            result->data = realloc(result->data, required_len);
-            if (!result->data){
-                // Failed to initialize a large enough buffer for the data.
-                return 0;
-            }
-        } else {
-            // Request data is too large.
-            return 0;
-        }
+  if (s[strlen(s)-1] == '"') {
+    s[strlen(s)-1] = '\0';
+  }
+
+  int i = 0;
+  while (s[i] != '\0' && s[i] == '"') i++;
+  memcpy(s, &s[i], strlen(s));
+}
+
+void load_config(struct config *con, char *filename) {
+  memset(con->endpoint, '\0', sizeof(con->endpoint));
+  memset(con->token, '\0', sizeof(con->token));
+  memset(con->organization, '\0', sizeof(con->organization));
+  memset(con->team, '\0', sizeof(con->team));
+  memset(con->group_name, '\0', sizeof(con->group_name));
+
+  FILE *file = fopen(filename, "r");
+
+  if (file == NULL) {
+    fprintf(stderr, "Config not found: %s\n", filename);
+    exit(1);
+  }
+
+  char line[MAXBUF];
+
+  while(fgets(line, sizeof(line), file) != NULL) {
+    if (strlen(line) != sizeof(line)-1) {
+      line[strlen(line)-1] = '\0';
     }
 
-    memcpy(result->data + result->pos, ptr, size * nmemb);
-    result->pos += size * nmemb;
+    char *lasts;
+    char *key = strtok_r(line, DELIM, &lasts);
+    char *value = strtok_r(NULL, DELIM, &lasts);
+    remove_quotes(value);
 
-    return size * nmemb;
+    if  (strcmp(key, "Endpoint") == 0) {
+      memcpy(con->endpoint, value, strlen(value));
+    } else if (strcmp(key, "Token") == 0) {
+      memcpy(con->token, value, strlen(value));
+    } else if (strcmp(key, "Organization") == 0) {
+      memcpy(con->organization, value, strlen(value));
+    } else if (strcmp(key, "Team") == 0) {
+      memcpy(con->team, value, strlen(value));
+    } else if (strcmp(key, "UidStarts") == 0) {
+      con->uid_starts = atoi(value);
+    } else if (strcmp(key, "Gid") == 0) {
+      con->gid = atoi(value);
+    } else if (strcmp(key, "GroupName") == 0) {
+      memcpy(con->group_name, value, strlen(value));
+    } else if (strcmp(key, "Syslog") == 0) {
+      if (strcmp(value, "true") == 0) {
+        con->syslog = true;
+      } else {
+        con->syslog = true;
+      }
+    }
+  }
+
+  if (!con->group_name) {
+    memcpy(con->group_name, con->team, strlen(con->team));
+  }
+
+  fclose(file);
 }
 
-char * nss_octopass_request(const char *url) {
-    CURL *curl = NULL;
-    CURLcode status;
-    struct curl_slist *headers = NULL;
-    char *data = NULL;
-    long code;
+void request(struct config *con,
+             char *url,
+             struct response *res) {
+  printf("Request URL: %s\n", url);
 
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
-    if (!curl) goto error;
+  char auth[64];
+  sprintf(auth, "Authorization: token %s", con->token);
 
-    data = malloc(NSS_OCTOPASS_INITIAL_BUFFER_SIZE);
-    if (!data) goto error;
+  CURL *hnd;
+  CURLcode result;
+  struct curl_slist *headers = NULL;
+  res->data = malloc(1);
+  res->size = 0;
 
-    struct response write_result = { .data = data, .pos = 0 };
+  headers = curl_slist_append(headers, auth);
 
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+  hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_URL, url);
+  //curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, NSS_OCTOPASS_VERSION_WITH_NAME);
+  curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
+  //curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+  curl_easy_setopt(hnd, CURLOPT_SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
+  //curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_response_callback);
+  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, res);
 
-    headers = curl_slist_append(headers, "User-Agent: NSS-OCTOPASS");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  result = curl_easy_perform(hnd);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_result);
+  if (result != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(result));
+  } else {
+    long *code;
+    curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
+    printf("status: %d\n", code);
+    printf("%lu bytes retrieved\n", (long)res->size);
+    //printf("%s\n", res->data);
+  }
 
-    status = curl_easy_perform(curl);
-    if (status != 0) goto error;
+  curl_easy_cleanup(hnd);
+  curl_slist_free_all(headers);
+}
 
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-    if (code != 200) goto error;
+int get_team_id(char *team, char *data) {
+  json_t *root;
+  json_error_t error;
+  root = json_loads(data, 0, &error);
 
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(headers);
-    curl_global_cleanup();
+  size_t i;
+  for (i = 0; i < json_array_size(root); i++) {
+    json_t *data = json_array_get(root, i);
+    const char *t = json_string_value(json_object_get(data, "name"));
 
-    data[write_result.pos] = '\0';
+    if  (strcmp(team, t) == 0) {
+      const json_int_t id = json_integer_value(json_object_get(data, "id"));
+      printf("%d: %s\n", id, team);
+      json_decref(root);
+      return id;
+    }
+  }
 
-    return data;
+  json_decref(root);
+  return 0;
+}
 
-error:
-    if(data)
-        free(data);
-    if(curl)
-        curl_easy_cleanup(curl);
-    if(headers)
-        curl_slist_free_all(headers);
-    curl_global_cleanup();
+void get_team_members(struct config *con, char *data) {
+  json_t *root;
+  json_error_t error;
+  root = json_loads(data, 0, &error);
 
-    return NULL;
+  char *gname = con->group_name;
+
+  size_t i;
+  for (i = 0; i < json_array_size(root); i++) {
+    json_t *data = json_array_get(root, i);
+    const json_int_t id = json_integer_value(json_object_get(data, "id"));
+    const char *user = json_string_value(json_object_get(data, "login"));
+    int uid = con->uid_starts + id;
+    printf("uid=%d(%s) gid=%d(%s) groups=%d(%s)\n",
+        uid, user, con->gid, gname, con->gid, gname);
+  }
+
+  json_decref(root);
+}
+
+int main(int argc, char *args[]) {
+  // get conf
+
+  struct config con;
+  load_config(&con, NSS_OCTOPASS_CONFIG_FILE);
+
+  char auth[64];
+  sprintf(auth, "Authorization: token %s", con.token);
+
+  printf("Endpoint: %s\n", con.endpoint);
+  printf("Token: %s\n", con.token);
+  printf("Org/Team: %s/%s\n", con.organization, con.team);
+  printf("Syslog: %d\n", con.syslog);
+  printf("UidStarts: %d\n", con.uid_starts);
+  printf("Gid: %d\n", con.gid);
+
+  // get team list
+
+  char url[strlen(con.endpoint) + strlen(con.organization) + 64];
+  sprintf(url, "%s/orgs/%s/teams", con.endpoint, con.organization);
+
+  struct response res;
+  request(&con, url, &res);
+
+  if (!res.data) {
+    fprintf(stderr, "Request failure\n");
+    return 1;
+  }
+
+  int team_id = get_team_id(con.team, res.data);
+
+  // get team members
+
+  sprintf(url, "%s/teams/%d/members", con.endpoint, team_id);
+  request(&con, url, &res);
+
+  if (!res.data) {
+    fprintf(stderr, "Request failure\n");
+    return 1;
+  }
+
+  get_team_members(&con, res.data);
+
+  // free
+
+  free(res.data);
+
+  return 0;
 }

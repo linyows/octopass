@@ -12,20 +12,35 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ucl.h>
+#include <stdbool.h>
 
+//#include <unistd.h>
+//#include <sys/types.h>
+//#include <sys/socket.h>
+//#include <sys/ioctl.h>
+//#include <netinet/in.h>
+//#include <net/if.h>
+//#include <arpa/inet.h>
+
+#define NSS_OCTOPASS_VERSION "0.1.0"
+#define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
+#define NSS_OCTOPASS_CONFIG_FILE "/octopass/octopass.conf"
+//#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #define NSS_OCTOPASS_LOCK() do { pthread_mutex_lock(&NSS_OCTOPASS_MUTEX); } while (0)
 #define NSS_OCTOPASS_UNLOCK() do { pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX); } while (0)
 #ifndef NSS_OCTOPASS_SCRIPT
 #define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
 #endif
 
-#define NSS_OCTOPASS_SERVER "api.github.com"
-#define NSS_OCTOPASS_PORT "443"
-#define NSS_OCTOPASS_INITIAL_BUFFER_SIZE (256 * 1024)  /* 256 KB */
-#define NSS_OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)  /* 10 MB */
+// 256KB
+#define NSS_OCTOPASS_INITIAL_BUFFER_SIZE (256 * 1024)
+// 10MB
+#define NSS_OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
-extern char *nss_octopass_request(const char *);
-extern size_t j_strlen(json_t *);
+#define MAXBUF 1024
+#define DELIM " = "
+
+extern char *nss_octopass_request(const char *, const char *);
+//extern void load_config(struct config *con, char *filename);
 
 #endif /* NSS_OCTOPASS_H */
