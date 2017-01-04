@@ -1,15 +1,15 @@
 #include "nss_octopass.h"
 
 struct config {
-   char endpoint[MAXBUF];
-   char token[MAXBUF];
-   char organization[MAXBUF];
-   char team[MAXBUF];
-   char group_name[MAXBUF];
-   long timeout;
-   long uid_starts;
-   long gid;
-   bool syslog;
+  char endpoint[MAXBUF];
+  char token[MAXBUF];
+  char organization[MAXBUF];
+  char team[MAXBUF];
+  char group_name[MAXBUF];
+  long timeout;
+  long uid_starts;
+  long gid;
+  bool syslog;
 };
 
 struct response {
