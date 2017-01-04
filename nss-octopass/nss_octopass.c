@@ -196,9 +196,8 @@ void get_team_members(struct config *con, char *data) {
   json_decref(root);
 }
 
-int main(int argc, char *args[]) {
+int nss_octopass_request(char *res_body) {
   // get conf
-
   struct config con;
   load_config(&con, NSS_OCTOPASS_CONFIG_FILE);
 
@@ -217,7 +216,6 @@ int main(int argc, char *args[]) {
   }
 
   // get team list
-
   char url[strlen(con.endpoint) + strlen(con.organization) + 64];
   sprintf(url, "%s/orgs/%s/teams", con.endpoint, con.organization);
 
@@ -229,13 +227,12 @@ int main(int argc, char *args[]) {
     if (con.syslog) {
       closelog();
     }
-    return 1;
+    return -1;
   }
 
   int team_id = get_team_id(con.team, res.data);
 
   // get team members
-
   sprintf(url, "%s/teams/%d/members", con.endpoint, team_id);
   request(&con, url, &res);
 
@@ -244,14 +241,18 @@ int main(int argc, char *args[]) {
     if (con.syslog) {
       closelog();
     }
-    return 1;
+    return -1;
   }
 
   get_team_members(&con, res.data);
 
-  // free
-
-  free(res.data);
+  res_body = res.data;
 
   return 0;
+  //free(res.data);
+}
+
+int main(int argc, char *args[]) {
+  char *res_body;
+  return nss_octopass_request(res_body);
 }

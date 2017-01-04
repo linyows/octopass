@@ -41,7 +41,6 @@
 #define MAXBUF 1024
 #define DELIM " = "
 
-extern char *nss_octopass_request(const char *, const char *);
-//extern void load_config(struct config *con, char *filename);
+extern int nss_octopass_request(char *res_body);
 
 #endif /* NSS_OCTOPASS_H */
