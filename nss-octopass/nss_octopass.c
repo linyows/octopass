@@ -1,17 +1,5 @@
 #include "nss_octopass.h"
 
-struct config {
-  char endpoint[MAXBUF];
-  char token[MAXBUF];
-  char organization[MAXBUF];
-  char team[MAXBUF];
-  char group_name[MAXBUF];
-  long timeout;
-  long uid_starts;
-  long gid;
-  bool syslog;
-};
-
 struct response {
   char *data;
   size_t size;
@@ -58,6 +46,10 @@ void load_config(struct config *con, char *filename) {
   memset(con->organization, '\0', sizeof(con->organization));
   memset(con->team, '\0', sizeof(con->team));
   memset(con->group_name, '\0', sizeof(con->group_name));
+  memset(con->home, '\0', sizeof(con->home));
+  memset(con->shell, '\0', sizeof(con->shell));
+  con->uid_starts = (long)0;
+  con->gid = (long)0;
 
   FILE *file = fopen(filename, "r");
 
@@ -86,6 +78,10 @@ void load_config(struct config *con, char *filename) {
       memcpy(con->organization, value, strlen(value));
     } else if (strcmp(key, "Team") == 0) {
       memcpy(con->team, value, strlen(value));
+    } else if (strcmp(key, "Home") == 0) {
+      memcpy(con->home, value, strlen(value));
+    } else if (strcmp(key, "Shell") == 0) {
+      memcpy(con->shell, value, strlen(value));
     } else if (strcmp(key, "UidStarts") == 0) {
       con->uid_starts = atoi(value);
     } else if (strcmp(key, "Gid") == 0) {
@@ -101,8 +97,26 @@ void load_config(struct config *con, char *filename) {
     }
   }
 
-  if (!con->group_name) {
+  if (strlen(con->group_name) == 0) {
     memcpy(con->group_name, con->team, strlen(con->team));
+  }
+
+  if (!con->uid_starts) {
+    con->uid_starts = (long)2000;
+  }
+
+  if (!con->gid) {
+    con->gid = (long)2000;
+  }
+
+  if (strlen(con->home) == 0) {
+    char *home = "/home/%s";
+    memcpy(con->home, home, strlen(home));
+  }
+
+  if (strlen(con->shell) == 0) {
+    char *shell = "/bin/bash";
+    memcpy(con->shell, shell, strlen(shell));
   }
 
   fclose(file);
@@ -189,62 +203,67 @@ void get_team_members(struct config *con, char *data) {
     const json_int_t id = json_integer_value(json_object_get(data, "id"));
     const char *user = json_string_value(json_object_get(data, "login"));
     int uid = con->uid_starts + id;
-    printf("uid=%d(%s) gid=%d(%s) groups=%d(%s)\n",
+    printf("uid=%ld(%s) gid=%ld(%s) groups=%ld(%s)\n",
         uid, user, con->gid, gname, con->gid, gname);
   }
 
   json_decref(root);
 }
 
-int nss_octopass_request(char *res_body) {
+int nss_octopass_request(struct config *con, char *res_body) {
   // get conf
-  struct config con;
-  load_config(&con, NSS_OCTOPASS_CONFIG_FILE);
+  load_config(con, NSS_OCTOPASS_CONFIG_FILE);
 
   char auth[64];
-  sprintf(auth, "Authorization: token %s", con.token);
+  sprintf(auth, "Authorization: token %s", con->token);
 
-  if (con.syslog) {
+  if (con->syslog) {
     const char* pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO,
-      "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, uid_starts: %d, gid: %d, group_name: %s}",
-      con.endpoint, con.token,
-      con.organization, con.team,
-      con.syslog, con.uid_starts,
-      con.gid, con.group_name);
+      "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
+      con->endpoint,
+      con->token,
+      con->organization,
+      con->team,
+      con->syslog,
+      con->uid_starts,
+      con->gid,
+      con->group_name,
+      con->home,
+      con->shell);
   }
 
   // get team list
-  char url[strlen(con.endpoint) + strlen(con.organization) + 64];
-  sprintf(url, "%s/orgs/%s/teams", con.endpoint, con.organization);
+  char url[strlen(con->endpoint) + strlen(con->organization) + 64];
+  sprintf(url, "%s/orgs/%s/teams", con->endpoint, con->organization);
 
   struct response res;
-  request(&con, url, &res);
+  request(con, url, &res);
 
   if (!res.data) {
     fprintf(stderr, "Request failure\n");
-    if (con.syslog) {
+    if (con->syslog) {
       closelog();
     }
     return -1;
   }
 
-  int team_id = get_team_id(con.team, res.data);
+  int team_id = get_team_id(con->team, res.data);
 
   // get team members
-  sprintf(url, "%s/teams/%d/members", con.endpoint, team_id);
-  request(&con, url, &res);
+  sprintf(url, "%s/teams/%d/members", con->endpoint, team_id);
+  request(con, url, &res);
 
   if (!res.data) {
     fprintf(stderr, "Request failure\n");
-    if (con.syslog) {
+    if (con->syslog) {
       closelog();
     }
     return -1;
   }
 
-  get_team_members(&con, res.data);
+  get_team_members(con, res.data);
 
   res_body = res.data;
 
@@ -253,6 +272,8 @@ int nss_octopass_request(char *res_body) {
 }
 
 int main(int argc, char *args[]) {
+  struct config con;
   char *res_body;
-  return nss_octopass_request(res_body);
+
+  return nss_octopass_request(&con, res_body);
 }

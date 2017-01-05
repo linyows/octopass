@@ -41,6 +41,21 @@
 #define MAXBUF 1024
 #define DELIM " = "
 
-extern int nss_octopass_request(char *res_body);
+struct config {
+  char endpoint[MAXBUF];
+  char token[MAXBUF];
+  char organization[MAXBUF];
+  char team[MAXBUF];
+  char group_name[MAXBUF];
+  char home[MAXBUF];
+  char shell[MAXBUF];
+  char gecos[MAXBUF];
+  long timeout;
+  long uid_starts;
+  long gid;
+  bool syslog;
+};
+
+extern int nss_octopass_request(struct config *con, char *res_body);
 
 #endif /* NSS_OCTOPASS_H */

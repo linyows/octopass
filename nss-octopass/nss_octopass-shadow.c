@@ -56,8 +56,9 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen) {
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(res);
+  int status = nss_octopass_request(&con, res);
   if (status != 0) {
     free(res);
     return NSS_STATUS_UNAVAIL;
@@ -180,8 +181,9 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name,
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(res);
+  int status = nss_octopass_request(&con, res);
   if (status != 0) {
       free(res);
       *errnop = ENOENT;
