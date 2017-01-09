@@ -45,6 +45,12 @@ void nss_octopass_remove_quotes(char *s) {
   memcpy(s, &s[i], strlen(s));
 }
 
+int * nss_octopass_intdup(int const * src, size_t len) {
+   int * p = malloc(len * sizeof(int));
+   memcpy(p, src, len * sizeof(int));
+   return p;
+}
+
 void nss_octopass_config_loading(struct config *con, char *filename) {
   memset(con->endpoint, '\0', sizeof(con->endpoint));
   memset(con->token, '\0', sizeof(con->token));
@@ -192,7 +198,7 @@ int nss_octopass_github_team_id(char *team, char *data) {
   return 0;
 }
 
-int nss_octopass_github_team_member_by_name(char *name, char *data) {
+long nss_octopass_github_team_member_by_name(char *name, char *data) {
   json_t *root;
   json_error_t error;
   root = json_loads(data, 0, &error);
@@ -205,8 +211,10 @@ int nss_octopass_github_team_member_by_name(char *name, char *data) {
     if (strcmp(name, u) == 0) {
       const json_int_t id = json_integer_value(json_object_get(data, "id"));
       syslog(LOG_INFO, "github: user(%s) -> id(%d)", id, name);
+
       json_decref(root);
-      return id;
+
+      return (long)id;
     }
   }
 
@@ -227,8 +235,12 @@ const char * nss_octopass_github_team_member_by_id(int gh_id, char *data) {
     if (id == gh_id) {
       const char *login = json_string_value(json_object_get(data, "login"));
       syslog(LOG_INFO, "github: id(%d) -> user(%s)", id, login);
+
+      const char *result;
+      result = strdup(login);
       json_decref(root);
-      return login;
+
+      return result;
     }
   }
 
@@ -336,12 +348,12 @@ int main(int argc, char *args[]) {
   struct response res;
   nss_octopass_team_members(&con, &res);
 
+  //char *u = "linyows";
+  //long id = nss_octopass_github_team_member_by_name(u, res.data);
+  //fprintf(stderr, "id: %d\n", id);
+
   const char *name = nss_octopass_github_team_member_by_id(66, res.data);
   fprintf(stderr, "name: %s\n", name);
-
-  //char *u = "linyows";
-  //int id = nss_octopass_github_team_member_by_name(u, res.data);
-  //fprintf(stderr, "id: %d\n", id);
 
   //nss_octopass_github_team_members_outoput(&con, res.data);
   return 0;
