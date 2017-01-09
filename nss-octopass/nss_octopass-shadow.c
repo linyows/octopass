@@ -58,7 +58,8 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen) {
 
   struct config con;
   char *res;
-  int status = nss_octopass_request(&con, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     return NSS_STATUS_UNAVAIL;
@@ -84,7 +85,7 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen) {
 
 enum nss_status _nss_octopass_endspent_locked(void) {
   if (ent_json_root){
-      while (ent_json_root->refcount > 0) json_decref(ent_json_root);
+    while (ent_json_root->refcount > 0) json_decref(ent_json_root);
   }
 
   ent_json_root = NULL;
@@ -183,11 +184,12 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name,
 
   struct config con;
   char *res;
-  int status = nss_octopass_request(&con, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
-      free(res);
-      *errnop = ENOENT;
-      return NSS_STATUS_UNAVAIL;
+    free(res);
+    *errnop = ENOENT;
+    return NSS_STATUS_UNAVAIL;
   }
 
   root = json_loads(res, 0, &error);
@@ -199,6 +201,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name,
   }
 
   int pack_result = pack_shadow_struct(root, result, buffer, buflen);
+
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;

@@ -62,8 +62,10 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen) {
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     return NSS_STATUS_UNAVAIL;
@@ -100,7 +102,7 @@ enum nss_status _nss_octopass_endpwent(void) {
 
 enum nss_status _nss_octopass_endpwent_locked(void) {
   if (ent_json_root){
-      while (ent_json_root->refcount > 0) json_decref(ent_json_root);
+    while (ent_json_root->refcount > 0) json_decref(ent_json_root);
   }
   ent_json_root = NULL;
   ent_json_idx = 0;
@@ -155,6 +157,7 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result,
   }
 
   ent_json_idx++;
+
   return NSS_STATUS_SUCCESS;
 }
 
@@ -167,8 +170,10 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid,
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     *errnop = ENOENT;
@@ -239,8 +244,10 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name,
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     *errnop = ENOENT;

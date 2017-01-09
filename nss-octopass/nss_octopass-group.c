@@ -13,7 +13,7 @@ static int pack_group_struct(json_t *root,
   size_t bufleft = buflen;
 
   if (!json_is_object(root)) {
-      return -1;
+    return -1;
   }
 
   json_t *j_member;
@@ -30,9 +30,13 @@ static int pack_group_struct(json_t *root,
 
   for (int i = 0; i < json_array_size(j_gr_mem); i++) {
     j_member = json_array_get(j_gr_mem, i);
-    if (!json_is_string(j_member)) return -1;
+    if (!json_is_string(j_member)) {
+      return -1;
+    }
 
-    if (bufleft <= j_strlen(j_member)) return -2;
+    if (bufleft <= j_strlen(j_member)) {
+      return -2;
+    }
     strncpy(next_buf, json_string_value(j_member), bufleft);
     result->gr_mem[i] = next_buf;
 
@@ -62,8 +66,10 @@ enum nss_status _nss_octopass_setgrent_locked(int stayopen) {
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     return NSS_STATUS_UNAVAIL;
@@ -100,7 +106,7 @@ enum nss_status _nss_octopass_endgrent(void) {
 
 enum nss_status _nss_octopass_endgrent_locked(void) {
   if (ent_json_root) {
-      while (ent_json_root->refcount > 0) json_decref(ent_json_root);
+    while (ent_json_root->refcount > 0) json_decref(ent_json_root);
   }
 
   ent_json_root = NULL;
@@ -160,6 +166,7 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result,
   return NSS_STATUS_SUCCESS;
 }
 
+// Find a group by gid
 enum nss_status _nss_octopass_getgrgid_r(gid_t gid,
                                          struct group *result,
                                          char *buffer,
@@ -174,7 +181,6 @@ enum nss_status _nss_octopass_getgrgid_r(gid_t gid,
   return ret;
 }
 
-// Find a group by gid
 enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid,
                                                 struct group *result,
                                                 char *buffer,
@@ -183,8 +189,10 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid,
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     *errnop = ENOENT;
@@ -241,8 +249,10 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name,
   json_t *root;
   json_error_t error;
 
+  struct config con;
   char *res;
-  int status = nss_octopass_request(&config, res);
+  int status = nss_octopass_team_members(&con, res);
+
   if (status != 0) {
     free(res);
     *errnop = ENOENT;
