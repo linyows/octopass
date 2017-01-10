@@ -3,7 +3,6 @@
 static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 static json_t *ent_json_root = NULL;
 static int ent_json_idx = 0;
-static struct config;
 
 static int pack_passwd_struct(json_t *root,
                               struct passwd *result,
