@@ -42,17 +42,17 @@ static int pack_shadow_struct(json_t *root,
 }
 
 // Called to open the shadow file
-enum nss_status _nss_octopass_setspent(int stayopen) {
+enum nss_status _nss_octopass_setspent(int stay_open) {
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
-  status = _nss_octopass_setspent_locked(stayopen);
+  status = _nss_octopass_setspent_locked(stay_open);
   NSS_OCTOPASS_UNLOCK();
 
   return status;
 }
 
-enum nss_status _nss_octopass_setspent_locked(int stayopen) {
+enum nss_status _nss_octopass_setspent_locked(int stay_open) {
   json_t *root;
   json_error_t error;
 

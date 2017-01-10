@@ -47,17 +47,17 @@ static int pack_passwd_struct(json_t *root,
 }
 
 // Called to open the passwd file
-enum nss_status _nss_octopass_setpwent(int stayopen) {
+enum nss_status _nss_octopass_setpwent(int stay_open) {
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
-  ret = _nss_octopass_setpwent_locked(stayopen);
+  ret = _nss_octopass_setpwent_locked(stay_open);
   NSS_OCTOPASS_UNLOCK();
 
   return ret;
 }
 
-enum nss_status _nss_octopass_setpwent_locked(int stayopen) {
+enum nss_status _nss_octopass_setpwent_locked(int stay_open) {
   json_t *root;
   json_error_t error;
 

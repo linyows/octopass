@@ -51,17 +51,17 @@ static int pack_group_struct(json_t *root,
 }
 
 // Called to open the group file
-enum nss_status _nss_octopass_setgrent(int stayopen) {
+enum nss_status _nss_octopass_setgrent(int stay_open) {
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
-  status = _nss_octopass_setgrent_locked(stayopen);
+  status = _nss_octopass_setgrent_locked(stay_open);
   NSS_OCTOPASS_UNLOCK();
 
   return status;
 }
 
-enum nss_status _nss_octopass_setgrent_locked(int stayopen) {
+enum nss_status _nss_octopass_setgrent_locked(int stay_open) {
   json_t *root;
   json_error_t error;
 
