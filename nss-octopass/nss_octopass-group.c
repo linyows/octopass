@@ -189,24 +189,27 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid,
   json_error_t error;
 
   struct config con;
-  char *res;
-  int status = nss_octopass_team_members(&con, res);
+  char *res_body;
+  int status = nss_octopass_team_members(&con, res_body);
 
   if (status != 0) {
-    free(res);
+    free(res_body);
     *errnop = ENOENT;
     return NSS_STATUS_UNAVAIL;
   }
 
-  root = json_loads(res, 0, &error);
-  free(res);
+  root = json_loads(res_body, 0, &error);
+  free(res_body);
 
-  if (!root) {
+  json_t *data = nss_octopass_github_team_member_by_id((int)gid, root);
+
+  if (!data) {
+    json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_UNAVAIL;
   }
 
-  int pack_result = pack_group_struct(root, result, buffer, buflen);
+  int pack_result = pack_group_struct(data, result, buffer, buflen);
 
   if (pack_result == -1) {
     json_decref(root);
@@ -221,7 +224,6 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid,
   }
 
   json_decref(root);
-
   return NSS_STATUS_SUCCESS;
 }
 
@@ -249,24 +251,31 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name,
   json_error_t error;
 
   struct config con;
-  char *res;
-  int status = nss_octopass_team_members(&con, res);
+  char *res_body;
+  int status = nss_octopass_team_members(&con, res_body);
 
   if (status != 0) {
-    free(res);
+    free(res_body);
     *errnop = ENOENT;
     return NSS_STATUS_UNAVAIL;
   }
 
-  root = json_loads(res, 0, &error);
-  free(res);
-
+  root = json_loads(res_body, 0, &error);
+  free(res_body);
   if (!root) {
     *errnop = ENOENT;
     return NSS_STATUS_UNAVAIL;
   }
 
-  int pack_result = pack_group_struct(root, result, buffer, buflen);
+  json_t *data = nss_octopass_github_team_member_by_name(name, root);
+
+  if (!data) {
+    json_decref(root);
+    *errnop = ENOENT;
+    return NSS_STATUS_UNAVAIL;
+  }
+
+  int pack_result = pack_group_struct(data, result, buffer, buflen);
 
   if (pack_result == -1) {
     json_decref(root);
@@ -281,6 +290,5 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name,
   }
 
   json_decref(root);
-
   return NSS_STATUS_SUCCESS;
 }

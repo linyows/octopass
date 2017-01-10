@@ -194,6 +194,10 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name,
 
   root = json_loads(res_body, 0, &error);
   free(res_body);
+  if (!root) {
+    *errnop = ENOENT;
+    return NSS_STATUS_UNAVAIL;
+  }
 
   json_t *data = nss_octopass_github_team_member_by_name(name, root);
 
