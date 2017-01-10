@@ -103,7 +103,7 @@ void nss_octopass_config_loading(struct config *con, char *filename) {
       if (strcmp(value, "true") == 0) {
         con->syslog = true;
       } else {
-        con->syslog = true;
+        con->syslog = false;
       }
     }
   }
