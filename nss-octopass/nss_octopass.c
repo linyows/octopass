@@ -10,10 +10,8 @@ struct member {
   char name[MAXBUF];
 };
 
-static size_t write_response_callback(void *contents,
-                                      size_t size,
-                                      size_t nmemb,
-                                      void *userp) {
+static size_t write_response_callback(void *contents, size_t size, size_t nmemb, void *userp)
+{
   size_t realsize = size * nmemb;
   struct response *res = (struct response *)userp;
 
@@ -31,27 +29,31 @@ static size_t write_response_callback(void *contents,
   return realsize;
 }
 
-void nss_octopass_remove_quotes(char *s) {
+void nss_octopass_remove_quotes(char *s)
+{
   if (s == NULL) {
     return;
   }
 
-  if (s[strlen(s)-1] == '"') {
-    s[strlen(s)-1] = '\0';
+  if (s[strlen(s) - 1] == '"') {
+    s[strlen(s) - 1] = '\0';
   }
 
   int i = 0;
-  while (s[i] != '\0' && s[i] == '"') i++;
+  while (s[i] != '\0' && s[i] == '"')
+    i++;
   memcpy(s, &s[i], strlen(s));
 }
 
-int * nss_octopass_intdup(int const * src, size_t len) {
-   int * p = malloc(len * sizeof(int));
-   memcpy(p, src, len * sizeof(int));
-   return p;
+int *nss_octopass_intdup(int const *src, size_t len)
+{
+  int *p = malloc(len * sizeof(int));
+  memcpy(p, src, len * sizeof(int));
+  return p;
 }
 
-void nss_octopass_config_loading(struct config *con, char *filename) {
+void nss_octopass_config_loading(struct config *con, char *filename)
+{
   memset(con->endpoint, '\0', sizeof(con->endpoint));
   memset(con->token, '\0', sizeof(con->token));
   memset(con->organization, '\0', sizeof(con->organization));
@@ -71,9 +73,9 @@ void nss_octopass_config_loading(struct config *con, char *filename) {
 
   char line[MAXBUF];
 
-  while(fgets(line, sizeof(line), file) != NULL) {
-    if (strlen(line) != sizeof(line)-1) {
-      line[strlen(line)-1] = '\0';
+  while (fgets(line, sizeof(line), file) != NULL) {
+    if (strlen(line) != sizeof(line) - 1) {
+      line[strlen(line) - 1] = '\0';
     }
 
     char *lasts;
@@ -81,7 +83,7 @@ void nss_octopass_config_loading(struct config *con, char *filename) {
     char *value = strtok_r(NULL, DELIM, &lasts);
     nss_octopass_remove_quotes(value);
 
-    if  (strcmp(key, "Endpoint") == 0) {
+    if (strcmp(key, "Endpoint") == 0) {
       memcpy(con->endpoint, value, strlen(value));
     } else if (strcmp(key, "Token") == 0) {
       memcpy(con->token, value, strlen(value));
@@ -133,10 +135,9 @@ void nss_octopass_config_loading(struct config *con, char *filename) {
   fclose(file);
 }
 
-void nss_octopass_github_request(struct config *con,
-                                 char *url,
-                                 struct response *res) {
-  //printf("Request URL: %s\n", url);
+void nss_octopass_github_request(struct config *con, char *url, struct response *res)
+{
+  // printf("Request URL: %s\n", url);
   syslog(LOG_INFO, "http get -- %s", url);
 
   char auth[64];
@@ -152,12 +153,12 @@ void nss_octopass_github_request(struct config *con,
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, url);
-  //curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+  // curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, NSS_OCTOPASS_VERSION_WITH_NAME);
   curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
-  //curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+  // curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
-  //curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+  // curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_response_callback);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, res);
 
@@ -169,14 +170,15 @@ void nss_octopass_github_request(struct config *con,
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
     syslog(LOG_INFO, "http status: %d -- %lu bytes retrieved", code, (long)res->size);
-    //printf("%s\n", res->data);
+    // printf("%s\n", res->data);
   }
 
   curl_easy_cleanup(hnd);
   curl_slist_free_all(headers);
 }
 
-int nss_octopass_github_team_id(char *team, char *data) {
+int nss_octopass_github_team_id(char *team, char *data)
+{
   json_t *root;
   json_error_t error;
   root = json_loads(data, 0, &error);
@@ -186,7 +188,7 @@ int nss_octopass_github_team_id(char *team, char *data) {
     json_t *data = json_array_get(root, i);
     const char *t = json_string_value(json_object_get(data, "name"));
 
-    if  (strcmp(team, t) == 0) {
+    if (strcmp(team, t) == 0) {
       const json_int_t id = json_integer_value(json_object_get(data, "id"));
       syslog(LOG_INFO, "team_id/name: %d/%s", id, team);
       json_decref(root);
@@ -198,7 +200,8 @@ int nss_octopass_github_team_id(char *team, char *data) {
   return 0;
 }
 
-json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root) {
+json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root)
+{
   size_t i;
 
   for (i = 0; i < json_array_size(root); i++) {
@@ -212,7 +215,8 @@ json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root) {
   return;
 }
 
-json_t * nss_octopass_github_team_member_by_id(int gh_id, json_t *root) {
+json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
+{
   size_t i;
 
   for (i = 0; i < json_array_size(root); i++) {
@@ -226,7 +230,8 @@ json_t * nss_octopass_github_team_member_by_id(int gh_id, json_t *root) {
   return;
 }
 
-int nss_octopass_github_id_by_name(char *name, char *res_body) {
+int nss_octopass_github_id_by_name(char *name, char *res_body)
+{
   json_t *root;
   json_error_t error;
   root = json_loads(res_body, 0, &error);
@@ -243,7 +248,8 @@ int nss_octopass_github_id_by_name(char *name, char *res_body) {
   return 0;
 }
 
-const char * nss_octopass_github_username_by_id(int id, char *res_body) {
+const char *nss_octopass_github_username_by_id(int id, char *res_body)
+{
   json_t *root;
   json_error_t error;
   root = json_loads(res_body, 0, &error);
@@ -264,7 +270,8 @@ const char * nss_octopass_github_username_by_id(int id, char *res_body) {
   return;
 }
 
-void nss_octopass_github_team_members_outoput(struct config *con, char *data) {
+void nss_octopass_github_team_members_outoput(struct config *con, char *data)
+{
   json_t *root;
   json_error_t error;
   root = json_loads(data, 0, &error);
@@ -277,38 +284,31 @@ void nss_octopass_github_team_members_outoput(struct config *con, char *data) {
     const json_int_t id = json_integer_value(json_object_get(data, "id"));
     const char *user = json_string_value(json_object_get(data, "login"));
     int uid = con->uid_starts + id;
-    printf("uid=%ld(%s) gid=%ld(%s) groups=%ld(%s)\n",
-        uid, user, con->gid, gname, con->gid, gname);
+    printf("uid=%ld(%s) gid=%ld(%s) groups=%ld(%s)\n", uid, user, con->gid, gname, con->gid, gname);
   }
 
   json_decref(root);
 }
 
-void nss_octopass_init(struct config *con) {
+void nss_octopass_init(struct config *con)
+{
   nss_octopass_config_loading(con, NSS_OCTOPASS_CONFIG_FILE);
 
   char auth[64];
   sprintf(auth, "Authorization: token %s", con->token);
 
   if (con->syslog) {
-    const char* pg_name = "nss-octopass";
+    const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO,
-      "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
-      con->endpoint,
-      con->token,
-      con->organization,
-      con->team,
-      con->syslog,
-      con->uid_starts,
-      con->gid,
-      con->group_name,
-      con->home,
-      con->shell);
+    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
+                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
+           con->endpoint, con->token, con->organization, con->team, con->syslog, con->uid_starts,
+           con->gid, con->group_name, con->home, con->shell);
   }
 }
 
-int nss_octopass_team_id(struct config *con) {
+int nss_octopass_team_id(struct config *con)
+{
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
   sprintf(url, "%s/orgs/%s/teams", con->endpoint, con->organization);
 
@@ -326,7 +326,8 @@ int nss_octopass_team_id(struct config *con) {
   return nss_octopass_github_team_id(con->team, res.data);
 }
 
-int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res) {
+int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
+{
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
   sprintf(url, "%s/teams/%d/members", con->endpoint, team_id);
 
@@ -343,7 +344,8 @@ int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct
   return 0;
 }
 
-int nss_octopass_team_members(struct config *con, struct response *res) {
+int nss_octopass_team_members(struct config *con, struct response *res)
+{
   nss_octopass_init(con);
 
   int team_id = nss_octopass_team_id(con);
@@ -351,7 +353,7 @@ int nss_octopass_team_members(struct config *con, struct response *res) {
     return -1;
   }
 
-  int status =  nss_octopass_team_members_by_team_id(con, team_id, res);
+  int status = nss_octopass_team_members_by_team_id(con, team_id, res);
   if (status == -1) {
     return -1;
   }
@@ -359,7 +361,8 @@ int nss_octopass_team_members(struct config *con, struct response *res) {
   return 0;
 }
 
-int nss_octopass_id_by_name(struct config *con, struct response *res, char *name) {
+int nss_octopass_id_by_name(struct config *con, struct response *res, char *name)
+{
   int status = nss_octopass_team_members(con, res);
   if (status == -1) {
     return -1;
@@ -368,7 +371,8 @@ int nss_octopass_id_by_name(struct config *con, struct response *res, char *name
   return nss_octopass_github_id_by_name(name, res->data);
 }
 
-const char * nss_octopass_name_by_id(struct config *con, struct response *res, int id) {
+const char *nss_octopass_name_by_id(struct config *con, struct response *res, int id)
+{
   int status = nss_octopass_team_members(con, res);
   if (status == -1) {
     return;
@@ -377,7 +381,8 @@ const char * nss_octopass_name_by_id(struct config *con, struct response *res, i
   return nss_octopass_github_username_by_id(id, res->data);
 }
 
-int main(int argc, char *args[]) {
+int main(int argc, char *args[])
+{
   struct config con;
   struct response res;
   nss_octopass_team_members(&con, &res);
@@ -389,6 +394,6 @@ int main(int argc, char *args[]) {
   const char *name = nss_octopass_github_username_by_id(id, res.data);
   fprintf(stderr, "name: %s\n", name);
 
-  //nss_octopass_github_team_members_outoput(&con, res.data);
+  // nss_octopass_github_team_members_outoput(&con, res.data);
   return 0;
 }

@@ -9,10 +9,10 @@
 #include <pthread.h>
 #include <pwd.h>
 #include <shadow.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <syslog.h>
 
 //#include <unistd.h>
@@ -27,8 +27,14 @@
 #define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
 #define NSS_OCTOPASS_CONFIG_FILE "/octopass/octopass.conf"
 //#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
-#define NSS_OCTOPASS_LOCK() do { pthread_mutex_lock(&NSS_OCTOPASS_MUTEX); } while (0)
-#define NSS_OCTOPASS_UNLOCK() do { pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX); } while (0)
+#define NSS_OCTOPASS_LOCK()                                                                        \
+  do {                                                                                             \
+    pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                       \
+  } while (0);
+#define NSS_OCTOPASS_UNLOCK()                                                                      \
+  do {                                                                                             \
+    pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX);                                                     \
+  } while (0);
 #ifndef NSS_OCTOPASS_SCRIPT
 #define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
 #endif
@@ -56,6 +62,8 @@ struct config {
   bool syslog;
 };
 
-extern int nss_octopass_request(struct config *con, char *res_body);
+extern int nss_octopass_team_members(struct config *con, struct response *res);
+extern json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root);
+extern json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root);
 
 #endif /* NSS_OCTOPASS_H */

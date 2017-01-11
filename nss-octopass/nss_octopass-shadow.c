@@ -4,10 +4,8 @@ static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 static json_t *ent_json_root = NULL;
 static int ent_json_idx = 0;
 
-static int pack_shadow_struct(json_t *root,
-                              struct spwd *result,
-                              char *buffer,
-                              size_t buflen) {
+static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, size_t buflen)
+{
   char *next_buf = buffer;
   size_t bufleft = buflen;
 
@@ -42,7 +40,8 @@ static int pack_shadow_struct(json_t *root,
 }
 
 // Called to open the shadow file
-enum nss_status _nss_octopass_setspent(int stay_open) {
+enum nss_status _nss_octopass_setspent(int stay_open)
+{
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
@@ -52,7 +51,8 @@ enum nss_status _nss_octopass_setspent(int stay_open) {
   return status;
 }
 
-enum nss_status _nss_octopass_setspent_locked(int stay_open) {
+enum nss_status _nss_octopass_setspent_locked(int stay_open)
+{
   json_t *root;
   json_error_t error;
 
@@ -83,9 +83,11 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open) {
   return NSS_STATUS_SUCCESS;
 }
 
-enum nss_status _nss_octopass_endspent_locked(void) {
-  if (ent_json_root){
-    while (ent_json_root->refcount > 0) json_decref(ent_json_root);
+enum nss_status _nss_octopass_endspent_locked(void)
+{
+  if (ent_json_root) {
+    while (ent_json_root->refcount > 0)
+      json_decref(ent_json_root);
   }
 
   ent_json_root = NULL;
@@ -95,7 +97,8 @@ enum nss_status _nss_octopass_endspent_locked(void) {
 }
 
 // Called to close the shadow file
-enum nss_status _nss_octopass_endspent(void) {
+enum nss_status _nss_octopass_endspent(void)
+{
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
@@ -105,10 +108,9 @@ enum nss_status _nss_octopass_endspent(void) {
   return status;
 }
 
-enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result,
-                                                char *buffer,
-                                                size_t buflen,
-                                                int *errnop) {
+enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffer, size_t buflen,
+                                                int *errnop)
+{
   enum nss_status status = NSS_STATUS_SUCCESS;
 
   if (ent_json_root == NULL) {
@@ -119,9 +121,8 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result,
     return status;
   }
 
-  int pack_result = pack_shadow_struct(
-    json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen
-  );
+  int pack_result =
+      pack_shadow_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen);
 
   // A necessary input file cannot be found.
   if (pack_result == -1) {
@@ -146,10 +147,9 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result,
 }
 
 // Called to look up next entry in shadow file
-enum nss_status _nss_octopass_getspent_r(struct spwd *result,
-                                         char *buffer,
-                                         size_t buflen,
-                                         int *errnop) {
+enum nss_status _nss_octopass_getspent_r(struct spwd *result, char *buffer, size_t buflen,
+                                         int *errnop)
+{
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
@@ -160,11 +160,9 @@ enum nss_status _nss_octopass_getspent_r(struct spwd *result,
 }
 
 // Find a shadow by name
-enum nss_status _nss_octopass_getspnam_r(const char *name,
-                                         struct spwd *result,
-                                         char *buffer,
-                                         size_t buflen,
-                                         int *errnop) {
+enum nss_status _nss_octopass_getspnam_r(const char *name, struct spwd *result, char *buffer,
+                                         size_t buflen, int *errnop)
+{
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
@@ -174,11 +172,9 @@ enum nss_status _nss_octopass_getspnam_r(const char *name,
   return status;
 }
 
-enum nss_status _nss_octopass_getspnam_r_locked(const char *name,
-                                                struct spwd *result,
-                                                char *buffer,
-                                                size_t buflen,
-                                                int *errnop) {
+enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *result, char *buffer,
+                                                size_t buflen, int *errnop)
+{
   json_t *root;
   json_error_t error;
 

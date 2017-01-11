@@ -4,10 +4,8 @@ static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 static json_t *ent_json_root = NULL;
 static int ent_json_idx = 0;
 
-static int pack_passwd_struct(json_t *root,
-                              struct passwd *result,
-                              char *buffer,
-                              size_t buflen) {
+static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer, size_t buflen)
+{
   char *next_buf = buffer;
   size_t bufleft = buflen;
 
@@ -32,14 +30,13 @@ static int pack_passwd_struct(json_t *root,
   }
   result->pw_name = strncpy(next_buf, json_string_value(j_pw_name), bufleft);
   next_buf += strlen(result->pw_name) + 1;
-  bufleft  -= strlen(result->pw_name) + 1;
+  bufleft -= strlen(result->pw_name) + 1;
 
   result->pw_passwd = "x";
   result->pw_uid = con->uid_starts + j_pw_id;
   result->pw_gid = con->gid;
   result->pw_gecos = "managed by nss-octopass";
-  char *dir[512]
-  sprintf(dir, con->home, result->pw_name);
+  char *dir[512] sprintf(dir, con->home, result->pw_name);
   result->pw_dir = dir;
   result->pw_shell = con->shell;
 
@@ -47,7 +44,8 @@ static int pack_passwd_struct(json_t *root,
 }
 
 // Called to open the passwd file
-enum nss_status _nss_octopass_setpwent(int stay_open) {
+enum nss_status _nss_octopass_setpwent(int stay_open)
+{
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
@@ -57,7 +55,8 @@ enum nss_status _nss_octopass_setpwent(int stay_open) {
   return ret;
 }
 
-enum nss_status _nss_octopass_setpwent_locked(int stay_open) {
+enum nss_status _nss_octopass_setpwent_locked(int stay_open)
+{
   json_t *root;
   json_error_t error;
 
@@ -89,7 +88,8 @@ enum nss_status _nss_octopass_setpwent_locked(int stay_open) {
 }
 
 // Called to close the passwd file
-enum nss_status _nss_octopass_endpwent(void) {
+enum nss_status _nss_octopass_endpwent(void)
+{
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
@@ -99,9 +99,11 @@ enum nss_status _nss_octopass_endpwent(void) {
   return ret;
 }
 
-enum nss_status _nss_octopass_endpwent_locked(void) {
-  if (ent_json_root){
-    while (ent_json_root->refcount > 0) json_decref(ent_json_root);
+enum nss_status _nss_octopass_endpwent_locked(void)
+{
+  if (ent_json_root) {
+    while (ent_json_root->refcount > 0)
+      json_decref(ent_json_root);
   }
   ent_json_root = NULL;
   ent_json_idx = 0;
@@ -110,10 +112,9 @@ enum nss_status _nss_octopass_endpwent_locked(void) {
 }
 
 // Called to look up next entry in passwd file
-enum nss_status _nss_octopass_getpwent_r(struct passwd *result,
-                                         char *buffer,
-                                         size_t buflen,
-                                         int *errnop) {
+enum nss_status _nss_octopass_getpwent_r(struct passwd *result, char *buffer, size_t buflen,
+                                         int *errnop)
+{
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
@@ -123,21 +124,20 @@ enum nss_status _nss_octopass_getpwent_r(struct passwd *result,
   return ret;
 }
 
-enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result,
-                                                char *buffer,
-                                                size_t buflen,
-                                                int *errnop) {
+enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buffer, size_t buflen,
+                                                int *errnop)
+{
   enum nss_status ret = NSS_STATUS_SUCCESS;
 
   if (ent_json_root == NULL) {
     ret = _nss_octopass_setpwent_locked(0);
   }
 
-  if (ret != NSS_STATUS_SUCCESS) return ret;
+  if (ret != NSS_STATUS_SUCCESS)
+    return ret;
 
-  int pack_result = pack_passwd_struct(
-    json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen
-  );
+  int pack_result =
+      pack_passwd_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen);
 
   if (pack_result == -1) {
     *errnop = ENOENT;
@@ -161,11 +161,9 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result,
 }
 
 // Find a passwd by uid
-enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid,
-                                                struct passwd *result,
-                                                char *buffer,
-                                                size_t buflen,
-                                                int *errnop) {
+enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result, char *buffer,
+                                                size_t buflen, int *errnop)
+{
   json_t *root;
   json_error_t error;
 
@@ -212,11 +210,9 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid,
   return NSS_STATUS_SUCCESS;
 }
 
-enum nss_status _nss_octopass_getpwuid_r(uid_t uid,
-                                         struct passwd *result,
-                                         char *buffer,
-                                         size_t buflen,
-                                         int *errnop) {
+enum nss_status _nss_octopass_getpwuid_r(uid_t uid, struct passwd *result, char *buffer,
+                                         size_t buflen, int *errnop)
+{
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
@@ -227,11 +223,9 @@ enum nss_status _nss_octopass_getpwuid_r(uid_t uid,
 }
 
 // Find a passwd by name
-enum nss_status _nss_octopass_getpwnam_r(const char *name,
-                                         struct passwd *result,
-                                         char *buffer,
-                                         size_t buflen,
-                                         int *errnop) {
+enum nss_status _nss_octopass_getpwnam_r(const char *name, struct passwd *result, char *buffer,
+                                         size_t buflen, int *errnop)
+{
   enum nss_status ret;
 
   NSS_OCTOPASS_LOCK();
@@ -241,11 +235,9 @@ enum nss_status _nss_octopass_getpwnam_r(const char *name,
   return ret;
 }
 
-enum nss_status _nss_octopass_getpwnam_r_locked(const char *name,
-                                                struct passwd *result,
-                                                char *buffer,
-                                                size_t buflen,
-                                                int *errnop) {
+enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd *result,
+                                                char *buffer, size_t buflen, int *errnop)
+{
   json_t *root;
   json_error_t error;
 
