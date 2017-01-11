@@ -1,15 +1,5 @@
 #include "nss_octopass.h"
 
-struct response {
-  char *data;
-  size_t size;
-};
-
-struct member {
-  int id;
-  char name[MAXBUF];
-};
-
 static size_t write_response_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;

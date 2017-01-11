@@ -47,6 +47,11 @@
 #define MAXBUF 1024
 #define DELIM " = "
 
+struct response {
+  char *data;
+  size_t size;
+};
+
 struct config {
   char endpoint[MAXBUF];
   char token[MAXBUF];
