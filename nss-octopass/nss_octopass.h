@@ -27,13 +27,13 @@
 #define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
 #define NSS_OCTOPASS_CONFIG_FILE "/octopass/octopass.conf"
 //#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
-#define NSS_OCTOPASS_LOCK()                                                                        \
-  do {                                                                                             \
-    pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                       \
+#define NSS_OCTOPASS_LOCK()                                                                                            \
+  do {                                                                                                                 \
+    pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                                           \
   } while (0);
-#define NSS_OCTOPASS_UNLOCK()                                                                      \
-  do {                                                                                             \
-    pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX);                                                     \
+#define NSS_OCTOPASS_UNLOCK()                                                                                          \
+  do {                                                                                                                 \
+    pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX);                                                                         \
   } while (0);
 #ifndef NSS_OCTOPASS_SCRIPT
 #define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
@@ -68,7 +68,7 @@ struct config {
 };
 
 extern int nss_octopass_team_members(struct config *con, struct response *res);
-extern void nss_octopass_load_config(struct config *con, char *filename);
+extern void nss_octopass_config_loading(struct config *con, char *filename);
 extern json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root);
 
