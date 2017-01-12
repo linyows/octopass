@@ -57,16 +57,16 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open)
   json_error_t error;
 
   struct config con;
-  char *res;
-  int status = nss_octopass_team_members(&con, res);
+  char *res_body;
+  int status = nss_octopass_team_members(&con, res_body);
 
   if (status != 0) {
-    free(res);
+    free(res_body);
     return NSS_STATUS_UNAVAIL;
   }
 
-  root = json_loads(res, 0, &error);
-  free(res);
+  root = json_loads(res_body, 0, &error);
+  free(res_body);
 
   if (!root) {
     return NSS_STATUS_UNAVAIL;

@@ -4,7 +4,8 @@ static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 static json_t *ent_json_root = NULL;
 static int ent_json_idx = 0;
 
-static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer, size_t buflen)
+static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer, size_t buflen,
+                              struct config *con)
 {
   char *next_buf = buffer;
   size_t bufleft = buflen;
@@ -136,8 +137,10 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   if (ret != NSS_STATUS_SUCCESS)
     return ret;
 
+  struct config con;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int pack_result =
-      pack_passwd_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen);
+      pack_passwd_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     *errnop = ENOENT;
@@ -192,7 +195,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
     return NSS_STATUS_UNAVAIL;
   }
 
-  int pack_result = pack_passwd_struct(data, result, buffer, buflen);
+  int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     json_decref(root);
@@ -266,7 +269,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
     return NSS_STATUS_UNAVAIL;
   }
 
-  int pack_result = pack_passwd_struct(data, result, buffer, buflen);
+  int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     json_decref(root);

@@ -284,9 +284,6 @@ void nss_octopass_init(struct config *con)
 {
   nss_octopass_config_loading(con, NSS_OCTOPASS_CONFIG_FILE);
 
-  char auth[64];
-  sprintf(auth, "Authorization: token %s", con->token);
-
   if (con->syslog) {
     const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
