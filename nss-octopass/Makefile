@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wstrict-prototypes -Werror -fPIC -std=c99
+CFLAGS=-Wall -Wstrict-prototypes -Werror -fPIC -std=c99 -D_GNU_SOURCE
 LD_SONAME=-Wl,-soname,libnss_octopass.so.2
 LIBRARY=libnss_octopass.so.2.0
 LINKS=libnss_octopass.so.2 libnss_octopass.so
