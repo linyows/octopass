@@ -2,10 +2,17 @@ language: go
 go:
   - 1.7
   - 1.6
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y gcc-4.6 libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool make cmake autoconf git wget bzip2
+  - sudo wget https://github.com/Snaipe/Criterion/releases/download/v2.3.0/criterion-v2.3.0-linux-x86_64.tar.bz2
+  - sudo tar xf criterion-v2.3.0-linux-x86_64.tar.bz2
+  - sudo mv criterion-v2.3.0/include/criterion/ /usr/include/
+  - sudo mv criterion-v2.3.0/lib/libcriterion.so /usr/lib/
 script:
   - make test
   - make cover
 after_script:
-- goveralls -coverprofile=coverage.out
+  - goveralls -coverprofile=coverage.out
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
