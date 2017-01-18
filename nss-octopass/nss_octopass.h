@@ -25,8 +25,7 @@
 
 #define NSS_OCTOPASS_VERSION "0.1.0"
 #define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
-#define NSS_OCTOPASS_CONFIG_FILE "/octopass/octopass.conf"
-//#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
+#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #define NSS_OCTOPASS_LOCK()                                                                                            \
   do {                                                                                                                 \
     pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                                           \
