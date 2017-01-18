@@ -369,20 +369,3 @@ const char *nss_octopass_name_by_id(struct config *con, struct response *res, in
 
   return nss_octopass_github_username_by_id(id, res->data);
 }
-
-int main(int argc, char *args[])
-{
-  struct config con;
-  struct response res;
-  nss_octopass_team_members(&con, &res);
-
-  char *u = "linyows";
-  int id  = nss_octopass_github_id_by_name(u, res.data);
-  fprintf(stderr, "id: %d\n", id);
-
-  const char *name = nss_octopass_github_username_by_id(id, res.data);
-  fprintf(stderr, "name: %s\n", name);
-
-  // nss_octopass_github_team_members_outoput(&con, res.data);
-  return 0;
-}
