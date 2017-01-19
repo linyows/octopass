@@ -1,2 +1,4 @@
 *.test
 octopass
+nss-octopass/criterion-v2.3.0
+nss-octopass/criterion.tar.bz2
