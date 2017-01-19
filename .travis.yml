@@ -21,7 +21,7 @@ addons:
 script:
   - make test
   - make cover
-  - pushd nss-octopass; make depsdev; make test
+  - cd nss-octopass && make test
 after_script:
   - goveralls -coverprofile=coverage.out
 notifications:

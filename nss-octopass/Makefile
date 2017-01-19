@@ -52,19 +52,20 @@ deps:
 	git clone --depth=1 https://github.com/vstakhov/libucl.git tmp/libucl
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 
-depsdev: deps
-	curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o tmp/criterion.tar.bz2
-	pushd tmp; tar xf criterion.tar.bz2; popd
-	mv tmp/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
-	mv tmp/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib64/
-	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
+depsdev:
+	rm -rf criterion.tar.bz2
+	curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o criterion.tar.bz2
+	tar xf criterion.tar.bz2
+	mv criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
+	cp criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib/
+	cp criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib64/
+	#git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-test:
+test: depsdev
 	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
 	./nss_octopass_test
 
 clean:
-	rm -rf tmp
 	rm -rf $(BUILD)
 
 install:
