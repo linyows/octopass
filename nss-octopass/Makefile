@@ -15,6 +15,8 @@ BUILD=.libs
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
 
+CRITERION_VERSION=2.3.0
+
 default: build
 build: nss_octopass
 
@@ -46,7 +48,23 @@ nss_octopass_test: $(SOURCE) nss_octopass_test.c nss_octopass.h
 	$(CC) $(CFLAGS) $(CFLAGS_TEST) $(LIBS) $(SOURCE) nss_octopass_test.c -o nss_octopass_test $(LIBS)
 	strip nss_octopass_test
 
+deps:
+	git clone --depth=1 https://github.com/vstakhov/libucl.git tmp/libucl
+	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
+
+depsdev: deps
+	curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o tmp/criterion.tar.bz2
+	pushd tmp; tar xf criterion.tar.bz2; popd
+	mv tmp/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
+	mv tmp/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib64/
+	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
+
+test:
+	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
+	./nss_octopass_test
+
 clean:
+	rm -rf tmp
 	rm -rf $(BUILD)
 
 install:
@@ -57,12 +75,4 @@ install:
 distclean: clean
 	rm -f *~ \#*
 
-dist:
-	rm -rf libnss-octopass-$(VERSION) libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION).tar.gz
-	mkdir libnss-octopass-$(VERSION)
-	cp $(SOURCES) libnss-octopass-$(VERSION)
-	tar cf libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION)
-	gzip -9 libnss-octopass-$(VERSION).tar
-rm -rf libnss-octopass-$(VERSION)
-
-.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean
+.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test

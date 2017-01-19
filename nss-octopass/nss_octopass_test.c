@@ -16,8 +16,13 @@ Test(nss_octopass, config_loading)
 
 Test(nss_octopass, remove_quotes)
 {
-  char s[] = "\"I'm a foo\"";
-  nss_octopass_remove_quotes(&s);
+  char s[] = "\"foo\"";
+  nss_octopass_remove_quotes(&s[0]);
 
-  cr_assert_str_eq(s, "I'm a foo");
+  cr_assert_str_eq(s, "foo");
+
+  char s_contains[] = "\"I'm a \"foo\"\"";
+  nss_octopass_remove_quotes(&s_contains[0]);
+
+  cr_assert_str_eq(s_contains, "I'm a \"foo\"");
 }
