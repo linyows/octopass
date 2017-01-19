@@ -7,18 +7,16 @@ LINKS=libnss_octopass.so.2 libnss_octopass.so
 CFLAGS_TEST=-DNSS_OCTOPASS_SCRIPT=\"./nss-octopass\"
 LIBS=-lpthread
 
-DESTDIR=/
-PREFIX=$(DESTDIR)/usr
+PREFIX=/usr
 LIBDIR=$(PREFIX)/lib64
+ifeq ($(wildcard $(LIBDIR)/.*),)
+LIBDIR=$(PREFIX)/lib
+endif
 BUILD=.libs
 
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
 CRITERION_VERSION=2.3.0
-MACHINE := $(shell uname -m)
-ifeq ($(MACHINE), i686)
-LIBDIR=$(PREFIX)/lib
-endif
 
 default: build
 build: nss_octopass
@@ -64,7 +62,7 @@ depsdev:
 
 test: depsdev
 	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
-	./nss_octopass_test
+	./nss_octopass_test --verbose
 
 clean:
 	rm -rf $(BUILD)
