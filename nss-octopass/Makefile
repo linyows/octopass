@@ -9,13 +9,16 @@ LIBS=-lpthread
 
 DESTDIR=/
 PREFIX=$(DESTDIR)/usr
-LIBDIR=$(PREFIX)/lib
+LIBDIR=$(PREFIX)/lib64
 BUILD=.libs
 
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
-
 CRITERION_VERSION=2.3.0
+MACHINE := $(shell uname -m)
+ifeq ($(MACHINE), i686)
+LIBDIR=$(PREFIX)/lib
+endif
 
 default: build
 build: nss_octopass
@@ -57,7 +60,7 @@ depsdev:
 	test -f criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o criterion.tar.bz2
 	tar xf criterion.tar.bz2
 	mv criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
-	test -d /usr/lib64 && mv criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib64/ || mv criterion-v$(CRITERION_VERSION)/lib/libcriterion.* /usr/lib/
+	mv criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
 test: depsdev
 	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
