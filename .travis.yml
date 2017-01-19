@@ -2,6 +2,7 @@ language: go
 go:
   - 1.7
   - 1.6
+sudo: true
 addons:
   apt:
     packages:
@@ -15,13 +16,10 @@ addons:
       - autoconf
       - git
       - bzip2
-#before_script:
-#  - sudo apt-get update -qq
-#  - sudo apt-get install -y gcc-4.6 libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool make cmake autoconf git wget bzip2
 script:
   - make test
   - make cover
-  - cd nss-octopass && make test
+  - cd nss-octopass && sudo make test
 after_script:
   - goveralls -coverprofile=coverage.out
 notifications:
