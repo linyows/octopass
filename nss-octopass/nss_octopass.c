@@ -146,6 +146,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   }
 
   fclose(file);
+
+  nss_octopass_override_config_by_env(con);
 }
 
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
