@@ -64,6 +64,10 @@ test: depsdev
 	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
 	./nss_octopass_test --verbose
 
+runtest:
+	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
+	./nss_octopass_test --verbose
+
 clean:
 	rm -rf $(BUILD)
 
@@ -75,4 +79,4 @@ install:
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test
+.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test runtest
