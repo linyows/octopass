@@ -1,7 +1,7 @@
 octopass
 ========
 
-A authentication command by golang on CLI.
+Management linux user and authentication by therganization/teamn Github.
 
 [![Travis](https://img.shields.io/travis/linyows/octopass.svg?style=flat-square)][travis]
 [![GitHub release](http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square)][release]
@@ -16,7 +16,9 @@ A authentication command by golang on CLI.
 Description
 -----------
 
-This is authenticated with the team on your organization in Github.
+This is linux user management tool by therganization/teamn github, and authentication.
+Dependingn github for user management, there are certain risks,
+but features easy handling and easefperation.
 
 Usage
 -----
