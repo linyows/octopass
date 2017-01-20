@@ -148,6 +148,15 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   fclose(file);
 
   nss_octopass_override_config_by_env(con);
+
+  if (con->syslog) {
+    const char *pg_name = "nss-octopass";
+    openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
+    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
+                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
+           con->endpoint, con->token, con->organization, con->team, con->syslog, con->uid_starts, con->gid,
+           con->group_name, con->home, con->shell);
+  }
 }
 
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
@@ -307,20 +316,6 @@ void nss_octopass_github_team_members_outoput(struct config *con, char *data)
   json_decref(root);
 }
 
-void nss_octopass_init(struct config *con)
-{
-  nss_octopass_config_loading(con, NSS_OCTOPASS_CONFIG_FILE);
-
-  if (con->syslog) {
-    const char *pg_name = "nss-octopass";
-    openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
-                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
-           con->endpoint, con->token, con->organization, con->team, con->syslog, con->uid_starts, con->gid,
-           con->group_name, con->home, con->shell);
-  }
-}
-
 int nss_octopass_team_id(struct config *con)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
@@ -360,8 +355,6 @@ int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct
 
 int nss_octopass_team_members(struct config *con, struct response *res)
 {
-  nss_octopass_init(con);
-
   int team_id = nss_octopass_team_id(con);
   if (team_id == -1) {
     return -1;

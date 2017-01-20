@@ -54,6 +54,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stay_open)
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -172,6 +173,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -232,6 +234,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {

@@ -47,6 +47,7 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open)
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -165,6 +166,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {

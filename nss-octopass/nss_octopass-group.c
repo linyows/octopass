@@ -46,6 +46,7 @@ enum nss_status _nss_octopass_setgrent_locked(int stay_open)
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -165,6 +166,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -222,6 +224,7 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
 
   struct config con;
   struct response res;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
