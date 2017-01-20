@@ -17,8 +17,8 @@ Description
 -----------
 
 This is linux user management tool by therganization/teamn github, and authentication.
-Dependingn github for user management, there are certain risks,
-but features easy handling and easefperation.
+Depending on github for user management, there are certain risks,
+but features easy handling and ease of operation.
 
 Usage
 -----
