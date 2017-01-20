@@ -42,6 +42,29 @@ int *nss_octopass_intdup(int const *src, size_t len)
   return p;
 }
 
+void nss_octopass_override_config_by_env(struct config *con)
+{
+  char *token = getenv("GITHUB_TOKEN");
+  if (token) {
+    sprintf(con->token, "%s", token);
+  }
+
+  char *endpoint = getenv("GITHUB_ENDPOINT");
+  if (endpoint) {
+    sprintf(con->endpoint, "%s", endpoint);
+  }
+
+  char *org = getenv("GITHUB_ORGANIZATION");
+  if (org) {
+    sprintf(con->organization, "%s", org);
+  }
+
+  char *team = getenv("GITHUB_TEAM");
+  if (team) {
+    sprintf(con->team, "%s", team);
+  }
+}
+
 void nss_octopass_config_loading(struct config *con, char *filename)
 {
   memset(con->endpoint, '\0', sizeof(con->endpoint));
