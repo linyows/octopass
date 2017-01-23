@@ -237,7 +237,7 @@ json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root)
     }
   }
 
-  return data;
+  return json_object();
 }
 
 json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
