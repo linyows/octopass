@@ -37,7 +37,7 @@ Test(nss_octopass, config_loading)
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.organization, "yourorganization");
   cr_assert_str_eq(con.team, "yourteam");
-  cr_assert(con.syslog == true);
+  cr_assert(con.syslog == false);
 }
 
 Test(nss_octopass, remove_quotes)
