@@ -133,7 +133,7 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
 
   if (pack_result == -1) {
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
@@ -194,7 +194,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
   if (!data) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
@@ -202,7 +202,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
@@ -255,7 +255,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
   if (!data) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
@@ -263,7 +263,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
