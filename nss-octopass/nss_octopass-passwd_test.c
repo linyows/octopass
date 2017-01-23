@@ -1,12 +1,15 @@
-#include <criterion/criterion.h>
 #define NSS_OCTOPASS_CONFIG_FILE "example.octopass.conf"
-
-#include "nss_octopass.h"
-#include "nss_octopass.c"
+#include <criterion/criterion.h>
 #include "nss_octopass-passwd.c"
 
 Test(nss_octopass, getpwnam_r)
 {
+  char *token    = getenv("GITHUB_TOKEN");
+  char *endpoint = getenv("GITHUB_ENDPOINT");
+  if (!token || !endpoint) {
+    cr_skip_test("Missing environment variables, token or endpoint");
+  }
+
   enum nss_status status;
   struct passwd pwent;
   int err;
@@ -16,7 +19,6 @@ Test(nss_octopass, getpwnam_r)
   const char *name = "linyows";
   status           = _nss_octopass_getpwnam_r(name, &pwent, buf, buflen, &err);
 
-  cr_assert_eq(err, 0);
   cr_assert_eq(status, NSS_STATUS_SUCCESS);
   cr_assert_str_eq(pwent.pw_name, "linyows");
   cr_assert_str_eq(pwent.pw_passwd, "x");
@@ -29,6 +31,12 @@ Test(nss_octopass, getpwnam_r)
 
 Test(nss_octopass, getpwnam_r__returns_not_found_if_it_is_not_team_member)
 {
+  char *token    = getenv("GITHUB_TOKEN");
+  char *endpoint = getenv("GITHUB_ENDPOINT");
+  if (!token || !endpoint) {
+    cr_skip_test("Missing environment variables, token or endpoint");
+  }
+
   enum nss_status status;
   struct passwd pwent;
   int err;
