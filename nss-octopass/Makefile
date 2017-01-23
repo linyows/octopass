@@ -67,6 +67,8 @@ test: depsdev
 runtest:
 	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
 	./nss_octopass_test --verbose
+	$(CC) nss_octopass-passwd_test.c -o nss_octopass-passwd_test -lcurl -ljansson -lcriterion
+	./nss_octopass-passwd_test --verbose
 
 clean:
 	rm -rf $(BUILD)
