@@ -37,8 +37,8 @@ void nss_octopass_remove_quotes(char *s)
 
 const char *nss_octopass_masking(const char *token)
 {
-  char s[strlen(token) - 1];
-  strncpy(s, token, 5);
+  char s[strlen(token) * sizeof(char)];
+  strncpy(s, token, 5 * sizeof(char));
   sprintf(s, "%s ************ REDACTED ************", s);
   char *mask = strdup(s);
   return mask;
