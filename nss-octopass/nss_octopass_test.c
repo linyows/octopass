@@ -1,7 +1,6 @@
 #include <criterion/criterion.h>
 #include "nss_octopass.c"
 
-/*
 Test(nss_octopass, override_config_by_env)
 {
   clearenv();
@@ -87,12 +86,10 @@ Test(nss_octopass, id_by_name)
 
   cr_assert_eq(id, 72049);
 }
-*/
 
-Test(nss_octopass, masked_token)
+Test(nss_octopass, masking)
 {
-  const char *src = "abcdefghijklmnopqrstuvwxyz0123456789!@#$";
-  const char *dst;
-  nss_octopass_masked_token(src, dst);
-  cr_assert_str_eq(dst, "abcdefghijklmno ******* REDACTED *******");
+  char *s          = "abcdefghijklmnopqrstuvwxyz0123456789!@#$";
+  const char *mask = nss_octopass_masking(s);
+  cr_assert_str_eq(mask, "abcde ************ REDACTED ************");
 }

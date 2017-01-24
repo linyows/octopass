@@ -61,13 +61,11 @@ depsdev: nss_octopass_build_dir
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
 test_without_depsdev:
-	$(CC) nss_octopass_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
+	$(CC) nss_octopass_test.c \
+		nss_octopass-passwd_test.c \
+		nss_octopass-group_test.c \
+		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
-#	$(CC) nss_octopass_test.c \
-#		nss_octopass-passwd_test.c \
-#		nss_octopass-group_test.c \
-#		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
-#		$(BUILD)/test --verbose
 
 test: depsdev test_without_depsdev
 

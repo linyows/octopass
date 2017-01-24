@@ -35,12 +35,13 @@ void nss_octopass_remove_quotes(char *s)
   memcpy(s, &s[i], strlen(s));
 }
 
-void nss_octopass_masked_token(const char *src, const char *dst)
+const char *nss_octopass_masking(const char *token)
 {
-  char s[42];
-  strncpy(s, src, 15);
-  sprintf(s, "%s ******* REDACTED *******", s);
-  dst = strdup(s);
+  char s[strlen(token)];
+  strncpy(s, token, 5);
+  sprintf(s, "%s ************ REDACTED ************", s);
+  char *mask = strdup(s);
+  return mask;
 }
 
 int *nss_octopass_intdup(int const *src, size_t len)
@@ -160,12 +161,10 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   if (con->syslog) {
     const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    const char *token;
-    nss_octopass_masked_token(con->token, token);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
                      "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
-           con->endpoint, token, con->organization, con->team, con->syslog, con->uid_starts, con->gid, con->group_name,
-           con->home, con->shell);
+           con->endpoint, nss_octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
+           con->gid, con->group_name, con->home, con->shell);
   }
 }
 
