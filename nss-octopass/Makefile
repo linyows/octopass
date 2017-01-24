@@ -54,21 +54,18 @@ deps:
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-depsdev:
-	test -f criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o criterion.tar.bz2
-	tar xf criterion.tar.bz2
-	mv criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
-	mv criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
+depsdev: nss_octopass_build_dir
+	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
+	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
+	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
+	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
-test: depsdev
-	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
-	./nss_octopass_test --verbose
+test_without_depsdev:
+	$(CC) nss_octopass_test.c \
+		nss_octopass-passwd_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test
+	$(BUILD)/test --verbose
 
-runtest:
-	$(CC) nss_octopass_test.c -o nss_octopass_test -lcurl -ljansson -lcriterion
-	./nss_octopass_test --verbose
-	$(CC) nss_octopass-passwd_test.c -o nss_octopass-passwd_test -lcurl -ljansson -lcriterion
-	./nss_octopass-passwd_test --verbose
+test: depsdev test_without_depsdev
 
 clean:
 	rm -rf $(BUILD)
@@ -81,4 +78,4 @@ install:
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test runtest
+.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
