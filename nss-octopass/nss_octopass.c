@@ -35,6 +35,14 @@ void nss_octopass_remove_quotes(char *s)
   memcpy(s, &s[i], strlen(s));
 }
 
+void nss_octopass_masked_token(const char *src, const char *dst)
+{
+  char s[42];
+  strncpy(s, src, 15);
+  sprintf(s, "%s ******* REDACTED *******", s);
+  dst = strdup(s);
+}
+
 int *nss_octopass_intdup(int const *src, size_t len)
 {
   int *p = malloc(len * sizeof(int));
@@ -123,6 +131,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     }
   }
 
+  nss_octopass_override_config_by_env(con);
+
   if (strlen(con->group_name) == 0) {
     memcpy(con->group_name, con->team, strlen(con->team));
   }
@@ -147,22 +157,23 @@ void nss_octopass_config_loading(struct config *con, char *filename)
 
   fclose(file);
 
-  nss_octopass_override_config_by_env(con);
-
   if (con->syslog) {
     const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
+    const char *token;
+    nss_octopass_masked_token(con->token, token);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
                      "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
-           con->endpoint, con->token, con->organization, con->team, con->syslog, con->uid_starts, con->gid,
-           con->group_name, con->home, con->shell);
+           con->endpoint, token, con->organization, con->team, con->syslog, con->uid_starts, con->gid, con->group_name,
+           con->home, con->shell);
   }
 }
 
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
 {
-  // printf("Request URL: %s\n", url);
-  syslog(LOG_INFO, "http get -- %s", url);
+  if (con->syslog) {
+    syslog(LOG_INFO, "http get -- %s", url);
+  }
 
   char auth[64];
   sprintf(auth, "Authorization: token %s", con->token);
@@ -177,12 +188,11 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, url);
-  // curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, NSS_OCTOPASS_VERSION_WITH_NAME);
   curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
-  // curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
-  // curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 3L);
+  curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 30L);
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_response_callback);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, res);
 
@@ -193,8 +203,9 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
-    syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", (long)code, (long)res->size);
-    // printf("%s\n", res->data);
+    if (con->syslog) {
+      syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", (long)code, (long)res->size);
+    }
   }
 
   curl_easy_cleanup(hnd);
@@ -214,7 +225,6 @@ int nss_octopass_github_team_id(char *team, char *data)
 
     if (strcmp(team, t) == 0) {
       const json_int_t id = json_integer_value(json_object_get(data, "id"));
-      syslog(LOG_INFO, "team_id/name: %d/%s", (int)id, team);
       json_decref(root);
       return id;
     }

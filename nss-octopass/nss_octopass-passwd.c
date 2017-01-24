@@ -42,7 +42,7 @@ static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer,
   char dir[MAXBUF];
   sprintf(dir, con->home, result->pw_name);
   result->pw_dir   = dir;
-  result->pw_shell = con->shell;
+  result->pw_shell = strdup(con->shell);
 
   return 0;
 }
@@ -95,9 +95,11 @@ enum nss_status _nss_octopass_setpwent(int stay_open)
 enum nss_status _nss_octopass_endpwent_locked(void)
 {
   if (ent_json_root) {
-    while (ent_json_root->refcount > 0)
+    while (ent_json_root->refcount > 0) {
       json_decref(ent_json_root);
+    }
   }
+
   ent_json_root = NULL;
   ent_json_idx  = 0;
 

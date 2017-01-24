@@ -9,7 +9,7 @@ static int pack_group_struct(json_t *root, struct group *result, char *buffer, s
   char *next_buf = buffer;
   size_t bufleft = buflen;
 
-  if (!json_is_object(root)) {
+  if (!json_is_array(root)) {
     return -1;
   }
 
@@ -17,11 +17,12 @@ static int pack_group_struct(json_t *root, struct group *result, char *buffer, s
 
   // Carve off some space for array of members.
   result->gr_mem    = (char **)next_buf;
-  result->gr_name   = con->group_name;
+  result->gr_name   = strdup(con->group_name);
   result->gr_passwd = "x";
   result->gr_gid    = con->gid;
 
-  for (int i = 0; i < json_array_size(root); i++) {
+  int i = 0;
+  for (i; i < json_array_size(root); i++) {
     json_t *j_member = json_object_get(json_array_get(root, i), "login");
     if (!json_is_string(j_member)) {
       return -1;
@@ -183,7 +184,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (!data) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   int pack_result = pack_group_struct(data, result, buffer, buflen, &con);
@@ -191,7 +192,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
@@ -225,6 +226,12 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   struct config con;
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+
+  if (strcmp(name, con.group_name) != 0) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
+
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -236,24 +243,17 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   root = json_loads(res.data, 0, &error);
   free(res.data);
   if (!root) {
-    *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
-  }
-
-  json_t *data = nss_octopass_github_team_member_by_name((char *)name, root);
-
-  if (!data) {
     json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_UNAVAIL;
   }
 
-  int pack_result = pack_group_struct(data, result, buffer, buflen, &con);
+  int pack_result = pack_group_struct(root, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {

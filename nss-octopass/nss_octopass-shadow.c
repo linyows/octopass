@@ -119,6 +119,9 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffe
   }
 
   if (status != NSS_STATUS_SUCCESS) {
+    if (status == NSS_STATUS_NOTFOUND) {
+      *errnop = ENOENT;
+    }
     return status;
   }
 
@@ -127,7 +130,7 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffe
   // A necessary input file cannot be found.
   if (pack_result == -1) {
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
@@ -187,7 +190,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   if (!data) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   int pack_result = pack_shadow_struct(data, result, buffer, buflen);
@@ -195,7 +198,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
-    return NSS_STATUS_UNAVAIL;
+    return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
