@@ -171,6 +171,45 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   }
 }
 
+void nss_octopass_export_file(char *file, char *data)
+{
+  FILE *fp = fopen(file, "w");
+  if (!fp) {
+    fprintf(stderr, "File open failure: %s\n", file);
+    exit(1);
+    return;
+  }
+  fprintf(fp, data);
+  fclose(fp);
+}
+
+char *nss_octopass_import_file(char *file)
+{
+  FILE *fp = fopen(file, "r");
+  if (!fp) {
+    fprintf(stderr, "File open failure: %s\n", file);
+    exit(1);
+    return;
+  }
+  char line[MAXBUF];
+  char *data;
+
+  if ((data = malloc(MAXBUF * sizeof(char))) != NULL) {
+    data[0] = '\0';
+  } else {
+    fprintf(stderr, "Malloc failed\n");
+  }
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    strcat(data, strdup(line));
+  }
+  fclose(fp);
+  char *res = data;
+  free(data);
+
+  return res;
+}
+
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
 {
   if (con->syslog) {

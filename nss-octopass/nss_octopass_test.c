@@ -25,6 +25,48 @@ Test(nss_octopass, override_config_by_env)
   clearenv();
 }
 
+Test(nss_octopass, export_file)
+{
+  char *f = "/tmp/__test__.txt";
+  char *d = "LINE1\nLINE2\nLINE3\n";
+  nss_octopass_export_file(f, d);
+
+  FILE *fp = fopen(f, "r");
+
+  if (fp == NULL) {
+    cr_assert_fail("File open failure");
+  }
+
+  char line[10];
+  int i = 0;
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    switch (i) {
+    case 0:
+      cr_assert_str_eq(line, "LINE1\n");
+      break;
+    case 1:
+      cr_assert_str_eq(line, "LINE2\n");
+      break;
+    case 2:
+      cr_assert_str_eq(line, "LINE3\n");
+      break;
+    }
+    i += 1;
+  }
+
+  fclose(fp);
+}
+
+Test(nss_octopass, import_file)
+{
+  char *f = "/tmp/__test__.txt";
+  char *d = "LINE1\nLINE2\nLINE3\n";
+  nss_octopass_export_file(f, d);
+  char *data = nss_octopass_import_file(f);
+  cr_assert_str_eq(data, d);
+}
+
 Test(nss_octopass, config_loading)
 {
   clearenv();
