@@ -1,3 +1,4 @@
+//#define NSS_OCTOPASS_CACHE 1
 #include <criterion/criterion.h>
 #include "nss_octopass.c"
 
@@ -63,7 +64,7 @@ Test(nss_octopass, import_file)
   char *f = "/tmp/__test__.txt";
   char *d = "LINE1\nLINE2\nLINE3\n";
   nss_octopass_export_file(f, d);
-  char *data = nss_octopass_import_file(f);
+  const char *data = nss_octopass_import_file(f);
   cr_assert_str_eq(data, d);
 }
 

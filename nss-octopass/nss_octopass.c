@@ -183,7 +183,7 @@ void nss_octopass_export_file(char *file, char *data)
   fclose(fp);
 }
 
-char *nss_octopass_import_file(char *file)
+const char *nss_octopass_import_file(char *file)
 {
   FILE *fp = fopen(file, "r");
   if (!fp) {
@@ -204,13 +204,13 @@ char *nss_octopass_import_file(char *file)
     strcat(data, strdup(line));
   }
   fclose(fp);
-  char *res = data;
+  const char *res = data;
   free(data);
 
   return res;
 }
 
-void nss_octopass_github_request(struct config *con, char *url, struct response *res)
+void nss_octopass_github_request_without_cache(struct config *con, char *url, struct response *res)
 {
   if (con->syslog) {
     syslog(LOG_INFO, "http get -- %s", url);
@@ -250,6 +250,26 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
 
   curl_easy_cleanup(hnd);
   curl_slist_free_all(headers);
+}
+
+void nss_octopass_github_request(struct config *con, char *url, struct response *res)
+{
+  if (NSS_OCTOPASS_CACHE == 0) {
+    nss_octopass_github_request_without_cache(con, url, res);
+    return;
+  }
+
+  char *file = curl_escape(url, strlen(url));
+  FILE *fp   = fopen(file, "r");
+
+  if (fp == NULL) {
+    nss_octopass_github_request_without_cache(con, url, res);
+    nss_octopass_export_file(file, res->data);
+  } else {
+    fclose(fp);
+    res->data = (char *)nss_octopass_import_file(file);
+    res->size = strlen(res->data);
+  }
 }
 
 int nss_octopass_github_team_id(char *team, char *data)
