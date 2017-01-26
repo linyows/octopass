@@ -2,7 +2,9 @@
 #include <criterion/criterion.h>
 #include "nss_octopass-group.c"
 
-Test(nss_octopass, getgrnam_r)
+extern void setup(void);
+
+Test(nss_octopass, getgrnam_r, .init = setup)
 {
   enum nss_status status;
   struct group grent;
@@ -21,7 +23,7 @@ Test(nss_octopass, getgrnam_r)
   cr_assert_str_eq(grent.gr_mem[0], "linyows");
 }
 
-Test(nss_octopass, getgrnam_r__when_team_member_not_found)
+Test(nss_octopass, getgrnam_r__when_team_member_not_found, .init = setup)
 {
   enum nss_status status;
   struct group grent;
