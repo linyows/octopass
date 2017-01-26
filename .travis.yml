@@ -17,7 +17,10 @@ addons:
       - git
       - bzip2
 script:
+  - export BUILD_DIR=$TRAVIS_BUILD_DIR
+  - export TRAVIS_BUILD_DIR=$BUILD_DIR/cli
   - pushd ./cli && make test; make cover; popd
+  - export TRAVIS_BUILD_DIR=$BUILD_DIR/nss
   - pushd ./nss && sudo make test; sudo make clean; popd
 after_script:
   - goveralls -coverprofile=coverage.out
