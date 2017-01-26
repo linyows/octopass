@@ -19,7 +19,7 @@ addons:
 script:
   - make test
   - make cover
-  - cd nss-octopass && sudo make test
+  - cd nss-octopass && sudo make test; sudo make clean
 after_script:
   - goveralls -coverprofile=coverage.out
 notifications:
