@@ -35,14 +35,20 @@ void nss_octopass_remove_quotes(char *s)
   memcpy(s, &s[i], strlen(s));
 }
 
+const char *nss_octopass_truncate(const char *str, int len)
+{
+  char s[len + 1];
+  strncpy(s, str, len);
+  *(s + len) = '\0';
+  char *res  = strdup(s);
+  return res;
+}
+
 const char *nss_octopass_masking(const char *token)
 {
   int len = 5;
-  char ss[strlen(token)];
-  char s[len + 1];
-  strncpy(s, token, len);
-  *(s + len) = '\0';
-  sprintf(s, "%s ************ REDACTED ************", s);
+  char s[strlen(token) + 1];
+  sprintf(s, "%s ************ REDACTED ************", nss_octopass_truncate(token, len));
   char *mask = strdup(s);
   return mask;
 }

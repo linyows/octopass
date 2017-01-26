@@ -53,11 +53,28 @@ Test(nss_octopass, import_file)
   cr_assert_str_eq(data, d);
 }
 
-Test(nss_octopass, masking)
+Test(nss_octopass, truncate)
 {
   char *s          = "abcdefghijklmnopqrstuvwxyz0123456789!@#$";
-  const char *mask = nss_octopass_masking(s);
-  cr_assert_str_eq(mask, "abcde ************ REDACTED ************");
+  const char *res1 = nss_octopass_truncate(s, 6);
+  cr_assert_str_eq(res1, "abcdef");
+
+  const char *res2 = nss_octopass_truncate(s, 2);
+  cr_assert_str_eq(res2, "ab");
+
+  const char *res3 = nss_octopass_truncate(s, 300);
+  cr_assert_str_eq(res3, s);
+}
+
+Test(nss_octopass, masking)
+{
+  char *s1          = "abcdefghijklmnopqrstuvwxyz0123456789!@#$";
+  const char *mask1 = nss_octopass_masking(s1);
+  cr_assert_str_eq(mask1, "abcde ************ REDACTED ************");
+
+  char *s2          = "----------klmnopqrstuvwxyz0123456789!@#$";
+  const char *mask2 = nss_octopass_masking(s2);
+  cr_assert_str_eq(mask2, "----- ************ REDACTED ************");
 }
 
 Test(nss_octopass, override_config_by_env)
