@@ -1,5 +1,4 @@
 *.test
 octopass
-.libs
 octopass.conf
 exports
