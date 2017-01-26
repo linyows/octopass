@@ -46,11 +46,17 @@ Test(nss_octopass, export_file)
 
 Test(nss_octopass, import_file)
 {
-  char *f = "/tmp/__test__.txt";
-  char *d = "LINE1\nLINE2\nLINE3\n";
-  nss_octopass_export_file(f, d);
-  const char *data = nss_octopass_import_file(f);
-  cr_assert_str_eq(data, d);
+  char *f1 = "/tmp/__test__1.txt";
+  char *d1 = "LINE1\nLINE2\nLINE3\n";
+  nss_octopass_export_file(f1, d1);
+  const char *data1 = nss_octopass_import_file(f1);
+  cr_assert_str_eq(data1, d1);
+
+  char *f2 = "/tmp/__test__2.txt";
+  char *d2 = "LINEa\nLINEb\nLINEc\n";
+  nss_octopass_export_file(f2, d2);
+  const char *data2 = nss_octopass_import_file(f2);
+  cr_assert_str_eq(data2, d2);
 }
 
 Test(nss_octopass, truncate)

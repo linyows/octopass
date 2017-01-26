@@ -210,7 +210,7 @@ const char *nss_octopass_import_file(char *file)
     strcat(data, strdup(line));
   }
   fclose(fp);
-  const char *res = data;
+  const char *res = strdup(data);
   free(data);
 
   return res;
