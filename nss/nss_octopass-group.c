@@ -21,8 +21,8 @@ static int pack_group_struct(json_t *root, struct group *result, char *buffer, s
   result->gr_passwd = "x";
   result->gr_gid    = con->gid;
 
-  int i = 0;
-  for (i; i < json_array_size(root); i++) {
+  int i;
+  for (i = 0; i < json_array_size(root); i++) {
     json_t *j_member = json_object_get(json_array_get(root, i), "login");
     if (!json_is_string(j_member)) {
       return -1;

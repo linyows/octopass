@@ -195,7 +195,6 @@ const char *nss_octopass_import_file(char *file)
   if (!fp) {
     fprintf(stderr, "File open failure: %s\n", file);
     exit(1);
-    return;
   }
   char line[MAXBUF];
   char *data;
