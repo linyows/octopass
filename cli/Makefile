@@ -24,7 +24,7 @@ test: deps
 	go test -v $(TEST) $(TESTARGS) -timeout=30s -parallel=4
 	go test -race $(TEST) $(TESTARGS)
 
-cover: deps
+cover: test
 	gotestcover -v -covermode=count -coverprofile=coverage.out -parallelpackages=4 ./...
 
 bin: depsdev
