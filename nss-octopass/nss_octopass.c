@@ -265,8 +265,12 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
     return;
   }
 
-  char *file = curl_escape(url, strlen(url));
-  FILE *fp   = fopen(file, "r");
+  char *base = curl_escape(url, strlen(url));
+  char f[strlen(base) + strlen(con->token) + 6];
+  char *file = f;
+  sprintf(f, "tmp/cache/%s-%s", base, nss_octopass_truncate(con->token, 6));
+
+  FILE *fp = fopen(file, "r");
 
   if (fp == NULL) {
     nss_octopass_github_request_without_cache(con, url, res);
