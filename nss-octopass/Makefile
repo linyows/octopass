@@ -12,7 +12,9 @@ LIBDIR=$(PREFIX)/lib64
 ifeq ($(wildcard $(LIBDIR)/.*),)
 LIBDIR=$(PREFIX)/lib
 endif
-BUILD=.libs
+TMP=tmp
+BUILD=$(TMP)/libs
+CACHE=$(TMP)/cache
 
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
@@ -21,8 +23,9 @@ CRITERION_VERSION=2.3.0
 default: build
 build: nss_octopass
 
-nss_octopass_build_dir:
-	[ -d $(BUILD) ] || mkdir $(BUILD)
+build_dir:
+	test -d $(BUILD) || mkdir -p $(BUILD)
+	test -d $(CACHE) || mkdir -p $(CACHE)
 
 nss_octopass-passwd:
 	$(CC) $(CFLAGS) -c nss_octopass-passwd.c -o $(BUILD)/nss_octopass-passwd.o
@@ -35,7 +38,7 @@ nss_octopass-shadow:
 
 nss_octopass_services: nss_octopass-passwd nss_octopass-group nss_octopass-shadow
 
-nss_octopass: nss_octopass_build_dir nss_octopass_services
+nss_octopass: build_dir nss_octopass_services
 	$(CC) $(CFLAGS) -c nss_octopass.c -o $(BUILD)/nss_octopass.o
 
 	$(CC) -shared $(LD_SONAME) -o $(BUILD)/$(LIBRARY) \
@@ -54,7 +57,7 @@ deps:
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-depsdev: nss_octopass_build_dir
+depsdev: build_dir
 	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
 	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
@@ -70,7 +73,7 @@ test_without_depsdev:
 test: depsdev test_without_depsdev
 
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(TMP)
 
 install:
 	[ -d $(LIBDIR) ] || install -d $(LIBDIR)
@@ -80,4 +83,4 @@ install:
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install nss_octopass_build_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
+.PHONY: clean install build_dir nss_octopass dist distclean deps depsdev test test_without_depsdev

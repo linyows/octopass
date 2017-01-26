@@ -1,8 +1,11 @@
+#define NSS_OCTOPASS_CACHE 1
 #define NSS_OCTOPASS_CONFIG_FILE "example.octopass.conf"
 #include <criterion/criterion.h>
 #include "nss_octopass-shadow.c"
 
-Test(nss_octopass, getspnam_r)
+extern void setup(void);
+
+Test(nss_octopass, getspnam_r, .init = setup)
 {
   enum nss_status status;
   struct spwd spent;
@@ -26,7 +29,7 @@ Test(nss_octopass, getspnam_r)
   cr_assert_eq(spent.sp_flag, ~0ul);
 }
 
-Test(nss_octopass, getspnam_r__when_team_member_not_found)
+Test(nss_octopass, getspnam_r__when_team_member_not_found, .init = setup)
 {
   enum nss_status status;
   struct spwd spent;
@@ -41,7 +44,7 @@ Test(nss_octopass, getspnam_r__when_team_member_not_found)
   cr_assert_eq(status, NSS_STATUS_NOTFOUND);
 }
 
-Test(nss_octopass, spent_list)
+Test(nss_octopass, spent_list, .init = setup)
 {
   enum nss_status status;
   struct spwd spent;
@@ -86,7 +89,7 @@ Test(nss_octopass, spent_list)
   cr_assert_eq(status, NSS_STATUS_SUCCESS);
 }
 
-Test(nss_octopass, spent_list__when_team_not_exist)
+Test(nss_octopass, spent_list__when_team_not_exist, .init = setup)
 {
   putenv("GITHUB_TEAM=team_not_exists");
 
@@ -120,7 +123,7 @@ Test(nss_octopass, spent_list__when_team_not_exist)
   clearenv();
 }
 
-Test(nss_octopass, spent_list__when_wrong_token)
+Test(nss_octopass, spent_list__when_wrong_token, .init = setup)
 {
   putenv("GITHUB_TOKEN=wrong_token");
 

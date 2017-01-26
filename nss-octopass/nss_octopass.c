@@ -35,14 +35,20 @@ void nss_octopass_remove_quotes(char *s)
   memcpy(s, &s[i], strlen(s));
 }
 
+const char *nss_octopass_truncate(const char *str, int len)
+{
+  char s[len + 1];
+  strncpy(s, str, len);
+  *(s + len) = '\0';
+  char *res  = strdup(s);
+  return res;
+}
+
 const char *nss_octopass_masking(const char *token)
 {
   int len = 5;
-  char ss[strlen(token)];
-  char s[len + 1];
-  strncpy(s, token, len);
-  *(s + len) = '\0';
-  sprintf(s, "%s ************ REDACTED ************", s);
+  char s[strlen(token) + 1];
+  sprintf(s, "%s ************ REDACTED ************", nss_octopass_truncate(token, len));
   char *mask = strdup(s);
   return mask;
 }
@@ -179,7 +185,7 @@ void nss_octopass_export_file(char *file, char *data)
     exit(1);
     return;
   }
-  fprintf(fp, data);
+  fprintf(fp, "%s", data);
   fclose(fp);
 }
 
@@ -204,7 +210,7 @@ const char *nss_octopass_import_file(char *file)
     strcat(data, strdup(line));
   }
   fclose(fp);
-  const char *res = data;
+  const char *res = strdup(data);
   free(data);
 
   return res;
@@ -259,8 +265,12 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
     return;
   }
 
-  char *file = curl_escape(url, strlen(url));
-  FILE *fp   = fopen(file, "r");
+  char *base = curl_escape(url, strlen(url));
+  char f[strlen(base) + strlen(con->token) + 6];
+  char *file = f;
+  sprintf(f, "tmp/cache/%s-%s", base, nss_octopass_truncate(con->token, 6));
+
+  FILE *fp = fopen(file, "r");
 
   if (fp == NULL) {
     nss_octopass_github_request_without_cache(con, url, res);
