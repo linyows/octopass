@@ -185,7 +185,7 @@ void nss_octopass_export_file(char *file, char *data)
     exit(1);
     return;
   }
-  fprintf(fp, data);
+  fprintf(fp, "%s", data);
   fclose(fp);
 }
 
