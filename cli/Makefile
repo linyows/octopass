@@ -7,7 +7,7 @@ default: test
 
 deps:
 	go get -d -t ./...
-	go get -u github.com/linyows/mflag
+	go get github.com/linyows/mflag
 	go get github.com/google/go-github/github
 	go get golang.org/x/oauth2
 	go get github.com/hashicorp/hcl
