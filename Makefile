@@ -7,7 +7,7 @@ default: test
 
 deps:
 	go get -d -t ./...
-	go get -u github.com/linyows/mflag
+	go get github.com/linyows/mflag
 	go get github.com/google/go-github/github
 	go get golang.org/x/oauth2
 	go get github.com/hashicorp/hcl
@@ -19,10 +19,11 @@ deps:
 depsdev:
 	go get -u github.com/mitchellh/gox
 	go get -u github.com/tcnksm/ghr
+	go get -u github.com/kyoh86/richgo
 
-test: deps
-	go test -v $(TEST) $(TESTARGS) -timeout=30s -parallel=4
-	go test -race $(TEST) $(TESTARGS)
+test: depsdev deps
+	richgo test -v $(TEST) $(TESTARGS) -timeout=30s -parallel=4
+	richgo test -race $(TEST) $(TESTARGS)
 
 cover: deps
 	gotestcover -v -covermode=count -coverprofile=coverage.out -parallelpackages=4 ./...
