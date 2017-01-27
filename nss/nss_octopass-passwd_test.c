@@ -152,3 +152,25 @@ Test(nss_octopass, pwent_list__when_wrong_token, .init = setup)
 
   clearenv();
 }
+
+Test(nss_octopass, getpwuid_r, .init = setup)
+{
+  enum nss_status status;
+  struct passwd pwent;
+  int err    = 0;
+  int buflen = 2048;
+  char buf[buflen];
+
+  uid_t uid = 74049;
+  status    = _nss_octopass_getpwuid_r(uid, &pwent, buf, buflen, &err);
+
+  cr_assert_eq(err, 0);
+  cr_assert_eq(status, NSS_STATUS_SUCCESS);
+  cr_assert_str_eq(pwent.pw_name, "linyows");
+  cr_assert_str_eq(pwent.pw_passwd, "x");
+  cr_assert_eq(pwent.pw_uid, 74049);
+  cr_assert_eq(pwent.pw_gid, 2000);
+  cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+  cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
+  cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
+}
