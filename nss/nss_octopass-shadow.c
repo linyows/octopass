@@ -48,6 +48,9 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open)
   struct config con;
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  if (con.syslog) {
+    syslog(LOG_INFO, "%s -- stya_open: %d", __func__, stay_open);
+  }
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -170,6 +173,9 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   struct config con;
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  if (con.syslog) {
+    syslog(LOG_INFO, "%s -- name: %s", __func__, name);
+  }
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
@@ -205,6 +211,10 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
     json_decref(root);
     *errnop = ERANGE;
     return NSS_STATUS_TRYAGAIN;
+  }
+
+  if (con.syslog) {
+    syslog(LOG_INFO, "%s -- sp_namp: %s", __func__, result->sp_namp);
   }
 
   json_decref(root);

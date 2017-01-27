@@ -56,7 +56,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stay_open)
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- stayopen: %d", __func__, stay_open);
+    syslog(LOG_INFO, "%s -- stay_open: %d", __func__, stay_open);
   }
   int status = nss_octopass_team_members(&con, &res);
 
@@ -156,7 +156,7 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->uid);
+    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->pw_uid);
   }
 
   ent_json_idx++;
@@ -227,7 +227,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->uid);
+    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->pw_uid);
   }
 
   json_decref(root);
@@ -295,7 +295,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->uid);
+    syslog(LOG_INFO, "%s -- pw_name: %s, pw_uid: %d", __func__, result->pw_name, result->pw_uid);
   }
 
   json_decref(root);
