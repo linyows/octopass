@@ -37,7 +37,7 @@ static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer,
   result->pw_gecos  = "managed by nss-octopass";
   char dir[MAXBUF];
   sprintf(dir, con->home, result->pw_name);
-  result->pw_dir   = dir;
+  result->pw_dir   = strdup(dir);
   result->pw_shell = strdup(con->shell);
 
   return 0;
