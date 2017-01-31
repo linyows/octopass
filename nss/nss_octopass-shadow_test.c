@@ -19,11 +19,11 @@ Test(nss_octopass, getspnam_r, .init = setup)
   cr_assert_eq(err, 0);
   cr_assert_eq(status, NSS_STATUS_SUCCESS);
   cr_assert_str_eq(spent.sp_namp, "linyows");
-  cr_assert_str_eq(spent.sp_pwdp, "*");
-  cr_assert_eq(spent.sp_lstchg, 13571);
-  cr_assert_eq(spent.sp_min, 0);
-  cr_assert_eq(spent.sp_max, 99999);
-  cr_assert_eq(spent.sp_warn, 7);
+  cr_assert_str_eq(spent.sp_pwdp, "!!");
+  cr_assert_eq(spent.sp_lstchg, -1);
+  cr_assert_eq(spent.sp_min, -1);
+  cr_assert_eq(spent.sp_max, -1);
+  cr_assert_eq(spent.sp_warn, -1);
   cr_assert_eq(spent.sp_inact, -1);
   cr_assert_eq(spent.sp_expire, -1);
   cr_assert_eq(spent.sp_flag, ~0ul);
@@ -75,11 +75,11 @@ Test(nss_octopass, spent_list, .init = setup)
     }
 
     cr_assert_str_eq(spent.sp_namp, "linyows");
-    cr_assert_str_eq(spent.sp_pwdp, "*");
-    cr_assert_eq(spent.sp_lstchg, 13571);
-    cr_assert_eq(spent.sp_min, 0);
-    cr_assert_eq(spent.sp_max, 99999);
-    cr_assert_eq(spent.sp_warn, 7);
+    cr_assert_str_eq(spent.sp_pwdp, "!!");
+    cr_assert_eq(spent.sp_lstchg, -1);
+    cr_assert_eq(spent.sp_min, -1);
+    cr_assert_eq(spent.sp_max, -1);
+    cr_assert_eq(spent.sp_warn, -1);
     cr_assert_eq(spent.sp_inact, -1);
     cr_assert_eq(spent.sp_expire, -1);
     cr_assert_eq(spent.sp_flag, ~0ul);
