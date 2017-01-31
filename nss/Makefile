@@ -72,6 +72,9 @@ test_without_depsdev:
 
 test: depsdev test_without_depsdev
 
+cli:
+	$(CC) nss_octopass_cli.c -lcurl -ljansson -o $(BUILD)/nss-octopass
+
 clean:
 	rm -rf $(TMP)
 
