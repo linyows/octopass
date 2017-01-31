@@ -1,9 +1,5 @@
 #include "nss_octopass.h"
 
-static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
-static json_t *ent_json_root              = NULL;
-static int ent_json_idx                   = 0;
-
 static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, size_t buflen)
 {
   char *next_buf = buffer;

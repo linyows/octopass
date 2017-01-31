@@ -76,4 +76,8 @@ extern void nss_octopass_config_loading(struct config *con, char *filename);
 extern json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root);
 
+static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
+static json_t *ent_json_root              = NULL;
+static int ent_json_idx                   = 0;
+
 #endif /* NSS_OCTOPASS_H */
