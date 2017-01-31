@@ -125,8 +125,15 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
     ret = _nss_octopass_setpwent_locked(0);
   }
 
-  if (ret != NSS_STATUS_SUCCESS)
+  if (ret != NSS_STATUS_SUCCESS) {
     return ret;
+  }
+
+  // Return notfound when there's nothing else to read.
+  if (ent_json_idx >= json_array_size(ent_json_root)) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
 
   struct config con;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
@@ -143,12 +150,6 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   if (pack_result == -2) {
     *errnop = ERANGE;
     return NSS_STATUS_TRYAGAIN;
-  }
-
-  // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
-    *errnop = ENOENT;
-    return NSS_STATUS_NOTFOUND;
   }
 
   if (con.syslog) {

@@ -24,11 +24,11 @@ static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, s
   next_buf += strlen(result->sp_namp) + 1;
   bufleft -= strlen(result->sp_namp) + 1;
 
-  result->sp_pwdp   = "*";
-  result->sp_lstchg = 13571;
-  result->sp_min    = 0;
-  result->sp_max    = 99999;
-  result->sp_warn   = 7;
+  result->sp_pwdp   = "!!";
+  result->sp_lstchg = -1;
+  result->sp_min    = -1;
+  result->sp_max    = -1;
+  result->sp_warn   = -1;
   result->sp_inact  = -1;
   result->sp_expire = -1;
   result->sp_flag   = ~0ul;
@@ -124,6 +124,12 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffe
     return status;
   }
 
+  // Return notfound when there's nothing else to read.
+  if (ent_json_idx >= json_array_size(ent_json_root)) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
+
   int pack_result = pack_shadow_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen);
 
   // A necessary input file cannot be found.
@@ -135,12 +141,6 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffe
   if (pack_result == -2) {
     *errnop = ERANGE;
     return NSS_STATUS_TRYAGAIN;
-  }
-
-  // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
-    *errnop = ENOENT;
-    return NSS_STATUS_NOTFOUND;
   }
 
   ent_json_idx++;

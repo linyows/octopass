@@ -56,11 +56,14 @@ Test(nss_octopass, pwent_list, .init = setup)
   cr_assert_eq(json_object_size(ent_json_root), 0);
   cr_assert_eq(status, NSS_STATUS_SUCCESS);
 
-  status = 0;
-  while (!status) {
+  while (status == NSS_STATUS_SUCCESS) {
     entry_number += 1;
     err    = 0;
     status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err);
+    if (status != NSS_STATUS_SUCCESS) {
+      continue;
+    }
+
     cr_assert_eq(ent_json_idx, entry_number);
     cr_assert_eq(json_is_array(ent_json_root), 1);
     cr_assert_eq(status, NSS_STATUS_SUCCESS);
@@ -101,8 +104,7 @@ Test(nss_octopass, pwent_list__when_team_not_exist, .init = setup)
   cr_assert_eq(json_object_size(ent_json_root), 0);
   cr_assert_eq(status, NSS_STATUS_UNAVAIL);
 
-  status = 0;
-  while (!status) {
+  while (status == NSS_STATUS_SUCCESS) {
     entry_number += 1;
     err    = 0;
     status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err);
@@ -135,8 +137,7 @@ Test(nss_octopass, pwent_list__when_wrong_token, .init = setup)
   cr_assert_eq(json_object_size(ent_json_root), 0);
   cr_assert_eq(status, NSS_STATUS_UNAVAIL);
 
-  status = 0;
-  while (!status) {
+  while (status == NSS_STATUS_SUCCESS) {
     entry_number += 1;
     err    = 0;
     status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err);

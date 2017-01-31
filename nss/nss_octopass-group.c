@@ -121,6 +121,12 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
     return ret;
   }
 
+  // Return notfound when there's nothing else to read.
+  if (ent_json_idx >= json_array_size(ent_json_root)) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
+
   struct config con;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
@@ -138,19 +144,13 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
     return NSS_STATUS_TRYAGAIN;
   }
 
-  // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
-    *errnop = ENOENT;
-    return NSS_STATUS_NOTFOUND;
-  }
-
   if (con.syslog) {
     syslog(LOG_INFO, "%s -- gr_name: %s", __func__, result->gr_name);
   }
 
   ent_json_idx++;
 
-  return NSS_STATUS_SUCCESS;
+  return NSS_STATUS_NOTFOUND;
 }
 
 // Called to look up next entry in group file
