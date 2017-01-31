@@ -26,15 +26,18 @@ void show_grent(struct group *grent)
   }
 }
 
-void exec_team_id(void)
+void show_spent(struct spwd *spent)
 {
-  struct config con;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
-  int id = nss_octopass_team_id(&con);
-  printf("endpoint: %s, organization: %s, team: %s, team_id: %d\n", con.endpoint, con.organization, con.team, id);
+  if (spent->sp_lstchg == -1 && spent->sp_min == -1 && spent->sp_max == -1 && spent->sp_warn == -1 &&
+      spent->sp_inact == -1 && spent->sp_expire == -1) {
+    printf("%s:%s:::::::\n", spent->sp_namp, spent->sp_pwdp);
+  } else {
+    printf("%s:%s:%ld:%ld:%ld:%ld:%ld:%ld:%ld\n", spent->sp_namp, spent->sp_pwdp, spent->sp_lstchg, spent->sp_min,
+           spent->sp_max, spent->sp_warn, spent->sp_inact, spent->sp_expire, spent->sp_flag);
+  }
 }
 
-void exec_getpwnam_r(const char *name)
+void call_getpwnam_r(const char *name)
 {
   enum nss_status status;
   struct passwd pwent;
@@ -45,7 +48,7 @@ void exec_getpwnam_r(const char *name)
   show_pwent(&pwent);
 }
 
-void exec_getpwuid_r(uid_t uid)
+void call_getpwuid_r(uid_t uid)
 {
   enum nss_status status;
   struct passwd pwent;
@@ -56,61 +59,104 @@ void exec_getpwuid_r(uid_t uid)
   show_pwent(&pwent);
 }
 
-void exec_pwlist(void)
+void call_pwlist(void)
 {
   enum nss_status status;
   struct passwd pwent;
-  int err                    = 0;
-  unsigned long entry_number = 0;
-  int buflen                 = 2048;
+  int err    = 0;
+  int buflen = 2048;
   char buf[buflen];
 
   status = _nss_octopass_setpwent(0);
 
-  status = 0;
-  while (!status) {
-    entry_number += 1;
-    err    = 0;
+  while (status == NSS_STATUS_SUCCESS) {
     status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err);
-    show_pwent(&pwent);
+    if (status == NSS_STATUS_SUCCESS) {
+      show_pwent(&pwent);
+    }
   }
 
   status = _nss_octopass_endpwent();
 }
 
-void exec_getgrnam_r(const char *name)
-{
-}
-
-void exec_getgrgid_r(gid_t gid)
-{
-}
-
-void exec_grlist(void)
+void call_getgrnam_r(const char *name)
 {
   enum nss_status status;
   struct group grent;
-  int err                    = 0;
-  unsigned long entry_number = 0;
-  int buflen                 = 2048;
+  int err    = 0;
+  int buflen = 2048;
+  char buf[buflen];
+  status = _nss_octopass_getgrnam_r(name, &grent, buf, buflen, &err);
+  show_grent(&grent);
+}
+
+void call_getgrgid_r(gid_t gid)
+{
+  enum nss_status status;
+  struct group grent;
+  int err    = 0;
+  int buflen = 2048;
+  char buf[buflen];
+  status = _nss_octopass_getgrgid_r(gid, &grent, buf, buflen, &err);
+  show_grent(&grent);
+}
+
+void call_grlist(void)
+{
+  enum nss_status status;
+  struct group grent;
+  int err    = 0;
+  int buflen = 2048;
   char buf[buflen];
 
-  status = _nss_octopass_setgrent(0);
+  status  = _nss_octopass_setgrent(0);
+  int max = json_array_size(ent_json_root);
 
-  status = 0;
-  while (!status) {
-    entry_number += 1;
-    err    = 0;
+  while (status == NSS_STATUS_SUCCESS) {
     status = _nss_octopass_getgrent_r(&grent, buf, buflen, &err);
-    show_grent(&grent);
+    if (status == NSS_STATUS_SUCCESS) {
+      show_grent(&grent);
+    }
   }
 
   status = _nss_octopass_endgrent();
 }
 
+void call_getspnam_r(const char *name)
+{
+  enum nss_status status;
+  struct spwd spent;
+  int err    = 0;
+  int buflen = 2048;
+  char buf[buflen];
+
+  status = _nss_octopass_getspnam_r(name, &spent, buf, buflen, &err);
+  show_spent(&spent);
+}
+
+void call_splist(void)
+{
+  enum nss_status status;
+  struct spwd spent;
+  int err    = 0;
+  int buflen = 2048;
+  char buf[buflen];
+
+  status = _nss_octopass_setspent(0);
+
+  while (status == NSS_STATUS_SUCCESS) {
+    status = _nss_octopass_getspent_r(&spent, buf, buflen, &err);
+    if (status == NSS_STATUS_SUCCESS) {
+      show_spent(&spent);
+    }
+  }
+
+  status = _nss_octopass_endspent();
+}
+
 void help(void)
 {
-  printf("Usage: nss-octopass [CMD]\n");
+  printf("Usage: nss-octopass [CMD] [KEY]\n");
   printf("\n");
   printf("Command:\n");
   printf("  passwd             get passwds, call setpwent(3), getpwent(3), endpwent(3)\n");
@@ -131,8 +177,9 @@ int main(int argc, char **argv)
     return 2;
   }
 
+  // passwd
   if (strcmp(argv[1], "passwd") == 0) {
-    exec_pwlist();
+    call_pwlist();
     return 0;
   }
 
@@ -142,7 +189,7 @@ int main(int argc, char **argv)
       return 1;
     }
     const char *name = (char *)argv[2];
-    exec_getpwnam_r(name);
+    call_getpwnam_r(name);
     return 0;
   }
 
@@ -152,12 +199,13 @@ int main(int argc, char **argv)
       return 1;
     }
     uid_t uid = (uid_t)atol(argv[2]);
-    exec_getpwuid_r(uid);
+    call_getpwuid_r(uid);
     return 0;
   }
 
+  // group
   if (strcmp(argv[1], "group") == 0) {
-    exec_grlist();
+    call_grlist();
     return 0;
   }
 
@@ -167,7 +215,7 @@ int main(int argc, char **argv)
       return 1;
     }
     const char *name = (char *)argv[2];
-    exec_getgrnam_r(name);
+    call_getgrnam_r(name);
     return 0;
   }
 
@@ -177,7 +225,23 @@ int main(int argc, char **argv)
       return 1;
     }
     gid_t gid = (gid_t)atol(argv[2]);
-    exec_getgrgid_r(gid);
+    call_getgrgid_r(gid);
+    return 0;
+  }
+
+  // shadow
+  if (strcmp(argv[1], "shadow") == 0) {
+    call_splist();
+    return 0;
+  }
+
+  if (strcmp(argv[1], "getspnam") == 0) {
+    if (argc < 3) {
+      fprintf(stderr, "getspunam requires a shadow name\n");
+      return 1;
+    }
+    const char *name = (char *)argv[2];
+    call_getspnam_r(name);
     return 0;
   }
 
