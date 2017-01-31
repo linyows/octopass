@@ -1,4 +1,3 @@
-#define NSS_OCTOPASS_CACHE 1
 #include "nss_octopass-passwd.c"
 #include "nss_octopass-group.c"
 #include "nss_octopass-shadow.c"
