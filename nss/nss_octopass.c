@@ -143,6 +143,11 @@ void nss_octopass_config_loading(struct config *con, char *filename)
 
   nss_octopass_override_config_by_env(con);
 
+  if (strlen(con->endpoint) == 0) {
+    char *endpoint = "https://api.github.com";
+    memcpy(con->endpoint, endpoint, strlen(endpoint));
+  }
+
   if (strlen(con->group_name) == 0) {
     memcpy(con->group_name, con->team, strlen(con->team));
   }
