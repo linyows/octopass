@@ -63,7 +63,7 @@ Test(nss_octopass, grent_list, .init = setup)
 
     cr_assert_eq(ent_json_idx, entry_number);
     cr_assert_eq(json_is_array(ent_json_root), 1);
-    cr_assert_eq(status, NSS_STATUS_NOTFOUND);
+    cr_assert_eq(status, NSS_STATUS_SUCCESS);
 
     if (strcmp(grent.gr_name, "admin") != 0) {
       printf("Unknown group: %s(%lu)\n", grent.gr_name, entry_number);
@@ -71,7 +71,7 @@ Test(nss_octopass, grent_list, .init = setup)
     }
 
     cr_assert_eq(err, 0);
-    cr_assert_eq(status, NSS_STATUS_NOTFOUND);
+    cr_assert_eq(status, NSS_STATUS_SUCCESS);
     cr_assert_str_eq(grent.gr_name, "admin");
     cr_assert_str_eq(grent.gr_passwd, "x");
     cr_assert_eq(grent.gr_gid, 2000);
