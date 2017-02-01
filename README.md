@@ -1,7 +1,7 @@
 octopass
 ========
 
-Management linux user and authentication by therganization/teamn Github.
+Management linux user and authentication by therganization/team on Github.
 
 [![Travis](https://img.shields.io/travis/linyows/octopass.svg?style=flat-square)][travis]
 [![GitHub release](http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square)][release]
@@ -16,12 +16,27 @@ Management linux user and authentication by therganization/teamn Github.
 Description
 -----------
 
-This is linux user management tool by therganization/teamn github, and authentication.
+This is linux user management tool by the organization/team on github, and authentication.
 Depending on github for user management, there are certain risks,
 but features easy handling and ease of operation.
 
 Usage
 -----
+
+### NSS command
+
+This is output in the same display as file such as passwd, shadow and group.
+For detail `--help`.
+
+```sh
+$ nss-octopass passwd
+chun-li:x:14301:2000:managed by nss-octopass:/home/chun-li:/bin/bash
+dhalsim:x:8875:2000:managed by nss-octopass:/home/dhalsim:/bin/bash
+ken:x:5458:2000:managed by nss-octopass:/home/ken:/bin/bash
+ryu:x:74049:2000:managed by nss-octopass:/home/ryu:/bin/bash
+sagat:x:93011:2000:managed by nss-octopass:/home/sagat:/bin/bash
+zangief:x:8305:2000:managed by nss-octopass:/home/zangief:/bin/bash
+```
 
 ### Keys command
 
