@@ -49,12 +49,15 @@ enum nss_status _nss_octopass_setgrent_locked(int stay_open)
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- stay_open: %d", __func__, stay_open);
+    syslog(LOG_INFO, "%s[L%d] -- stay_open: %d", __func__, __LINE__, stay_open);
   }
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
@@ -62,11 +65,17 @@ enum nss_status _nss_octopass_setgrent_locked(int stay_open)
   free(res.data);
 
   if (!root) {
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
   if (!json_is_array(root)) {
     json_decref(root);
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
@@ -134,26 +143,31 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
   struct config con;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s", __func__);
+    syslog(LOG_INFO, "%s[L%d]", __func__, __LINE__);
   }
   int pack_result = pack_group_struct(ent_json_root, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
   if (pack_result == -2) {
     *errnop = ERANGE;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "TRYAGAIN");
+    }
     return NSS_STATUS_TRYAGAIN;
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- gr_name: %s", __func__, result->gr_name);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, gr_name: %s", __func__, __LINE__, "SUCCESS", result->gr_name);
   }
 
   ent_json_idx++;
-
   return NSS_STATUS_SUCCESS;
 }
 
@@ -179,11 +193,14 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- gid: %d", __func__, gid);
+    syslog(LOG_INFO, "%s[L%d] -- gid: %d", __func__, __LINE__, gid);
   }
 
   if (gid != con.gid) {
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
+    }
     return NSS_STATUS_NOTFOUND;
   }
 
@@ -192,6 +209,9 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (status != 0) {
     free(res.data);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
@@ -201,6 +221,9 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (json_array_size(root) == 0) {
     json_decref(root);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
+    }
     return NSS_STATUS_NOTFOUND;
   }
 
@@ -209,17 +232,23 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
+    }
     return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
     json_decref(root);
     *errnop = ERANGE;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "TRYAGAIN");
+    }
     return NSS_STATUS_TRYAGAIN;
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- gr_name: %s", __func__, result->gr_name);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, gr_name: %s", __func__, __LINE__, "SUCCESS", result->gr_name);
   }
 
   json_decref(root);
@@ -248,11 +277,14 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- name: %s", __func__, name);
+    syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
 
   if (strcmp(name, con.group_name) != 0) {
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
+    }
     return NSS_STATUS_NOTFOUND;
   }
 
@@ -261,6 +293,9 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   if (status != 0) {
     free(res.data);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
@@ -269,6 +304,9 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   if (!root) {
     json_decref(root);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
     return NSS_STATUS_UNAVAIL;
   }
 
@@ -277,17 +315,23 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
   if (pack_result == -1) {
     json_decref(root);
     *errnop = ENOENT;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
+    }
     return NSS_STATUS_NOTFOUND;
   }
 
   if (pack_result == -2) {
     json_decref(root);
     *errnop = ERANGE;
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "TRYAGAIN");
+    }
     return NSS_STATUS_TRYAGAIN;
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s -- gr_name: %s", __func__, result->gr_name);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, gr_name: %s", __func__, __LINE__, "SUCCESS", result->gr_name);
   }
 
   json_decref(root);
