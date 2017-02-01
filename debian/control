@@ -1,0 +1,19 @@
+Source: octopass
+Section: admin
+Priority: optional
+Maintainer: linyows <linyow@gmail.com>
+Build-Depends: debhelper (>= 9), gcc, make, nss-devel, libcurl, jansson
+Standards-Version: 3.9.6
+Homepage: https://github.com/linyows/octopass
+Vcs-Browser: https://github.com/linyows/octopass/tree/debian
+Vcs-Git: https://github.com/linyows/octopass -b debian
+
+Package: octopass
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: This is linux user management tool by the
+ organization/team on github, and authentication.
+ Depending on github for user management,
+ there are certain risks, but features easy handling and
+ ease of operation.
