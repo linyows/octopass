@@ -87,8 +87,9 @@ enum nss_status _nss_octopass_setspent(int stay_open)
 enum nss_status _nss_octopass_endspent_locked(void)
 {
   if (ent_json_root) {
-    while (ent_json_root->refcount > 0)
+    while (ent_json_root->refcount > 0) {
       json_decref(ent_json_root);
+    }
   }
 
   ent_json_root = NULL;
@@ -189,7 +190,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
 
   json_t *data = nss_octopass_github_team_member_by_name((char *)name, root);
 
-  if (!data) {
+  if (json_object_size(data) == 0) {
     json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;

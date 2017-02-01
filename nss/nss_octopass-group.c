@@ -190,7 +190,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
 
   json_t *data = nss_octopass_github_team_member_by_id((int)gid, root);
 
-  if (!data) {
+  if (json_object_size(data) == 0) {
     json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;

@@ -203,7 +203,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   json_t *data = nss_octopass_github_team_member_by_id((int)uid, root);
 
-  if (!data) {
+  if (json_object_size(data) == 0) {
     json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;
