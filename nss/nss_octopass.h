@@ -23,9 +23,6 @@
 #define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #endif
 #define NSS_OCTOPASS_CACHE_DIR "/tmp"
-#ifndef NSS_OCTOPASS_CACHE_TIME
-#define NSS_OCTOPASS_CACHE_TIME 300
-#endif
 #define NSS_OCTOPASS_LOCK()                                                                                            \
   do {                                                                                                                 \
     pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                                           \
