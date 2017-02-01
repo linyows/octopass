@@ -12,14 +12,14 @@ void show_pwent(struct passwd *pwent)
 void show_grent(struct group *grent)
 {
   printf("%s:%s:%ld", grent->gr_name, grent->gr_passwd, grent->gr_gid);
-  const int num = sizeof grent->gr_mem / sizeof grent->gr_mem[0];
+  const int count = sizeof(grent->gr_mem) / sizeof(char);
   int i;
 
-  for (i = 0; i < num; i++) {
+  for (i = 0; i < count; i++) {
     printf(":%s", grent->gr_mem[i]);
   }
 
-  if (num == 0) {
+  if (count == 0) {
     printf(":\n");
   } else {
     printf("\n");
