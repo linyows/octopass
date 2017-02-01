@@ -122,7 +122,7 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
   }
 
   // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
+  if (ent_json_idx > 0) {
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;
   }
@@ -150,7 +150,7 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
 
   ent_json_idx++;
 
-  return NSS_STATUS_NOTFOUND;
+  return NSS_STATUS_SUCCESS;
 }
 
 // Called to look up next entry in group file
