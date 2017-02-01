@@ -198,15 +198,13 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   root = json_loads(res.data, 0, &error);
   free(res.data);
 
-  json_t *data = nss_octopass_github_team_member_by_id((int)gid, root);
-
-  if (json_object_size(data) == 0) {
+  if (json_array_size(root) == 0) {
     json_decref(root);
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;
   }
 
-  int pack_result = pack_group_struct(data, result, buffer, buflen, &con);
+  int pack_result = pack_group_struct(root, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     json_decref(root);
