@@ -181,6 +181,12 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
   if (con.syslog) {
     syslog(LOG_INFO, "%s -- gid: %d", __func__, gid);
   }
+
+  if (gid != con.gid) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
+
   int status = nss_octopass_team_members(&con, &res);
 
   if (status != 0) {
