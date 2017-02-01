@@ -60,7 +60,7 @@ struct config {
   char home[MAXBUF];
   char shell[MAXBUF];
   char gecos[MAXBUF];
-  int cache;
+  long cache;
   long timeout;
   long uid_starts;
   long gid;

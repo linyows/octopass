@@ -133,7 +133,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     } else if (strcmp(key, "GroupName") == 0) {
       memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Cache") == 0) {
-      con->cache = atoi(value);
+      con->cache = (long)atoi(value);
     } else if (strcmp(key, "Syslog") == 0) {
       if (strcmp(value, "true") == 0) {
         con->syslog = true;
@@ -178,7 +178,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
-                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %d}",
+                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
            con->endpoint, nss_octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
            con->gid, con->group_name, con->home, con->shell, con->cache);
   }
@@ -288,7 +288,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
     if (stat(file, &statbuf) != -1) {
       unsigned long now  = time(NULL);
       unsigned long diff = now - statbuf.st_mtime;
-      if ((int)diff > con->cache) {
+      if (diff > con->cache) {
         nss_octopass_github_request_without_cache(con, url, res);
         nss_octopass_export_file(file, res->data);
         return;
