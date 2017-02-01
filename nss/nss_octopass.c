@@ -132,6 +132,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
       con->gid = atoi(value);
     } else if (strcmp(key, "GroupName") == 0) {
       memcpy(con->group_name, value, strlen(value));
+    } else if (strcmp(key, "Cache") == 0) {
+      con->cache = atoi(value);
     } else if (strcmp(key, "Syslog") == 0) {
       if (strcmp(value, "true") == 0) {
         con->syslog = true;
@@ -158,6 +160,10 @@ void nss_octopass_config_loading(struct config *con, char *filename)
 
   if (!con->gid) {
     con->gid = (long)2000;
+  }
+
+  if (!con->cache) {
+    con->cache = (int)60;
   }
 
   if (strlen(con->home) == 0) {
@@ -264,7 +270,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
 
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
 {
-  if (NSS_OCTOPASS_CACHE == 0) {
+  if (con->cache == 0) {
     nss_octopass_github_request_without_cache(con, url, res);
     return;
   }
@@ -272,7 +278,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   char *base = curl_escape(url, strlen(url));
   char f[strlen(base) + strlen(con->token) + 6];
   char *file = f;
-  sprintf(f, "tmp/cache/%s-%s", base, nss_octopass_truncate(con->token, 6));
+  sprintf(f, "%s/nss_octopass-%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
 
   FILE *fp = fopen(file, "r");
 
@@ -281,6 +287,22 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
     nss_octopass_export_file(file, res->data);
   } else {
     fclose(fp);
+
+    struct stat statbuf;
+    if (stat(file, &statbuf) != -1) {
+      unsigned long now  = time(NULL);
+      unsigned long diff = now - statbuf.st_mtime;
+      if ((int)diff > con->cache) {
+        nss_octopass_github_request_without_cache(con, url, res);
+        nss_octopass_export_file(file, res->data);
+        return;
+      }
+    }
+
+    if (con->syslog) {
+      syslog(LOG_INFO, "use cache: %s", file);
+    }
+
     res->data = (char *)nss_octopass_import_file(file);
     res->size = strlen(res->data);
   }

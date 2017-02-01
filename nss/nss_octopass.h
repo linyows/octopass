@@ -14,22 +14,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
-
-//#include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <sys/ioctl.h>
-//#include <netinet/in.h>
-//#include <net/if.h>
-//#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define NSS_OCTOPASS_VERSION "0.1.0"
 #define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
 #ifndef NSS_OCTOPASS_CONFIG_FILE
 #define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #endif
-#ifndef NSS_OCTOPASS_CACHE
-#define NSS_OCTOPASS_CACHE 0
+#define NSS_OCTOPASS_CACHE_DIR "/tmp"
+#ifndef NSS_OCTOPASS_CACHE_TIME
+#define NSS_OCTOPASS_CACHE_TIME 300
 #endif
 #define NSS_OCTOPASS_LOCK()                                                                                            \
   do {                                                                                                                 \
@@ -65,6 +60,7 @@ struct config {
   char home[MAXBUF];
   char shell[MAXBUF];
   char gecos[MAXBUF];
+  int cache;
   long timeout;
   long uid_starts;
   long gid;

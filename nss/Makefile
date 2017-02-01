@@ -14,9 +14,8 @@ ifeq ($(wildcard $(LIBDIR)/.*),)
 LIBDIR=$(PREFIX)/lib
 endif
 BINDIR=$(PREFIX)/bin
-TMP=tmp
-BUILD=$(TMP)/libs
-CACHE=$(TMP)/cache
+BUILD=tmp/libs
+CACHE=/tmp/nss_octopass-*
 
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
@@ -27,7 +26,6 @@ build: nss_octopass nss_octopass_cli
 
 build_dir:
 	test -d $(BUILD) || mkdir -p $(BUILD)
-	test -d $(CACHE) || mkdir -p $(CACHE)
 
 nss_octopass-passwd:
 	$(CC) $(CFLAGS) -c nss_octopass-passwd.c -o $(BUILD)/nss_octopass-passwd.o
@@ -107,6 +105,7 @@ install_cli:
 
 clean:
 	rm -rf $(TMP)
+	rm -rf $(CACHE)
 
 distclean: clean
 	rm -f *~ \#*
