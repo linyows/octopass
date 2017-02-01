@@ -162,10 +162,6 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     con->gid = (long)2000;
   }
 
-  if (!con->cache) {
-    con->cache = (int)60;
-  }
-
   if (strlen(con->home) == 0) {
     char *home = "/home/%s";
     memcpy(con->home, home, strlen(home));
@@ -182,9 +178,9 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     const char *pg_name = "nss-octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
-                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s}",
+                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %d}",
            con->endpoint, nss_octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
-           con->gid, con->group_name, con->home, con->shell);
+           con->gid, con->group_name, con->home, con->shell, con->cache);
   }
 }
 
