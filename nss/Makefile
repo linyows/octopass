@@ -13,6 +13,7 @@ LIBDIR=$(PREFIX)/lib64
 ifeq ($(wildcard $(LIBDIR)/.*),)
 LIBDIR=$(PREFIX)/lib
 endif
+BINDIR=$(PREFIX)/bin
 TMP=tmp
 BUILD=$(TMP)/libs
 CACHE=$(TMP)/cache
@@ -22,7 +23,7 @@ VERSION=$(shell cat version)
 CRITERION_VERSION=2.3.0
 
 default: build
-build: nss_octopass
+build: nss_octopass nss_octopass_cli
 
 build_dir:
 	test -d $(BUILD) || mkdir -p $(BUILD)
@@ -94,13 +95,18 @@ nss_octopass_cli: build_dir nss_octopass_cli_services
 
 cli: nss_octopass_cli
 
-clean:
-	rm -rf $(TMP)
+install: install_lib install_cli
 
-install:
+install_lib:
 	[ -d $(LIBDIR) ] || install -d $(LIBDIR)
 	install $(BUILD)/$(LIBRARY) $(LIBDIR)
 	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done
+
+install_cli:
+	cp $(BUILD)/$(CLI) $(BINDIR)/$(CLI)
+
+clean:
+	rm -rf $(TMP)
 
 distclean: clean
 	rm -f *~ \#*
