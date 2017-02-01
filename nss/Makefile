@@ -41,13 +41,12 @@ nss_octopass_services: nss_octopass-passwd nss_octopass-group nss_octopass-shado
 
 nss_octopass: build_dir nss_octopass_services
 	$(CC) $(CFLAGS) -c nss_octopass.c -o $(BUILD)/nss_octopass.o
-
 	$(CC) -shared $(LD_SONAME) -o $(BUILD)/$(LIBRARY) \
 		$(BUILD)/nss_octopass.o \
 		$(BUILD)/nss_octopass-passwd.o \
 		$(BUILD)/nss_octopass-group.o \
 		$(BUILD)/nss_octopass-shadow.o \
-        -lcurl -ljansson
+		-lcurl -ljansson
 
 nss_octopass_test: $(SOURCE) nss_octopass_test.c nss_octopass.h
 	$(CC) $(CFLAGS) $(CFLAGS_TEST) $(LIBS) $(SOURCE) nss_octopass_test.c -o nss_octopass_test $(LIBS)
