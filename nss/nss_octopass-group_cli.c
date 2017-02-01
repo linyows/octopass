@@ -3,7 +3,7 @@
 void show_grent(struct group *grent)
 {
   printf("%s:%s:%d", grent->gr_name, grent->gr_passwd, grent->gr_gid);
-  const int count = sizeof(grent->gr_mem) / sizeof(char);
+  const int count = sizeof(grent->gr_mem) / sizeof(*grent->gr_mem);
   int i;
 
   for (i = 0; i < count; i++) {
