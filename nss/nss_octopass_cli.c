@@ -49,7 +49,9 @@ void call_getpwnam_r(const char *name)
   int buflen = 2048;
   char buf[buflen];
   status = _nss_octopass_getpwnam_r(name, &pwent, buf, buflen, &err);
-  show_pwent(&pwent);
+  if (status == NSS_STATUS_SUCCESS) {
+    show_pwent(&pwent);
+  }
 }
 
 void call_getpwuid_r(uid_t uid)
@@ -60,7 +62,9 @@ void call_getpwuid_r(uid_t uid)
   int buflen = 2048;
   char buf[buflen];
   status = _nss_octopass_getpwuid_r(uid, &pwent, buf, buflen, &err);
-  show_pwent(&pwent);
+  if (status == NSS_STATUS_SUCCESS) {
+    show_pwent(&pwent);
+  }
 }
 
 void call_pwlist(void)
@@ -91,7 +95,9 @@ void call_getgrnam_r(const char *name)
   int buflen = 2048;
   char buf[buflen];
   status = _nss_octopass_getgrnam_r(name, &grent, buf, buflen, &err);
-  show_grent(&grent);
+  if (status == NSS_STATUS_SUCCESS) {
+    show_grent(&grent);
+  }
 }
 
 void call_getgrgid_r(gid_t gid)
@@ -102,7 +108,9 @@ void call_getgrgid_r(gid_t gid)
   int buflen = 2048;
   char buf[buflen];
   status = _nss_octopass_getgrgid_r(gid, &grent, buf, buflen, &err);
-  show_grent(&grent);
+  if (status == NSS_STATUS_SUCCESS) {
+    show_grent(&grent);
+  }
 }
 
 void call_grlist(void)
@@ -135,7 +143,9 @@ void call_getspnam_r(const char *name)
   char buf[buflen];
 
   status = _nss_octopass_getspnam_r(name, &spent, buf, buflen, &err);
-  show_spent(&spent);
+  if (status == NSS_STATUS_SUCCESS) {
+    show_spent(&spent);
+  }
 }
 
 void call_splist(void)
