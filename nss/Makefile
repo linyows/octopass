@@ -6,6 +6,7 @@ LINKS=libnss_octopass.so.2 libnss_octopass.so
 
 CFLAGS_TEST=-DNSS_OCTOPASS_SCRIPT=\"./nss-octopass\"
 LIBS=-lpthread
+CLI=nss-octopass
 
 PREFIX=/usr
 LIBDIR=$(PREFIX)/lib64
@@ -72,8 +73,27 @@ test_without_depsdev:
 
 test: depsdev test_without_depsdev
 
-cli:
-	$(CC) nss_octopass_cli.c -lcurl -ljansson -o $(BUILD)/nss-octopass
+nss_octopass-passwd_cli:
+	$(CC) $(CFLAGS) -c nss_octopass-passwd_cli.c -o $(BUILD)/nss_octopass-passwd_cli.o
+
+nss_octopass-group_cli:
+	$(CC) $(CFLAGS) -c nss_octopass-group_cli.c -o $(BUILD)/nss_octopass-group_cli.o
+
+nss_octopass-shadow_cli:
+	$(CC) $(CFLAGS) -c nss_octopass-shadow_cli.c -o $(BUILD)/nss_octopass-shadow_cli.o
+
+nss_octopass_cli_services: nss_octopass-passwd_cli nss_octopass-group_cli nss_octopass-shadow_cli
+
+nss_octopass_cli: build_dir nss_octopass_cli_services
+	$(CC) $(CFLAGS) -c nss_octopass_cli.c -o $(BUILD)/nss_octopass_cli.o
+	$(CC) -o $(BUILD)/$(CLI) \
+		$(BUILD)/nss_octopass_cli.o \
+		$(BUILD)/nss_octopass-passwd_cli.o \
+		$(BUILD)/nss_octopass-group_cli.o \
+		$(BUILD)/nss_octopass-shadow_cli.o \
+		-lcurl -ljansson
+
+cli: nss_octopass_cli
 
 clean:
 	rm -rf $(TMP)
