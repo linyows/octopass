@@ -3,6 +3,10 @@
 #include "nss_octopass-shadow.c"
 #include "nss_octopass.c"
 
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+
 void show_pwent(struct passwd *pwent)
 {
   printf("%s:%s:%ld:%ld:%s:%s:%s\n", pwent->pw_name, pwent->pw_passwd, pwent->pw_uid, pwent->pw_gid, pwent->pw_gecos,
@@ -185,7 +189,7 @@ int main(int argc, char **argv)
 
   if (strcmp(argv[1], "getpwnam") == 0) {
     if (argc < 3) {
-      fprintf(stderr, "getpwunam requires a username\n");
+      fprintf(stderr, ANSI_COLOR_RED "Error: %s requires a username" ANSI_COLOR_RESET "\n", argv[1]);
       return 1;
     }
     const char *name = (char *)argv[2];
@@ -195,7 +199,7 @@ int main(int argc, char **argv)
 
   if (strcmp(argv[1], "getpwuid") == 0) {
     if (argc < 3) {
-      fprintf(stderr, "getpwuid requires a user id\n");
+      fprintf(stderr, ANSI_COLOR_RED "Error: %s requires a user id" ANSI_COLOR_RESET "\n", argv[1]);
       return 1;
     }
     uid_t uid = (uid_t)atol(argv[2]);
@@ -211,7 +215,7 @@ int main(int argc, char **argv)
 
   if (strcmp(argv[1], "getgrnam") == 0) {
     if (argc < 3) {
-      fprintf(stderr, "getgrunam requires a group name\n");
+      fprintf(stderr, ANSI_COLOR_RED "Error: %s requires a gruop name" ANSI_COLOR_RESET "\n", argv[1]);
       return 1;
     }
     const char *name = (char *)argv[2];
@@ -221,7 +225,7 @@ int main(int argc, char **argv)
 
   if (strcmp(argv[1], "getgrgid") == 0) {
     if (argc < 3) {
-      fprintf(stderr, "getgrgid requires a group id\n");
+      fprintf(stderr, ANSI_COLOR_RED "Error: %s requires a group id" ANSI_COLOR_RESET "\n", argv[1]);
       return 1;
     }
     gid_t gid = (gid_t)atol(argv[2]);
@@ -237,7 +241,7 @@ int main(int argc, char **argv)
 
   if (strcmp(argv[1], "getspnam") == 0) {
     if (argc < 3) {
-      fprintf(stderr, "getspunam requires a shadow name\n");
+      fprintf(stderr, ANSI_COLOR_RED "Error: %s requires a shadow name" ANSI_COLOR_RESET "\n", argv[1]);
       return 1;
     }
     const char *name = (char *)argv[2];
@@ -245,6 +249,6 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  fprintf(stderr, "Invalid command: %s\n", argv[1]);
+  fprintf(stderr, ANSI_COLOR_RED "Error: Invalid command: %s" ANSI_COLOR_RESET "\n", argv[1]);
   return 1;
 }
