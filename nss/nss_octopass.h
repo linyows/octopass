@@ -35,8 +35,6 @@
 #define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
 #endif
 
-// 256KB
-#define NSS_OCTOPASS_INITIAL_BUFFER_SIZE (256 * 1024)
 // 10MB
 #define NSS_OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
