@@ -13,7 +13,7 @@ void setup(void)
 
 Test(nss_octopass, export_file)
 {
-  char *f = "/tmp/__test__.txt";
+  char *f = "/tmp/nss_octopass-export_file_test_1.txt";
   char *d = "LINE1\nLINE2\nLINE3\n";
   nss_octopass_export_file(f, d);
 
@@ -46,13 +46,13 @@ Test(nss_octopass, export_file)
 
 Test(nss_octopass, import_file)
 {
-  char *f1 = "/tmp/__test__1.txt";
+  char *f1 = "/tmp/nss_octopass-import_file_test_1.txt";
   char *d1 = "LINE1\nLINE2\nLINE3\n";
   nss_octopass_export_file(f1, d1);
   const char *data1 = nss_octopass_import_file(f1);
   cr_assert_str_eq(data1, d1);
 
-  char *f2 = "/tmp/__test__2.txt";
+  char *f2 = "/tmp/nss_octopass-import_file_test_2.txt";
   char *d2 = "LINEa\nLINEb\nLINEc\n";
   nss_octopass_export_file(f2, d2);
   const char *data2 = nss_octopass_import_file(f2);
@@ -119,6 +119,13 @@ Test(nss_octopass, config_loading)
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.organization, "yourorganization");
   cr_assert_str_eq(con.team, "yourteam");
+  cr_assert_str_eq(con.group_name, "yourgroup");
+  cr_assert_str_eq(con.home, "/home/yourteam/%s");
+  cr_assert_str_eq(con.shell, "/bin/sh");
+  // cr_assert_str_eq(con.gecos, "your comment field");
+  cr_assert_eq(con.uid_starts, 5000);
+  cr_assert_eq(con.gid, 5000);
+  cr_assert_eq(con.cache, 300);
   cr_assert(con.syslog == false);
 }
 
