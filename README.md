@@ -1,7 +1,7 @@
 octopass
 ========
 
-Management linux user and authentication by therganization/team on Github.
+Management linux user and authentication by the organization/team on Github.
 
 [![Travis](https://img.shields.io/travis/linyows/octopass.svg?style=flat-square)][travis]
 [![GitHub release](http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square)][release]
