@@ -132,16 +132,18 @@ void nss_octopass_config_loading(struct config *con, char *filename)
       memcpy(con->organization, value, strlen(value));
     } else if (strcmp(key, "Team") == 0) {
       memcpy(con->team, value, strlen(value));
+    } else if (strcmp(key, "Group") == 0) {
+      memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Home") == 0) {
       memcpy(con->home, value, strlen(value));
     } else if (strcmp(key, "Shell") == 0) {
       memcpy(con->shell, value, strlen(value));
+    } else if (strcmp(key, "Gecos") == 0) {
+      memcpy(con->gecos, value, strlen(value));
     } else if (strcmp(key, "UidStarts") == 0) {
       con->uid_starts = atoi(value);
     } else if (strcmp(key, "Gid") == 0) {
       con->gid = atoi(value);
-    } else if (strcmp(key, "GroupName") == 0) {
-      memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Cache") == 0) {
       con->cache = (long)atoi(value);
     } else if (strcmp(key, "Syslog") == 0) {
