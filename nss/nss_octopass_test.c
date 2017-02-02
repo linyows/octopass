@@ -1,4 +1,3 @@
-#define NSS_OCTOPASS_CACHE 1
 #define NSS_OCTOPASS_CONFIG_FILE "example.octopass.conf"
 #include <criterion/criterion.h>
 #include "nss_octopass.c"

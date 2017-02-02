@@ -155,6 +155,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     }
   }
 
+  fclose(file);
+
   nss_octopass_override_config_by_env(con);
 
   if (strlen(con->endpoint) == 0) {
@@ -166,14 +168,6 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     memcpy(con->group_name, con->team, strlen(con->team));
   }
 
-  if (!con->uid_starts) {
-    con->uid_starts = (long)2000;
-  }
-
-  if (!con->gid) {
-    con->gid = (long)2000;
-  }
-
   if (strlen(con->home) == 0) {
     char *home = "/home/%s";
     memcpy(con->home, home, strlen(home));
@@ -183,8 +177,6 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     char *shell = "/bin/bash";
     memcpy(con->shell, shell, strlen(shell));
   }
-
-  fclose(file);
 
   if (con->syslog) {
     const char *pg_name = "nss-octopass";
