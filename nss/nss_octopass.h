@@ -55,10 +55,9 @@ struct config {
   char home[MAXBUF];
   char shell[MAXBUF];
   char gecos[MAXBUF];
-  long cache;
-  long timeout;
   long uid_starts;
   long gid;
+  long cache;
   bool syslog;
 };
 
