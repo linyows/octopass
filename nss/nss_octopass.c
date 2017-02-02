@@ -211,7 +211,7 @@ const char *nss_octopass_import_file(char *file)
   char line[MAXBUF];
   char *data;
 
-  if ((data = malloc(MAXBUF * sizeof(char *))) != NULL) {
+  if ((data = malloc(NSS_OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
     data[0] = '\0';
   } else {
     fprintf(stderr, "Malloc failed\n");
