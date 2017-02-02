@@ -15,7 +15,7 @@ LIBDIR=$(PREFIX)/lib
 endif
 BINDIR=$(PREFIX)/sbin
 BUILD=tmp/libs
-CACHE=/tmp/nss_octopass-*
+CACHE=/var/cache/octopass
 
 SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
 VERSION=$(shell cat version)
@@ -26,6 +26,9 @@ build: nss_octopass nss_octopass_cli
 
 build_dir:
 	test -d $(BUILD) || mkdir -p $(BUILD)
+
+cache_dir:
+	test -d $(CACHE) || mkdir -p $(CACHE)
 
 nss_octopass-passwd:
 	$(CC) $(CFLAGS) -c nss_octopass-passwd.c -o $(BUILD)/nss_octopass-passwd.o
@@ -38,7 +41,7 @@ nss_octopass-shadow:
 
 nss_octopass_services: nss_octopass-passwd nss_octopass-group nss_octopass-shadow
 
-nss_octopass: build_dir nss_octopass_services
+nss_octopass: build_dir cache_dir nss_octopass_services
 	$(CC) $(CFLAGS) -c nss_octopass.c -o $(BUILD)/nss_octopass.o
 	$(CC) -shared $(LD_SONAME) -o $(BUILD)/$(LIBRARY) \
 		$(BUILD)/nss_octopass.o \
@@ -56,7 +59,7 @@ deps:
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-depsdev: build_dir
+depsdev: build_dir cache_dir
 	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
 	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
@@ -82,7 +85,7 @@ nss_octopass-shadow_cli:
 
 nss_octopass_cli_services: nss_octopass-passwd_cli nss_octopass-group_cli nss_octopass-shadow_cli
 
-nss_octopass_cli: build_dir nss_octopass_cli_services
+nss_octopass_cli: build_dir cache_dir nss_octopass_cli_services
 	$(CC) $(CFLAGS) -c nss_octopass_cli.c -o $(BUILD)/nss_octopass_cli.o
 	$(CC) -o $(BUILD)/$(CLI) \
 		$(BUILD)/nss_octopass_cli.o \
@@ -105,9 +108,8 @@ install_cli:
 
 clean:
 	rm -rf $(TMP)
-	rm -rf $(CACHE)
 
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install build_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
+.PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test test_without_depsdev

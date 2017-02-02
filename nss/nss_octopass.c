@@ -286,7 +286,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   char *base = curl_escape(url, strlen(url));
   char f[strlen(base) + strlen(con->token) + 6];
   char *file = f;
-  sprintf(f, "%s/nss_octopass-%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
+  sprintf(f, "%s/%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
 
   FILE *fp = fopen(file, "r");
 
