@@ -13,7 +13,7 @@ LIBDIR=$(PREFIX)/lib64
 ifeq ($(wildcard $(LIBDIR)/.*),)
 LIBDIR=$(PREFIX)/lib
 endif
-BINDIR=$(PREFIX)/bin
+BINDIR=$(PREFIX)/sbin
 BUILD=tmp/libs
 CACHE=/tmp/nss_octopass-*
 
