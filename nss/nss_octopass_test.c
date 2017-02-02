@@ -122,7 +122,6 @@ Test(nss_octopass, config_loading)
   cr_assert_str_eq(con.group_name, "yourgroup");
   cr_assert_str_eq(con.home, "/home/yourteam/%s");
   cr_assert_str_eq(con.shell, "/bin/sh");
-  // cr_assert_str_eq(con.gecos, "your comment field");
   cr_assert_eq(con.uid_starts, 5000);
   cr_assert_eq(con.gid, 5000);
   cr_assert_eq(con.cache, 300);
@@ -150,16 +149,4 @@ Test(nss_octopass, team_id, .init = setup)
   int id = nss_octopass_team_id(&con);
 
   cr_assert_eq(id, 2244789);
-}
-
-Test(nss_octopass, id_by_name, .init = setup)
-{
-  struct config con;
-  struct response res;
-  char *name = "linyows";
-  char *f    = "example.octopass.conf";
-  nss_octopass_config_loading(&con, f);
-  int id = nss_octopass_id_by_name(&con, &res, name);
-
-  cr_assert_eq(id, 72049);
 }

@@ -54,7 +54,6 @@ struct config {
   char group_name[MAXBUF];
   char home[MAXBUF];
   char shell[MAXBUF];
-  char gecos[MAXBUF];
   long uid_starts;
   long gid;
   long cache;
