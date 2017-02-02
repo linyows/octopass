@@ -97,8 +97,9 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
-  con->uid_starts = (long)0;
-  con->gid        = (long)0;
+  con->uid_starts = (long)2000;
+  con->gid        = (long)2000;
+  con->cache      = (long)500;
 
   FILE *file = fopen(filename, "r");
 
