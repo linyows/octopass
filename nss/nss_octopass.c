@@ -5,6 +5,11 @@ static size_t write_response_callback(void *contents, size_t size, size_t nmemb,
   size_t realsize      = size * nmemb;
   struct response *res = (struct response *)userp;
 
+  if (realsize > NSS_OCTOPASS_MAX_BUFFER_SIZE) {
+    printf("response is too large\n");
+    return 0;
+  }
+
   res->data = realloc(res->data, res->size + realsize + 1);
   if (res->data == NULL) {
     // out of memory!
