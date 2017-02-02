@@ -71,25 +71,23 @@ auth requisite pam_exec.so quiet expose_authtok log=/var/log/octopass.log /usr/b
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
 ```
 
-Install
--------
+Configuration
+-------------
 
-To install, use `go get`:
-
-```bash
-$ go get -d github.com/linyows/octopass
-```
-
-Contribution
-------------
-
-1. Fork ([https://github.com/linyows/octopass/fork](https://github.com/linyows/octopass/fork))
-1. Create a feature branch
-1. Commit your changes
-1. Rebase your local changes against the master branch
-1. Run test suite with the `go test ./...` command and confirm that it passes
-1. Run `gofmt -s`
-1. Create a new Pull Request
+Key             | Description                  | Default
+---             | ---                          | ---
+Endpoint        | github endpoint              | https://api.github.com
+Token           | github personal access token | -
+Organization    | github organization          | -
+Team            | github team                  | -
+Group           | group on linux               | same as team
+Home            | user home                    | /home/%s
+Shell           | user shell                   | /bin/bash
+UidStarts       | start number of uid          | 2000
+Gid             | gid                          | 2000
+Cache           | github api cache sec         | 500
+Syslog          | use syslog                   | false
+MembershipCheck | check membership in auth     | false
 
 Author
 ------
