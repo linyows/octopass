@@ -15,7 +15,7 @@ extern void call_splist(void);
 
 void help(void)
 {
-  printf("Usage: nss-octopass [CMD] [KEY]\n");
+  printf("Usage: nss-octopass [options] [CMD] [KEY]\n");
   printf("\n");
   printf("Command:\n");
   printf("  passwd             get passwds, call setpwent(3), getpwent(3), endpwent(3)\n");
@@ -27,6 +27,10 @@ void help(void)
   printf("  shadow             get shadows, call setspent(3), getspent(3), endspent(3)\n");
   printf("  getspnam [NAME]    get a shadow by name, call getspnam(3)\n");
   printf("\n");
+  printf("Options:\n");
+  printf("  -h, --help         show this help message and exit\n");
+  printf("  -v, --version      print the version and exit\n");
+  printf("\n");
 }
 
 int main(int argc, char **argv)
@@ -34,6 +38,11 @@ int main(int argc, char **argv)
   if (argc < 2 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
     help();
     return 2;
+  }
+
+  if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-v")) {
+    printf("%s\n", NSS_OCTOPASS_VERSION_WITH_NAME);
+    return 0;
   }
 
   // passwd
