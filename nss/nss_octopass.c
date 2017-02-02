@@ -115,6 +115,10 @@ void nss_octopass_config_loading(struct config *con, char *filename)
       line[strlen(line) - 1] = '\0';
     }
 
+    if (strlen(line) == 0) {
+      continue;
+    }
+
     char *lasts;
     char *key   = strtok_r(line, DELIM, &lasts);
     char *value = strtok_r(NULL, DELIM, &lasts);
