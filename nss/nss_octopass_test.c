@@ -119,11 +119,11 @@ Test(nss_octopass, config_loading)
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.organization, "yourorganization");
   cr_assert_str_eq(con.team, "yourteam");
-  cr_assert_str_eq(con.group_name, "yourgroup");
-  cr_assert_str_eq(con.home, "/home/yourteam/%s");
-  cr_assert_str_eq(con.shell, "/bin/sh");
-  cr_assert_eq(con.uid_starts, 5000);
-  cr_assert_eq(con.gid, 5000);
+  cr_assert_str_eq(con.group_name, "yourteam");
+  cr_assert_str_eq(con.home, "/home/%s");
+  cr_assert_str_eq(con.shell, "/bin/bash");
+  cr_assert_eq(con.uid_starts, 2000);
+  cr_assert_eq(con.gid, 2000);
   cr_assert_eq(con.cache, 300);
   cr_assert(con.syslog == false);
 }
