@@ -89,7 +89,7 @@ Test(nss_octopass, pwent_list, .init = setup)
 
 Test(nss_octopass, pwent_list__when_team_not_exist, .init = setup)
 {
-  putenv("GITHUB_TEAM=team_not_exists");
+  putenv("OCTOPASS_TEAM=team_not_exists");
 
   enum nss_status status;
   struct passwd pwent;
@@ -122,7 +122,7 @@ Test(nss_octopass, pwent_list__when_team_not_exist, .init = setup)
 
 Test(nss_octopass, pwent_list__when_wrong_token, .init = setup)
 {
-  putenv("GITHUB_TOKEN=wrong_token");
+  putenv("OCTOPASS_TOKEN=wrong_token");
 
   enum nss_status status;
   struct passwd pwent;

@@ -60,22 +60,22 @@ const char *nss_octopass_masking(const char *token)
 
 void nss_octopass_override_config_by_env(struct config *con)
 {
-  char *token = getenv("GITHUB_TOKEN");
+  char *token = getenv("OCTOPASS_TOKEN");
   if (token) {
     sprintf(con->token, "%s", token);
   }
 
-  char *endpoint = getenv("GITHUB_ENDPOINT");
+  char *endpoint = getenv("OCTOPASS_ENDPOINT");
   if (endpoint) {
     sprintf(con->endpoint, "%s", endpoint);
   }
 
-  char *org = getenv("GITHUB_ORGANIZATION");
+  char *org = getenv("OCTOPASS_ORGANIZATION");
   if (org) {
     sprintf(con->organization, "%s", org);
   }
 
-  char *team = getenv("GITHUB_TEAM");
+  char *team = getenv("OCTOPASS_TEAM");
   if (team) {
     sprintf(con->team, "%s", team);
   }

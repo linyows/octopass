@@ -4,8 +4,8 @@
 
 void setup(void)
 {
-  char *token    = getenv("GITHUB_TOKEN");
-  char *endpoint = getenv("GITHUB_ENDPOINT");
+  char *token    = getenv("OCTOPASS_TOKEN");
+  char *endpoint = getenv("OCTOPASS_ENDPOINT");
   if (!token || !endpoint) {
     cr_skip_test("Missing environment variables, token or endpoint");
   }
@@ -94,10 +94,10 @@ Test(nss_octopass, override_config_by_env)
   cr_assert_str_empty(con.organization);
   cr_assert_str_empty(con.team);
 
-  putenv("GITHUB_TOKEN=secret-token");
-  putenv("GITHUB_ENDPOINT=https://api.github.com");
-  putenv("GITHUB_ORGANIZATION=octopass");
-  putenv("GITHUB_TEAM=operation");
+  putenv("OCTOPASS_TOKEN=secret-token");
+  putenv("OCTOPASS_ENDPOINT=https://api.github.com");
+  putenv("OCTOPASS_ORGANIZATION=octopass");
+  putenv("OCTOPASS_TEAM=operation");
   nss_octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
   cr_assert_str_eq(con.endpoint, "https://api.github.com");
