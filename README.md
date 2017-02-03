@@ -1,12 +1,17 @@
-octopass
-========
+<p align="center">
+<img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass.png?raw=true" width="400">
+</p>
 
+<p align="center">
 Management linux user and authentication by the organization/team on Github.
+</p>
 
+<p align="center">
 [![Travis](https://img.shields.io/travis/linyows/octopass.svg?style=flat-square)][travis]
 [![GitHub release](http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square)][release]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 [![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
+</p>
 
 [travis]: https://travis-ci.org/linyows/octopass
 [release]: https://github.com/linyows/octopass/releases
