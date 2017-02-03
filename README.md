@@ -1,22 +1,17 @@
 <p align="center">
-<img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass.png?raw=true" width="400">
+  <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass.png?raw=true" width="400">
 </p>
 
 <p align="center">
-Management linux user and authentication by the organization/team on Github.
+  Management linux user and authentication by the organization/team on Github.
 </p>
 
 <p align="center">
-[![Travis](https://img.shields.io/travis/linyows/octopass.svg?style=flat-square)][travis]
-[![GitHub release](http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square)][release]
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
-[![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
+  <a href="https://travis-ci.org/linyows/octopass" title="travis"><img src="https://img.shields.io/travis/linyows/octopass.svg?style=flat-square"></a>
+  <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square"></a>
+  <a href="https://github.com/linyows/octopass/blob/master/LICENSE" title="MIT License"><img src="http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
+  <a href="http://godoc.org/github.com/linyows/octopass" title="Go Documentation"><img src="http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square"></a>
 </p>
-
-[travis]: https://travis-ci.org/linyows/octopass
-[release]: https://github.com/linyows/octopass/releases
-[license]: https://github.com/linyows/octopass/blob/master/LICENSE
-[godocs]: http://godoc.org/github.com/linyows/octopass
 
 Description
 -----------
