@@ -40,7 +40,7 @@ static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, s
   return 0;
 }
 
-enum nss_status _nss_octopass_setspent_locked(int stay_open)
+enum nss_status _nss_octopass_setspent_locked(int stayopen)
 {
   json_t *root;
   json_error_t error;
@@ -49,7 +49,7 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open)
   struct response res;
   nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stay_open);
+    syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stayopen);
   }
   int status = nss_octopass_team_members(&con, &res);
 
@@ -86,12 +86,12 @@ enum nss_status _nss_octopass_setspent_locked(int stay_open)
 }
 
 // Called to open the shadow file
-enum nss_status _nss_octopass_setspent(int stay_open)
+enum nss_status _nss_octopass_setspent(int stayopen)
 {
   enum nss_status status;
 
   NSS_OCTOPASS_LOCK();
-  status = _nss_octopass_setspent_locked(stay_open);
+  status = _nss_octopass_setspent_locked(stayopen);
   NSS_OCTOPASS_UNLOCK();
 
   return status;

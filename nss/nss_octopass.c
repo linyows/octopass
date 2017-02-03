@@ -6,14 +6,14 @@ static size_t write_response_callback(void *contents, size_t size, size_t nmemb,
   struct response *res = (struct response *)userp;
 
   if (realsize > NSS_OCTOPASS_MAX_BUFFER_SIZE) {
-    fprintf(stderr, "response is too large\n");
+    fprintf(stderr, "Response is too large\n");
     return 0;
   }
 
   res->data = realloc(res->data, res->size + realsize + 1);
   if (res->data == NULL) {
     // out of memory!
-    fprintf(stderr, "not enough memory (realloc returned NULL)\n");
+    fprintf(stderr, "Not enough memory (realloc returned NULL)\n");
     return 0;
   }
 
@@ -254,7 +254,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   result = curl_easy_perform(hnd);
 
   if (result != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(result));
+    fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
