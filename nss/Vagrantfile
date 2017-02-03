@@ -7,9 +7,6 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder '.', '/octopass'
 
   config.vm.provision 'shell', inline: <<-SHELL
-    yum install -y gcc make curl-devel jansson-devel nss-devel autoconf libtool git vim
-    git clone --depth=1 https://github.com/vstakhov/libucl.git && \
-      pushd libucl && ./autogen.sh && ./configure && make && make install && popd
-    git clone https://github.com/allanjude/uclcmd.git
+    yum install -y glibc gcc make libcurl-devel jansson-devel git vim
   SHELL
 end
