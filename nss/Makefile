@@ -112,4 +112,13 @@ clean:
 distclean: clean
 	rm -f *~ \#*
 
+dist:
+	rm -rf libnss-octopass-$(VERSION) libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION).tar.gz
+	mkdir libnss-octopass-$(VERSION)
+	cp $(SOURCES) libnss-octopass-$(VERSION)
+	tar cf libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION)
+	gzip -9 libnss-octopass-$(VERSION).tar
+	rm -rf libnss-octopass-$(VERSION)
+
+
 .PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
