@@ -1,0 +1,5 @@
+rpm:
+  dockerfile: dockerfiles/Dockerfile.centos
+  build: .
+  volumes:
+    - .:/builds

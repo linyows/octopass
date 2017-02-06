@@ -17,7 +17,7 @@ BINDIR=$(PREFIX)/sbin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
-SOURCES=Makefile nss_octopass.c version libnss-octopass.spec
+SOURCES=Makefile nss_octopass.h nss_octopass*.c version example.octopass.conf COPYING
 VERSION=$(shell cat version)
 CRITERION_VERSION=2.3.0
 
@@ -87,7 +87,7 @@ nss_octopass_cli_services: nss_octopass-passwd_cli nss_octopass-group_cli nss_oc
 
 nss_octopass_cli: build_dir cache_dir nss_octopass_cli_services
 	$(CC) $(CFLAGS) -c nss_octopass_cli.c -o $(BUILD)/nss_octopass_cli.o
-	$(CC) -o $(BUILD)/$(CLI) \
+	$(CC) -o $(BUILD)/nss-octopass \
 		$(BUILD)/nss_octopass_cli.o \
 		$(BUILD)/nss_octopass-passwd_cli.o \
 		$(BUILD)/nss_octopass-group_cli.o \
@@ -101,10 +101,10 @@ install: install_lib install_cli
 install_lib:
 	[ -d $(LIBDIR) ] || install -d $(LIBDIR)
 	install $(BUILD)/$(LIBRARY) $(LIBDIR)
-	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done
+	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done;
 
 install_cli:
-	cp $(BUILD)/$(CLI) $(BINDIR)/$(CLI)
+	cp $(BUILD)/nss-octopass $(BINDIR)/nss-octopass
 
 clean:
 	rm -rf $(TMP)
@@ -113,12 +113,11 @@ distclean: clean
 	rm -f *~ \#*
 
 dist:
-	rm -rf libnss-octopass-$(VERSION) libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION).tar.gz
-	mkdir libnss-octopass-$(VERSION)
-	cp $(SOURCES) libnss-octopass-$(VERSION)
-	tar cf libnss-octopass-$(VERSION).tar libnss-octopass-$(VERSION)
-	gzip -9 libnss-octopass-$(VERSION).tar
-	rm -rf libnss-octopass-$(VERSION)
-
+	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).tar.gz
+	mkdir octopass-$(VERSION)
+	cp $(SOURCES) octopass-$(VERSION)
+	tar cf octopass-$(VERSION).tar octopass-$(VERSION)
+	gzip -9 octopass-$(VERSION).tar
+	rm -rf octopass-$(VERSION)
 
 .PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
