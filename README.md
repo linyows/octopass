@@ -23,9 +23,13 @@ but features easy handling and ease of operation.
 Usage
 -----
 
-### NSS command
+By octopass name resolution, you can check the id of team members of github organization.
 
-This is output in the same display as file such as passwd, shadow and group.
+```sh
+$ id ken
+uid=5458(ken) gid=2000(operators) groups=2000(operators)
+```
+You can also see a list like `/etc/passwd,shadow,group` by the `nss-octopass`.
 For detail `--help`.
 
 ```sh
@@ -38,41 +42,36 @@ sagat:x:93011:2000:managed by nss-octopass:/home/sagat:/bin/bash
 zangief:x:8305:2000:managed by nss-octopass:/home/zangief:/bin/bash
 ```
 
-### Keys command
-
-Get public keys for AuthorizedKeysCommand in sshd(8)
+And octopass gets the public key from github for key authentication.
 
 ```sh
-$ octopass -t <token> keys <user@github>
+$ octopass ken
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vRgHRMH9dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==
 ```
 
-#### SSHD Configuration
+Why?
+----
 
-```
-AuthorizedKeysCommand /usr/bin/octopass --config=/etc/octopass.conf keys %u
-AuthorizedKeysCommandUser root
-UsePAM yes
-PasswordAuthentication no
-```
+I did not need functions like ldap, and asked for ease and ease of introduction.
+Therefore, the user only considers it as administrator authority.
+However, it is very easy to add a newly added user or to remove a user who leaves.
 
-### Pam Command
+Also, in order to speedily resolve names, Github API responses are file cached.
+With this, even if Github is down, it will work if past caches remain.
 
-Authenticate with github for pam_exec(8)
+Installation
+------------
 
-```sh
-$ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
-```
-
-#### PAM Configuration
-
-```
-#@include common-auth
-auth requisite pam_exec.so quiet expose_authtok log=/var/log/octopass.log /usr/bin/octopass --config=/etc/octopass.conf pam
-auth optional pam_unix.so not_set_pass use_first_pass nodelay
-```
+Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
 
 Configuration
 -------------
+
+Edit octopass.conf:
+
+```
+$ mv /etc/{octopass.conf.example,octopass.conf}
+```
 
 Key             | Description                  | Default
 ---             | ---                          | ---
@@ -88,6 +87,79 @@ Gid             | gid                          | 2000
 Cache           | github api cache sec         | 500
 Syslog          | use syslog                   | false
 MembershipCheck | check membership in auth     | false
+
+Generate token from here: https://github.com/settings/tokens/new.
+Need: Read org and team membership
+
+### Building from Source
+
+Dependency
+
+- glibc
+- libcurl
+- jansson
+
+```
+$ wget https://github.com/linyows/octopass/releases/download/v0.1.0/linux_amd64.zip
+$ unzip linux_amd64.zip
+$ mv octopass /usr/bin/
+$ git clone https://github.com/linyows/octopass
+$ cd nss
+$ make && make install
+$ mv example.octopass.conf /etc/octopass.conf
+```
+
+### SSHD Configuration
+
+/etc/ssh/sshd_config:
+
+```
+AuthorizedKeysCommand /usr/bin/octopass
+AuthorizedKeysCommandUser root
+UsePAM yes
+PasswordAuthentication no
+```
+
+### PAM Configuration
+
+#### Ubuntu
+
+/etc/pam.d/sshd:
+
+```
+#@include common-auth
+auth requisite pam_exec.so quiet expose_authtok log=/var/log/octopass.log /usr/bin/octopass --config=/etc/octopass.conf pam
+auth optional pam_unix.so not_set_pass use_first_pass nodelay
+session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
+```
+
+#### CentOS
+
+/etc/pam.d/system-auth-ac:
+
+```
+# auth        sufficient    pam_unix.so nullok try_first_pass
+auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass
+auth optional pam_unix.so not_set_pass use_first_pass nodelay
+```
+
+/etc/pam.d/sshd:
+
+```
+session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
+```
+
+### NSS Switch Configuration
+
+/etc/nsswitch.conf:
+
+```
+passwd:     files octopass sss
+shadow:     files octopass sss
+group:      files octopass sss
+```
+
+Enable octopass as name resolution.
 
 Author
 ------
