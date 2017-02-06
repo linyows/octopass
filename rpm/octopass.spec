@@ -29,11 +29,12 @@ unzip %{SOURCE1}
 
 %install
 %{__rm} -rf %{buildroot}
-mkdir -p %{buildroot}/usr/{lib64,sbin}
+mkdir -p %{buildroot}/usr/{lib64,bin}
 mkdir -p %{buildroot}%{_sysconfdir}
 make PREFIX=%{buildroot}/usr install
-install -m 700 octopass %{buildroot}/usr/sbin/octopass
-install -m 600 example.octopass.conf %{buildroot}%{_sysconfdir}/octopass.conf.example
+install -d -m 755 %{_var}/cache/octopass
+install -m 755 octopass %{buildroot}/usr/bin/octopass
+install -m 644 example.octopass.conf %{buildroot}%{_sysconfdir}/octopass.conf.example
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -49,9 +50,9 @@ install -m 600 example.octopass.conf %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /usr/lib64/libnss_octopass.so
 /usr/lib64/libnss_octopass.so.2
 /usr/lib64/libnss_octopass.so.2.0
-%attr(700, root, root) /usr/sbin/nss-octopass
-%attr(700, root, root) /usr/sbin/octopass
-%attr(600, root, root) /etc/octopass.conf.example
+/usr/bin/nss-octopass
+/usr/bin/octopass
+/etc/octopass.conf.example
 
 %changelog
 * Fri Feb 3 2017 linyows <linyows@gmail.com> - 1:0.1.0-1
