@@ -16,12 +16,8 @@ const (
 
 // Options is structure
 type Options struct {
-	Config   string
-	Endpoint string
-	Token    string
-	Belongs  string
-	Syslog   bool
-	Version  bool
+	Config  string
+	Version bool
 }
 
 // CLI is the command line object
@@ -30,18 +26,14 @@ type CLI struct {
 	inStream             *os.File
 }
 
-var usageText = `Usage: octopass [options] <command> [args]
-
-Commands:
-  keys   get public keys for AuthorizedKeysCommand in sshd(8)
-  pam    authenticate with github for pam_exec(8)
+var usageText = `Usage: octopass [options] [args]
 
 Options:`
 
 var exampleText = `
 Examples:
-  $ octopass -t <token> keys <user@github>
-  $ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
+  $ octopass <user@github>
+  $ echo <token@github> | env PAM_USER=<user@github> octopass
 
 `
 
@@ -58,11 +50,7 @@ func (cli *CLI) Run(args []string) int {
 
 	var opt Options
 
-	f.StringVar(&opt.Config, []string{"c", "-config"}, "", "the path to the configuration file")
-	f.StringVar(&opt.Endpoint, []string{"e", "-endpoint"}, "", "specify github api endpoint")
-	f.StringVar(&opt.Token, []string{"t", "-token"}, "", "github personal token for using API")
-	f.StringVar(&opt.Belongs, []string{"b", "-belongs"}, "", "organization/team on github")
-	f.BoolVar(&opt.Syslog, []string{"s", "-syslog"}, false, "use syslog for log output")
+	f.StringVar(&opt.Config, []string{"c", "-config"}, "/etc/octopass.conf", "the path to the configuration file")
 	f.BoolVar(&opt.Version, []string{"v", "-version"}, false, "print the version and exit")
 
 	if err := f.Parse(args[1:]); err != nil {
@@ -75,20 +63,13 @@ func (cli *CLI) Run(args []string) int {
 		return ExitCodeOK
 	}
 
-	if len(parsedArgs) == 0 {
-		f.Usage()
-		return ExitCodeOK
-	}
-
-	if parsedArgs[0] != "keys" && parsedArgs[0] != "pam" {
-		fmt.Fprintf(cli.errStream, "invalid argument: %s\n", parsedArgs[0])
-		return ExitCodeError
-	}
-
 	c := NewConfig(&opt)
 	oct := NewOctopass(c, cli, nil)
 	if err := oct.Run(parsedArgs); err != nil {
-		fmt.Fprintf(cli.errStream, "%s\n", err)
+		msg := fmt.Sprintf("%s", err)
+		if msg != "" {
+			fmt.Fprintf(cli.errStream, "%s\n", err)
+		}
 		return ExitCodeError
 	}
 

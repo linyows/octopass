@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"strings"
 
 	"github.com/hashicorp/hcl"
 )
@@ -19,21 +18,14 @@ type config struct {
 
 // NewConfig creates config from Options
 func NewConfig(opt *Options) *config {
-	var org, team string
-
-	if opt.Belongs != "" {
-		b := strings.Split(opt.Belongs, "/")
-		org = b[0]
-		team = b[1]
-	}
 
 	c := &config{
-		Endpoint:        opt.Endpoint,
-		Token:           opt.Token,
-		Organization:    org,
-		Team:            team,
-		Syslog:          opt.Syslog,
-		MembershipCheck: true,
+		Endpoint:        "",
+		Token:           "",
+		Organization:    "",
+		Team:            "",
+		Syslog:          false,
+		MembershipCheck: false,
 	}
 
 	if opt.Config == "" {

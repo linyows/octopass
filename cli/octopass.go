@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -25,7 +26,7 @@ type Octopass struct {
 func NewOctopass(c *config, cli *CLI, client *github.Client) *Octopass {
 	var logWriter io.Writer
 	if c.Syslog == false {
-		logWriter = cli.errStream
+		logWriter = new(bytes.Buffer)
 	}
 
 	if err := SetupLogger(logWriter); err != nil {
@@ -65,12 +66,17 @@ func DefaultClient(token string, endpoint string) *github.Client {
 func (o *Octopass) Run(args []string) error {
 	var u string
 
-	switch args[0] {
-	case "keys":
+	stdin, err := o.IsStdinGiven()
+	if err != nil {
+		return err
+	}
+
+	if stdin == false {
+		// SSH-KEYS
 		if len(args) == 0 {
 			return fmt.Errorf("User required")
 		}
-		u = args[1]
+		u = args[0]
 		log.Print("[DEBUG] " + fmt.Sprintf("Keys request user: %s", u))
 
 		if o.isConfirmable() {
@@ -87,14 +93,8 @@ func (o *Octopass) Run(args []string) error {
 			return err
 		}
 
-	case "pam":
-		stdin, err := o.IsStdinGiven()
-		if err != nil {
-			return err
-		}
-		if stdin == false {
-			return fmt.Errorf("STDIN required")
-		}
+	} else {
+		// PAM
 		if u = os.Getenv("PAM_USER"); u == "" {
 			return fmt.Errorf("PAM_USER required")
 		}
@@ -115,7 +115,8 @@ func (o *Octopass) Run(args []string) error {
 			return err
 		}
 		if res == false {
-			return fmt.Errorf("Not authenticated")
+			log.Print("[DEBUG] Not authenticated")
+			return errors.New("")
 		}
 	}
 

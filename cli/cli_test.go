@@ -33,23 +33,15 @@ func TestRun_helpFlag(t *testing.T) {
 		t.Errorf("expected %d to eq %d", status, ExitCodeError)
 	}
 
-	expected := `Usage: octopass [options] <command> [args]
-
-Commands:
-  keys   get public keys for AuthorizedKeysCommand in sshd(8)
-  pam    authenticate with github for pam_exec(8)
+	expected := `Usage: octopass [options] [args]
 
 Options:
-  -b, --belongs      organization/team on github
-  -c, --config       the path to the configuration file
-  -e, --endpoint     specify github api endpoint
-  -s, --syslog       use syslog for log output
-  -t, --token        github personal token for using API
-  -v, --version      print the version and exit
+  -c, --config=/etc/octopass.conf    the path to the configuration file
+  -v, --version                      print the version and exit
 
 Examples:
-  $ octopass -t <token> keys <user@github>
-  $ echo <token@github> | env PAM_USER=<user@github> octopass -t <token> pam
+  $ octopass <user@github>
+  $ echo <token@github> | env PAM_USER=<user@github> octopass
 
 `
 
