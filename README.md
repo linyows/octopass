@@ -132,7 +132,7 @@ $ mv octopass /usr/bin/
 $ git clone https://github.com/linyows/octopass
 $ cd nss
 $ make && make install
-$ mv example.octopass.conf /etc/octopass.conf
+$ mv octopass.conf.example /etc/octopass.conf
 ```
 
 ### SSHD Configuration

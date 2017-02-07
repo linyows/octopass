@@ -17,7 +17,7 @@ BINDIR=$(PREFIX)/bin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
-SOURCES=Makefile nss_octopass.h nss_octopass*.c version example.octopass.conf COPYING
+SOURCES=Makefile nss_octopass.h nss_octopass*.c version octopass.conf.example COPYING
 VERSION=$(shell cat version)
 CRITERION_VERSION=2.3.0
 

@@ -34,7 +34,7 @@ mkdir -p %{buildroot}%{_sysconfdir}
 make PREFIX=%{buildroot}/usr install
 install -d -m 755 %{_var}/cache/octopass
 install -m 755 octopass %{buildroot}/usr/bin/octopass
-install -m 644 example.octopass.conf %{buildroot}%{_sysconfdir}/octopass.conf.example
+install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.example
 
 %clean
 %{__rm} -rf %{buildroot}
