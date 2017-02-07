@@ -112,7 +112,7 @@ Test(nss_octopass, config_loading)
   clearenv();
 
   struct config con;
-  char *f = "example.octopass.conf";
+  char *f = "octopass.conf.example";
   nss_octopass_config_loading(&con, f);
 
   cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
@@ -144,7 +144,7 @@ Test(nss_octopass, remove_quotes)
 Test(nss_octopass, team_id, .init = setup)
 {
   struct config con;
-  char *f = "example.octopass.conf";
+  char *f = "octopass.conf.example";
   nss_octopass_config_loading(&con, f);
   int id = nss_octopass_team_id(&con);
 
