@@ -9,7 +9,8 @@ Vcs-Browser: https://github.com/linyows/octopass/tree/debian
 Vcs-Git: https://github.com/linyows/octopass -b debian
 
 Package: octopass
-Architecture: amd64
+Architecture: any
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: This is linux user management tool by the
  organization/team on github, and authentication.
