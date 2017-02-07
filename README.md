@@ -67,14 +67,14 @@ With this, even if Github is down, it will work if past caches remain.
 | | cache +---+ Octopass | +---+
 | +-------+   +----------+ |   |
 +--------------------------+   |
-       Linux Server            |
+      Linux Server A           |
                                |   +--------------------------+
 +--------------------------+   |   | Github API               |
 | +-------+   +----------+ |   +---+ * NSS:  org/team members |
 | | cache +---+ Octopass | +-------+ * SSHD: user public keys |
 | +-------+   +----------+ |   +---+ * PAM:  basic auth       |
 +--------------------------+   |   |                          |
-       Linux Server            |   +--------------------------+
+      Linux Server B           |   +--------------------------+
                                |
 +--------------------------+   |
 | +-------+   +----------+ |   |
@@ -154,7 +154,7 @@ PasswordAuthentication no
 
 ```
 #@include common-auth
-auth requisite pam_exec.so quiet expose_authtok log=/var/log/octopass.log /usr/bin/octopass --config=/etc/octopass.conf pam
+auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
 session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 ```
