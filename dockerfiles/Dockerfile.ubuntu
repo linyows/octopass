@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+MAINTAINER linyows <linyows@gmail.com>
+
+RUN apt-get -qq update && \
+    apt-get install -qq glibc-source gcc make libcurl4-gnutls-dev libjansson-dev \
+                        bzip2 unzip debhelper dh-make devscripts
+
+ENV VERSION 0.1.0
+ENV USER root
+
+RUN mkdir /octopass
+ADD . /octopass
+WORKDIR /octopass/nss
+
+RUN make dist && tar xvf octopass-$VERSION.tar.gz && cd octopass-$VERSION && \
+    curl -sL https://github.com/linyows/octopass/releases/download/v$VERSION/linux_amd64.zip -o octopass.zip && \
+    unzip octopass.zip && rm octopass.zip && \
+    dh_make --single --createorig -y && \
+    rm -rf debian/*.ex debian/*.EX && cp -v /octopass/debian/* debian/ && \
+    debuild -uc -us && cp *.deb /builds
