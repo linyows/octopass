@@ -59,6 +59,32 @@ However, it is very easy to add a newly added user or to remove a user who leave
 Also, in order to speedily resolve names, Github API responses are file cached.
 With this, even if Github is down, it will work if past caches remain.
 
+### Architecture
+
+```
++--------------------------+
+| +-------+   +----------+ |
+| | cache +---+ Octopass | +---+
+| +-------+   +----------+ |   |
++--------------------------+   |
+       Linux Server            |
+                               |   +--------------------------+
++--------------------------+   |   | Github API               |
+| +-------+   +----------+ |   +---+ * NSS:  org/team members |
+| | cache +---+ Octopass | +-------+ * SSHD: user public keys |
+| +-------+   +----------+ |   +---+ * PAM:  basic auth       |
++--------------------------+   |   |                          |
+       Linux Server            |   +--------------------------+
+                               |
++--------------------------+   |
+| +-------+   +----------+ |   |
+| | cache +---+ Octopass | +---+
+| +-------+   +----------+ |
++--------------------------+
+       Linux Server
+```
+
+
 Installation
 ------------
 
