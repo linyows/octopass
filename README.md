@@ -23,6 +23,10 @@ but features easy handling and ease of operation.
 Usage
 -----
 
+Adding members of organization/team of github...
+
+<img alt="Github Org/Team" src="https://github.com/linyows/octopass/blob/master/misc/github-org-team.png?raw=true" width="400">
+
 By octopass name resolution, you can check the id of team members of github organization.
 
 ```sh
