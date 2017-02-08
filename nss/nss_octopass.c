@@ -238,6 +238,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   struct curl_slist *headers = NULL;
   res->data                  = malloc(1);
   res->size                  = 0;
+  res->httpstatus            = 0;
 
   headers = curl_slist_append(headers, auth);
 
@@ -258,6 +259,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
+    res->httpstatus = code;
     if (con->syslog) {
       syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", (long)code, (long)res->size);
     }
@@ -283,7 +285,9 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
 
   if (fp == NULL) {
     nss_octopass_github_request_without_cache(con, url, res);
-    nss_octopass_export_file(file, res->data);
+    if (res->httpstatus == (long)200) {
+      nss_octopass_export_file(file, res->data);
+    }
   } else {
     fclose(fp);
 
@@ -293,8 +297,10 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
         nss_octopass_github_request_without_cache(con, url, res);
-        nss_octopass_export_file(file, res->data);
-        return;
+        if (res->httpstatus == (long)200) {
+          nss_octopass_export_file(file, res->data);
+          return;
+        }
       }
     }
 
