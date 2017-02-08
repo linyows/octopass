@@ -23,7 +23,7 @@ but features easy handling and ease of operation.
 Usage
 -----
 
-<img alt="Github Org/Team" src="https://github.com/linyows/octopass/blob/master/misc/github-org-team.png?raw=true" width="400" align="right">
+<img alt="Github Org/Team" src="https://github.com/linyows/octopass/blob/master/misc/github-org-team.png?raw=true" width="500" align="right">
 
 For example, adding "Ken" to a team with github organization ...
 
