@@ -62,26 +62,16 @@ With this, even if Github is down, it will work if past caches remain.
 ### Architecture
 
 ```
-+--------------------------+
-| +-------+   +----------+ |
-| | cache +---+ Octopass | +---+
-| +-------+   +----------+ |   |
-+--------------------------+   |
-      Linux Server A           |
-                               |   +--------------------------+
-+--------------------------+   |   | Github API               |
-| +-------+   +----------+ |   +---+ * NSS:  org/team members |
-| | cache +---+ Octopass | +-------+ * SSHD: user public keys |
-| +-------+   +----------+ |   +---+ * PAM:  basic auth       |
-+--------------------------+   |   |                          |
-      Linux Server B           |   +--------------------------+
-                               |
-+--------------------------+   |
-| +-------+   +----------+ |   |
-| | cache +---+ Octopass | +---+
-| +-------+   +----------+ |
-+--------------------------+
-       Linux Server
++------------------------+     +--------------------+     +------------------------+
+|           +----------+ |     |                    |     | +----------+           |
+| +-------+ | Octopass | |     | Github API         |     | | Octopass | +-------+ |
+| |       | |          +-----> |                    | <-----+          | |       | |
+| | cache +-+ * NSS    | |     | * org/team members |     | | * NSS    +-+ cache | |
+| |       | | * SSHD   | <-----+ * user public keys +-----> | * SSHD   | |       | |
+| +-------+ | * PAM    | |     | * basic auth       |     | | * PAM    | +-------+ |
+|           +----------+ |     |                    |     | +----------+           |
++------------------------+     +--------------------+     +------------------------+
+       Linux Server                                              Linux Server
 ```
 
 
@@ -89,6 +79,26 @@ Installation
 ------------
 
 Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
+
+:cry: Package now has only RPM, so I am glad if someone will help me.
+
+### Building from Source
+
+Dependency
+
+- glibc
+- libcurl
+- jansson
+
+```
+$ wget https://github.com/linyows/octopass/releases/download/v0.1.0/linux_amd64.zip
+$ unzip linux_amd64.zip
+$ mv octopass /usr/bin/
+$ git clone https://github.com/linyows/octopass
+$ cd nss
+$ make && make install
+$ mv octopass.conf.example /etc/octopass.conf
+```
 
 Configuration
 -------------
@@ -116,24 +126,6 @@ MembershipCheck | check membership in auth     | false
 
 Generate token from here: https://github.com/settings/tokens/new.
 Need: Read org and team membership
-
-### Building from Source
-
-Dependency
-
-- glibc
-- libcurl
-- jansson
-
-```
-$ wget https://github.com/linyows/octopass/releases/download/v0.1.0/linux_amd64.zip
-$ unzip linux_amd64.zip
-$ mv octopass /usr/bin/
-$ git clone https://github.com/linyows/octopass
-$ cd nss
-$ make && make install
-$ mv octopass.conf.example /etc/octopass.conf
-```
 
 ### SSHD Configuration
 
