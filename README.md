@@ -23,9 +23,13 @@ but features easy handling and ease of operation.
 Usage
 -----
 
-Adding members of organization/team of github...
+For example, adding Ken to a team with github organization ...
 
-<img alt="Github Org/Team" src="https://github.com/linyows/octopass/blob/master/misc/github-org-team.png?raw=true" width="400">
+Octopass is a valid linux server, Ken will be able to ssh login with the key registered in github.
+
+<img alt="Github Org/Team" src="https://github.com/linyows/octopass/blob/master/misc/github-org-team.png?raw=true" width="500" align="right">
+
+- - -
 
 By octopass name resolution, you can check the id of team members of github organization.
 
