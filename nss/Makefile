@@ -120,4 +120,15 @@ dist:
 	gzip -9 octopass-$(VERSION).tar
 	rm -rf octopass-$(VERSION)
 
+dist_debian:
+	test -f $(BUILD)/go-octopass.zip || curl -sL https://github.com/linyows/octopass/releases/download/v$(VERSION)/linux_amd64.zip -o $(BUILD)/go-octopass.zip
+	unzip $(BUILD)/go-octopass.zip
+	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).orig.tar.xz
+	mkdir octopass-$(VERSION)
+	cp $(SOURCES) octopass octopass-$(VERSION)
+	tar cvf octopass-$(VERSION).tar octopass-$(VERSION)
+	xz -v octopass-$(VERSION).tar
+	mv octopass-$(VERSION).tar.xz octopass-$(VERSION).orig.tar.xz
+	rm -rf octopass-$(VERSION)
+
 .PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
