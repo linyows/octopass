@@ -115,7 +115,7 @@ Test(nss_octopass, config_loading)
   char *f = "octopass.conf.example";
   nss_octopass_config_loading(&con, f);
 
-  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
+  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3");
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.organization, "yourorganization");
   cr_assert_str_eq(con.team, "yourteam");
