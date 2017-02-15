@@ -44,7 +44,7 @@
 struct response {
   char *data;
   size_t size;
-  long httpstatus;
+  long *httpstatus;
 };
 
 struct config {
