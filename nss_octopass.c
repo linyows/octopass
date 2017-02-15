@@ -238,7 +238,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   struct curl_slist *headers = NULL;
   res->data                  = malloc(1);
   res->size                  = 0;
-  res->httpstatus            = (long)0;
+  res->httpstatus            = (long *)0;
 
   headers = curl_slist_append(headers, auth);
 

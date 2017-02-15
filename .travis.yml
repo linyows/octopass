@@ -15,6 +15,6 @@ addons:
       - git
       - bzip2
 script:
-  - make test && make clean
+  - make test
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
