@@ -2,6 +2,7 @@ language: c
 compiler:
   - gcc
   - clang
+sudo: true
 addons:
   apt:
     packages:
@@ -15,6 +16,6 @@ addons:
       - git
       - bzip2
 script:
-  - make test
+  - sudo make test
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
