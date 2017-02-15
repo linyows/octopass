@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Management linux user and authentication by the organization/team on Github.
+  Management linux user and authentication with the organization/team on Github.
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 Description
 -----------
 
-This is linux user management tool by the organization/team on github, and authentication.
+This is linux user management tool with the organization/team on github, and authentication.
 Depending on github for user management, there are certain risks,
 but features easy handling and ease of operation.
 

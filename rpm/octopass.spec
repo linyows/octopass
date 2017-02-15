@@ -1,4 +1,4 @@
-Summary:          Management linux user and authentication by therganization/teamn Github.
+Summary:          Management linux user and authentication with the organization/team on Github.
 Name:             octopass
 Version:          0.1.0
 Release:          1
@@ -16,7 +16,7 @@ BuildArch:        i386, x86_64
 %define debug_package %{nil}
 
 %description
-This is linux user management tool by the organization/team on github, and authentication.
+This is linux user management tool with the organization/team on github, and authentication.
 Depending on github for user management, there are certain risks,
 but features easy handling and ease of operation.
 
