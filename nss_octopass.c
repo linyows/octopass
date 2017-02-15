@@ -259,7 +259,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
-    res->httpstatus = *(code);
+    res->httpstatus = code;
     if (con->syslog) {
       syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", (long)code, (long)res->size);
     }
@@ -281,11 +281,12 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   char *file = f;
   sprintf(f, "%s/%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
 
-  FILE *fp = fopen(file, "r");
+  FILE *fp      = fopen(file, "r");
+  long *ok_code = (long *)200;
 
   if (fp == NULL) {
     nss_octopass_github_request_without_cache(con, url, res);
-    if (res->httpstatus == (long)200) {
+    if (res->httpstatus == ok_code) {
       nss_octopass_export_file(file, res->data);
     }
   } else {
@@ -297,7 +298,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
         nss_octopass_github_request_without_cache(con, url, res);
-        if (res->httpstatus == (long)200) {
+        if (res->httpstatus == ok_code) {
           nss_octopass_export_file(file, res->data);
           return;
         }
