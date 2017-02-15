@@ -17,8 +17,8 @@ addons:
       - git
       - bzip2
 script:
-  - pushd cli && make cover; popd
-  - pushd nss && sudo make test; popd
+  - pushd cli && make cover && popd
+  - pushd nss && sudo make test && popd
 after_script:
   - goveralls -coverprofile=coverage.out
 notifications:
