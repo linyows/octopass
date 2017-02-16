@@ -138,7 +138,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     nss_octopass_remove_quotes(value);
 
     if (strcmp(key, "Endpoint") == 0) {
-      memcpy(con->endpoint, value, strlen(value));
+      const char *url = octopass_url_normalization(value);
+      memcpy(con->endpoint, url, strlen(url));
     } else if (strcmp(key, "Token") == 0) {
       memcpy(con->token, value, strlen(value));
     } else if (strcmp(key, "Organization") == 0) {
