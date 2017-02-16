@@ -58,6 +58,21 @@ const char *nss_octopass_masking(const char *token)
   return mask;
 }
 
+const char *octopass_url_normalization(char *url)
+{
+  char *slash;
+  slash = strrchr(url, (int)'/');
+
+  if (slash != NULL && strcmp(slash, "/") != 0) {
+    char tmp[MAXBUF];
+    sprintf(tmp, "%s/", url);
+    char *res = strdup(tmp);
+    return res;
+  }
+
+  return url;
+}
+
 void nss_octopass_override_config_by_env(struct config *con)
 {
   char *token = getenv("OCTOPASS_TOKEN");
