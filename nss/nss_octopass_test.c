@@ -114,12 +114,12 @@ Test(nss_octopass, override_config_by_env)
   cr_assert_str_empty(con.team);
 
   putenv("OCTOPASS_TOKEN=secret-token");
-  putenv("OCTOPASS_ENDPOINT=https://api.github.com");
+  putenv("OCTOPASS_ENDPOINT=https://api.github.com/");
   putenv("OCTOPASS_ORGANIZATION=octopass");
   putenv("OCTOPASS_TEAM=operation");
   nss_octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
-  cr_assert_str_eq(con.endpoint, "https://api.github.com");
+  cr_assert_str_eq(con.endpoint, "https://api.github.com/");
   cr_assert_str_eq(con.organization, "octopass");
   cr_assert_str_eq(con.team, "operation");
 
@@ -134,7 +134,7 @@ Test(nss_octopass, config_loading)
   char *f = "octopass.conf.example";
   nss_octopass_config_loading(&con, f);
 
-  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3");
+  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.organization, "yourorganization");
   cr_assert_str_eq(con.team, "yourteam");

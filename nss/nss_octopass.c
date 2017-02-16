@@ -171,7 +171,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   nss_octopass_override_config_by_env(con);
 
   if (strlen(con->endpoint) == 0) {
-    char *endpoint = "https://api.github.com";
+    char *endpoint = "https://api.github.com/";
     memcpy(con->endpoint, endpoint, strlen(endpoint));
   }
 
@@ -386,7 +386,7 @@ json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
 int nss_octopass_team_id(struct config *con)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%s/orgs/%s/teams", con->endpoint, con->organization);
+  sprintf(url, "%sorgs/%s/teams", con->endpoint, con->organization);
 
   struct response res;
   nss_octopass_github_request(con, url, &res);
@@ -405,7 +405,7 @@ int nss_octopass_team_id(struct config *con)
 int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%s/teams/%d/members", con->endpoint, team_id);
+  sprintf(url, "%steams/%d/members", con->endpoint, team_id);
 
   nss_octopass_github_request(con, url, res);
 
