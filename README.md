@@ -9,8 +9,7 @@
 <p align="center">
   <a href="https://travis-ci.org/linyows/octopass" title="travis"><img src="https://img.shields.io/travis/linyows/octopass.svg?style=flat-square"></a>
   <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square"></a>
-  <a href="https://github.com/linyows/octopass/blob/master/LICENSE" title="MIT License"><img src="http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
-  <a href="http://godoc.org/github.com/linyows/octopass" title="Go Documentation"><img src="http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square"></a>
+  <a href="https://github.com/linyows/octopass/blob/master/LICENSE" title="MIT License"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square"></a>
 </p>
 
 Description
