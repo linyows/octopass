@@ -82,7 +82,8 @@ void nss_octopass_override_config_by_env(struct config *con)
 
   char *endpoint = getenv("OCTOPASS_ENDPOINT");
   if (endpoint) {
-    sprintf(con->endpoint, "%s", endpoint);
+    const char *url = octopass_url_normalization(endpoint);
+    sprintf(con->endpoint, "%s", url);
   }
 
   char *org = getenv("OCTOPASS_ORGANIZATION");
