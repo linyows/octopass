@@ -58,6 +58,21 @@ const char *nss_octopass_masking(const char *token)
   return mask;
 }
 
+const char *octopass_url_normalization(char *url)
+{
+  char *slash;
+  slash = strrchr(url, (int)'/');
+
+  if (slash != NULL && strcmp(slash, "/") != 0) {
+    char tmp[MAXBUF];
+    sprintf(tmp, "%s/", url);
+    char *res = strdup(tmp);
+    return res;
+  }
+
+  return url;
+}
+
 void nss_octopass_override_config_by_env(struct config *con)
 {
   char *token = getenv("OCTOPASS_TOKEN");
@@ -67,7 +82,8 @@ void nss_octopass_override_config_by_env(struct config *con)
 
   char *endpoint = getenv("OCTOPASS_ENDPOINT");
   if (endpoint) {
-    sprintf(con->endpoint, "%s", endpoint);
+    const char *url = octopass_url_normalization(endpoint);
+    sprintf(con->endpoint, "%s", url);
   }
 
   char *org = getenv("OCTOPASS_ORGANIZATION");
@@ -123,7 +139,8 @@ void nss_octopass_config_loading(struct config *con, char *filename)
     nss_octopass_remove_quotes(value);
 
     if (strcmp(key, "Endpoint") == 0) {
-      memcpy(con->endpoint, value, strlen(value));
+      const char *url = octopass_url_normalization(value);
+      memcpy(con->endpoint, url, strlen(url));
     } else if (strcmp(key, "Token") == 0) {
       memcpy(con->token, value, strlen(value));
     } else if (strcmp(key, "Organization") == 0) {
@@ -156,7 +173,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   nss_octopass_override_config_by_env(con);
 
   if (strlen(con->endpoint) == 0) {
-    char *endpoint = "https://api.github.com";
+    char *endpoint = "https://api.github.com/";
     memcpy(con->endpoint, endpoint, strlen(endpoint));
   }
 
@@ -371,7 +388,7 @@ json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
 int nss_octopass_team_id(struct config *con)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%s/orgs/%s/teams", con->endpoint, con->organization);
+  sprintf(url, "%sorgs/%s/teams", con->endpoint, con->organization);
 
   struct response res;
   nss_octopass_github_request(con, url, &res);
@@ -390,7 +407,7 @@ int nss_octopass_team_id(struct config *con)
 int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%s/teams/%d/members", con->endpoint, team_id);
+  sprintf(url, "%steams/%d/members", con->endpoint, team_id);
 
   nss_octopass_github_request(con, url, res);
 

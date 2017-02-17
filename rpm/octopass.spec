@@ -32,7 +32,7 @@ unzip %{SOURCE1}
 mkdir -p %{buildroot}/usr/{lib64,bin}
 mkdir -p %{buildroot}%{_sysconfdir}
 make PREFIX=%{buildroot}/usr install
-install -d -m 755 %{_var}/cache/octopass
+install -d -m 755 %{buildroot}/var/cache/octopass
 install -m 755 octopass %{buildroot}/usr/bin/octopass
 install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.example
 
@@ -52,6 +52,7 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /usr/lib64/libnss_octopass.so.2.0
 /usr/bin/nss-octopass
 /usr/bin/octopass
+/var/cache/octopass
 /etc/octopass.conf.example
 
 %changelog

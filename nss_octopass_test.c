@@ -83,6 +83,25 @@ Test(nss_octopass, masking)
   cr_assert_str_eq(mask2, "----- ************ REDACTED ************");
 }
 
+Test(nss_octopass, url_normalization)
+{
+  char *base_url1  = "https://foo.com/api/v3";
+  const char *url1 = octopass_url_normalization(base_url1);
+  cr_assert_str_eq(url1, "https://foo.com/api/v3/");
+
+  char *base_url2  = "https://foo.com/api/v3/";
+  const char *url2 = octopass_url_normalization(base_url2);
+  cr_assert_str_eq(url2, "https://foo.com/api/v3/");
+
+  char *base_url3  = "https://api.github.com";
+  const char *url3 = octopass_url_normalization(base_url3);
+  cr_assert_str_eq(url3, "https://api.github.com/");
+
+  char *base_url4  = "https://api.github.com/";
+  const char *url4 = octopass_url_normalization(base_url4);
+  cr_assert_str_eq(url4, "https://api.github.com/");
+}
+
 Test(nss_octopass, override_config_by_env)
 {
   clearenv();
@@ -95,12 +114,12 @@ Test(nss_octopass, override_config_by_env)
   cr_assert_str_empty(con.team);
 
   putenv("OCTOPASS_TOKEN=secret-token");
-  putenv("OCTOPASS_ENDPOINT=https://api.github.com");
+  putenv("OCTOPASS_ENDPOINT=https://api.github.com/");
   putenv("OCTOPASS_ORGANIZATION=octopass");
   putenv("OCTOPASS_TEAM=operation");
   nss_octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
-  cr_assert_str_eq(con.endpoint, "https://api.github.com");
+  cr_assert_str_eq(con.endpoint, "https://api.github.com/");
   cr_assert_str_eq(con.organization, "octopass");
   cr_assert_str_eq(con.team, "operation");
 
