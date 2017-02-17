@@ -262,7 +262,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, NSS_OCTOPASS_VERSION_WITH_NAME);
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, OCTOPASS_VERSION_WITH_NAME);
   curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 3L);
   curl_easy_setopt(hnd, CURLOPT_TIMEOUT, 15L);

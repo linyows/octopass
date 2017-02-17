@@ -6,7 +6,7 @@ LINKS=libnss_octopass.so.2 libnss_octopass.so
 
 CFLAGS_TEST=-DNSS_OCTOPASS_SCRIPT=\"./nss-octopass\"
 LIBS=-lpthread
-CLI=nss-octopass
+CLI=octopass
 
 PREFIX=/usr
 LIBDIR=$(PREFIX)/lib64

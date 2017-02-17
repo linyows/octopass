@@ -17,8 +17,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define NSS_OCTOPASS_VERSION "0.1.0"
-#define NSS_OCTOPASS_VERSION_WITH_NAME "nss-octopass/" NSS_OCTOPASS_VERSION
+#define OCTOPASS_VERSION "0.1.0"
+#define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef NSS_OCTOPASS_CONFIG_FILE
 #define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #endif
