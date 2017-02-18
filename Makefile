@@ -65,14 +65,14 @@ depsdev: build_dir cache_dir
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
-test_without_depsdev:
+testdev:
 	$(CC) nss_octopass_test.c \
 		nss_octopass-passwd_test.c \
 		nss_octopass-group_test.c \
 		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
 
-test: depsdev test_without_depsdev
+test: depsdev testdev
 
 nss_octopass-passwd_cli:
 	$(CC) $(CFLAGS) -c nss_octopass-passwd_cli.c -o $(BUILD)/nss_octopass-passwd_cli.o
@@ -131,4 +131,4 @@ dist_debian:
 	mv octopass-$(VERSION).tar.xz octopass-$(VERSION).orig.tar.xz
 	rm -rf octopass-$(VERSION)
 
-.PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test test_without_depsdev
+.PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test testdev
