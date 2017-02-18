@@ -241,14 +241,17 @@ const char *nss_octopass_import_file(char *file)
   return res;
 }
 
-void nss_octopass_github_request_without_cache(struct config *con, char *url, struct response *res)
+void nss_octopass_github_request_without_cache(struct config *con, char *url, struct response *res, char *token)
 {
   if (con->syslog) {
     syslog(LOG_INFO, "http get -- %s", url);
   }
 
   char auth[64];
-  sprintf(auth, "Authorization: token %s", con->token);
+  if (token == NULL) {
+    token = con->token;
+  }
+  sprintf(auth, "Authorization: token %s", token);
 
   CURL *hnd;
   CURLcode result;
@@ -288,8 +291,9 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
 
 void nss_octopass_github_request(struct config *con, char *url, struct response *res)
 {
+  char *token = NULL;
   if (con->cache == 0) {
-    nss_octopass_github_request_without_cache(con, url, res);
+    nss_octopass_github_request_without_cache(con, url, res, token);
     return;
   }
 
@@ -302,7 +306,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   long *ok_code = (long *)200;
 
   if (fp == NULL) {
-    nss_octopass_github_request_without_cache(con, url, res);
+    nss_octopass_github_request_without_cache(con, url, res, token);
     if (res->httpstatus == ok_code) {
       nss_octopass_export_file(file, res->data);
     }
@@ -314,7 +318,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
       unsigned long now  = time(NULL);
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
-        nss_octopass_github_request_without_cache(con, url, res);
+        nss_octopass_github_request_without_cache(con, url, res, token);
         if (res->httpstatus == ok_code) {
           nss_octopass_export_file(file, res->data);
           return;
