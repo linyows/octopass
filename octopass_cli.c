@@ -18,24 +18,28 @@ extern void call_splist(void);
 
 void help(void)
 {
+  printf(ANSI_COLOR_GREEN " _  ____ _ __    _____" ANSI_COLOR_RESET "\n");
+  printf(ANSI_COLOR_GREEN "/ \\/  | / \\|_)/\\(__(__" ANSI_COLOR_RESET "\n");
+  printf(ANSI_COLOR_GREEN "\\_/\\_ | \\_/| /--\\__)__)" ANSI_COLOR_RESET "\n");
+  printf("\n");
   printf("Usage: octopass [options] [CMD]\n");
   printf("\n");
   printf("Commands:\n");
-  printf("  [USER]               get public keys from github\n");
-  printf("  pam [user]           receive the password from stdin and return the auth result with the exit status)\n");
-  printf("  getent passwd [key]  displays passwd entries as octopass nss module\n");
-  printf("  getent shadow [key]  displays shadow passwd entries as octopass nss module\n");
-  printf("  getent group [key]   displays group entries as octopass nss module\n");
+  printf("  [USER]         get public keys from github\n");
+  printf("  pam [user]     receive the password from stdin and return the auth result with the exit status\n");
+  printf("  passwd [key]   displays passwd entries as octopass nss module\n");
+  printf("  shadow [key]   displays shadow passwd entries as octopass nss module\n");
+  printf("  group [key]    displays group entries as octopass nss module\n");
   printf("\n");
   printf("Options:\n");
-  printf("  -h, --help           show this help message and exit\n");
-  printf("  -v, --version        print the version and exit\n");
+  printf("  -h, --help     show this help message and exit\n");
+  printf("  -v, --version  print the version and exit\n");
   printf("\n");
 }
 
 int main(int argc, char **argv)
 {
-  if (argc < 1 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+  if (argc < 2 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
     help();
     return 2;
   }
@@ -45,6 +49,7 @@ int main(int argc, char **argv)
     return 0;
   }
 
+  // PASSWD
   if (strcmp(argv[1], "passwd") == 0) {
     if (argc < 3) {
       call_pwlist();
@@ -60,6 +65,7 @@ int main(int argc, char **argv)
     return 0;
   }
 
+  // GROUP
   if (strcmp(argv[1], "group") == 0) {
     if (argc < 3) {
       call_grlist();
@@ -75,13 +81,14 @@ int main(int argc, char **argv)
     return 0;
   }
 
+  // SHADOW
   if (strcmp(argv[1], "shadow") == 0) {
     if (argc < 3) {
       call_splist();
     } else {
       long id = atol(argv[2]);
       if (id > 0) {
-        fprintf(stderr, ANSI_COLOR_RED "[Error]" ANSI_COLOR_RESET " Invalid arguments: %s\n", argv[2]);
+        fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Invalid arguments: %s\n", argv[2]);
       } else {
         call_getspnam_r((char *)argv[2]);
       }
@@ -89,10 +96,38 @@ int main(int argc, char **argv)
     return 0;
   }
 
+  // PAM
   if (strcmp(argv[1], "pam") == 0) {
-    return 0;
+    char token[40 + 1];
+    fgets(token, sizeof(token), stdin);
+    if (token == NULL) {
+      fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Token is required\n");
+      return 2;
+    }
+
+    char *user;
+    if (argc < 3) {
+      user = getenv("PAM_USER");
+      if (user == NULL) {
+        fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "User is required\n");
+        return 2;
+      }
+    } else {
+      user = argv[2];
+    }
+
+    struct config con;
+    nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+    return octopass_autentication_with_token(&con, user, token);
   }
 
-  fprintf(stderr, ANSI_COLOR_RED "[Error]" ANSI_COLOR_RESET " Invalid command: %s\n", argv[1]);
+  // PUBLIC KEYS
+  struct config con;
+  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  const char *keys = octopass_github_user_keys(&con, (char *)argv[1]);
+  if (keys != NULL) {
+    printf("%s", keys);
+  }
+
   return 0;
 }
