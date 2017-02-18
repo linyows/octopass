@@ -440,3 +440,74 @@ int nss_octopass_team_members(struct config *con, struct response *res)
 
   return 0;
 }
+
+// OK: 0
+// NG: 1
+int octopass_autentication_with_token(struct config *con, char *user, char *token)
+{
+  struct response res;
+  char url[strlen(con->endpoint) + strlen("user") + 1];
+  sprintf(url, "%suser", con->endpoint);
+  nss_octopass_github_request_without_cache(con, url, &res, token);
+
+  long *ok_code = (long *)200;
+  if (res.httpstatus == ok_code) {
+    json_t *root;
+    json_error_t error;
+    root              = json_loads(res.data, 0, &error);
+    const char *login = json_string_value(json_object_get(root, "login"));
+
+    if (strcmp(login, user) == 0) {
+      json_decref(root);
+      return 0;
+    }
+
+    json_decref(root);
+  }
+
+  if (con->syslog) {
+    closelog();
+  }
+  return 1;
+}
+
+const char *octopass_only_keys(char *data)
+{
+  json_t *root;
+  json_error_t error;
+  root = json_loads(data, 0, &error);
+
+  char *keys = malloc(NSS_OCTOPASS_MAX_BUFFER_SIZE);
+
+  size_t i;
+  for (i = 0; i < json_array_size(root); i++) {
+    json_t *obj     = json_array_get(root, i);
+    const char *key = json_string_value(json_object_get(obj, "key"));
+    strcat(keys, strdup(key));
+    strcat(keys, "\n");
+  }
+
+  const char *res = strdup(keys);
+  free(keys);
+  json_decref(root);
+
+  return res;
+}
+
+const char *octopass_github_user_keys(struct config *con, char *user)
+{
+  struct response res;
+  char url[strlen(con->endpoint) + strlen(user) + 64];
+  sprintf(url, "%susers/%s/keys?per_page=100", con->endpoint, user);
+  nss_octopass_github_request(con, url, &res);
+
+  if (!res.data) {
+    fprintf(stderr, "Request failure\n");
+    if (con->syslog) {
+      closelog();
+    }
+    return NULL;
+  }
+
+  return octopass_only_keys(res.data);
+}
