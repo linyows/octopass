@@ -1,6 +1,5 @@
 # This shared library is only for NSS.
 libnss-cache binary: package-name-doesnt-match-sonames libnss-cache2
 
-octopass: arch-dependent-file-not-in-arch-specific-directory usr/bin/nss-octopass
 octopass: arch-dependent-file-not-in-arch-specific-directory usr/bin/octopass
 octopass: statically-linked-binary usr/bin/octopass

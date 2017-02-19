@@ -192,7 +192,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   }
 
   if (con->syslog) {
-    const char *pg_name = "nss-octopass";
+    const char *pg_name = "octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
                      "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",

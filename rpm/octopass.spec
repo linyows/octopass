@@ -50,7 +50,6 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /usr/lib64/libnss_octopass.so
 /usr/lib64/libnss_octopass.so.2
 /usr/lib64/libnss_octopass.so.2.0
-/usr/bin/nss-octopass
 /usr/bin/octopass
 /var/cache/octopass
 /etc/octopass.conf.example

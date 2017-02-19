@@ -36,17 +36,17 @@ By octopass name resolution, you can check the id of team members of github orga
 $ id ken
 uid=5458(ken) gid=2000(operators) groups=2000(operators)
 ```
-You can also see a list like `/etc/passwd,shadow,group` by the `nss-octopass`.
+You can also see a list like `/etc/passwd,shadow,group` by the `octopass`.
 For detail `--help`.
 
 ```sh
-$ nss-octopass passwd
-chun-li:x:14301:2000:managed by nss-octopass:/home/chun-li:/bin/bash
-dhalsim:x:8875:2000:managed by nss-octopass:/home/dhalsim:/bin/bash
-ken:x:5458:2000:managed by nss-octopass:/home/ken:/bin/bash
-ryu:x:74049:2000:managed by nss-octopass:/home/ryu:/bin/bash
-sagat:x:93011:2000:managed by nss-octopass:/home/sagat:/bin/bash
-zangief:x:8305:2000:managed by nss-octopass:/home/zangief:/bin/bash
+$ octopass passwd
+chun-li:x:14301:2000:managed by octopass:/home/chun-li:/bin/bash
+dhalsim:x:8875:2000:managed by octopass:/home/dhalsim:/bin/bash
+ken:x:5458:2000:managed by octopass:/home/ken:/bin/bash
+ryu:x:74049:2000:managed by octopass:/home/ryu:/bin/bash
+sagat:x:93011:2000:managed by octopass:/home/sagat:/bin/bash
+zangief:x:8305:2000:managed by octopass:/home/zangief:/bin/bash
 ```
 
 And octopass gets the public key from github for key authentication.

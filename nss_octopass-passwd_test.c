@@ -21,7 +21,7 @@ Test(nss_octopass, getpwnam_r, .init = setup)
   cr_assert_str_eq(pwent.pw_passwd, "x");
   cr_assert_eq(pwent.pw_uid, 74049);
   cr_assert_eq(pwent.pw_gid, 2000);
-  cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+  cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
   cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
   cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
 }
@@ -75,7 +75,7 @@ Test(nss_octopass, pwent_list, .init = setup)
     cr_assert_str_eq(pwent.pw_passwd, "x");
     cr_assert_eq(pwent.pw_uid, 74049);
     cr_assert_eq(pwent.pw_gid, 2000);
-    cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+    cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
     cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
     cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
   }
@@ -169,7 +169,7 @@ Test(nss_octopass, getpwuid_r, .init = setup)
   cr_assert_str_eq(pwent.pw_passwd, "x");
   cr_assert_eq(pwent.pw_uid, 74049);
   cr_assert_eq(pwent.pw_gid, 2000);
-  cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+  cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
   cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
   cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
 }
