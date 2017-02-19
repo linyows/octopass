@@ -55,5 +55,7 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /etc/octopass.conf.example
 
 %changelog
-* Fri Feb 3 2017 linyows <linyows@gmail.com> - 1:0.1.0-1
-- hello world!
+* Sun Feb 19 2017 linyows <linyows@gmail.com> - 0.2.0-1
+- Change implementation in Go to C
+* Fri Feb 03 2017 linyows <linyows@gmail.com> - 0.1.0-1
+- Initial packaging
