@@ -47,11 +47,11 @@ enum nss_status _nss_octopass_setgrent_locked(int stayopen)
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -141,7 +141,7 @@ enum nss_status _nss_octopass_getgrent_r_locked(struct group *result, char *buff
   }
 
   struct config con;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d]", __func__, __LINE__);
   }
@@ -191,7 +191,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- gid: %d", __func__, __LINE__, gid);
   }
@@ -204,7 +204,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
     return NSS_STATUS_NOTFOUND;
   }
 
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -275,7 +275,7 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
@@ -288,7 +288,7 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
     return NSS_STATUS_NOTFOUND;
   }
 
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);

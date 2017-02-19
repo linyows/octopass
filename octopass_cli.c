@@ -117,13 +117,13 @@ int main(int argc, char **argv)
     }
 
     struct config con;
-    nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+    octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
     return octopass_autentication_with_token(&con, user, token);
   }
 
   // PUBLIC KEYS
   struct config con;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   const char *keys = octopass_github_user_keys(&con, (char *)argv[1]);
   if (keys != NULL) {
     printf("%s", keys);

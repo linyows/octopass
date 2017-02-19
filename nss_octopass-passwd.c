@@ -54,11 +54,11 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -152,7 +152,7 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   }
 
   struct config con;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d]", __func__, __LINE__);
   }
@@ -204,11 +204,11 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- uid: %d", __func__, __LINE__, uid);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -231,7 +231,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   int gh_id = uid - con.uid_starts;
 
-  json_t *data = nss_octopass_github_team_member_by_id(gh_id, root);
+  json_t *data = octopass_github_team_member_by_id(gh_id, root);
 
   if (json_object_size(data) == 0) {
     json_decref(root);
@@ -287,11 +287,11 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -312,7 +312,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
     return NSS_STATUS_UNAVAIL;
   }
 
-  json_t *data = nss_octopass_github_team_member_by_name((char *)name, root);
+  json_t *data = octopass_github_team_member_by_name((char *)name, root);
 
   if (!data) {
     json_decref(root);

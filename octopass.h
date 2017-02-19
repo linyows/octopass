@@ -58,10 +58,10 @@ struct config {
   bool syslog;
 };
 
-extern int nss_octopass_team_members(struct config *con, struct response *res);
-extern void nss_octopass_config_loading(struct config *con, char *filename);
-extern json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root);
-extern json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root);
+extern int octopass_team_members(struct config *con, struct response *res);
+extern void octopass_config_loading(struct config *con, char *filename);
+extern json_t *octopass_github_team_member_by_name(char *name, json_t *root);
+extern json_t *octopass_github_team_member_by_id(int gh_id, json_t *root);
 int octopass_autentication_with_token(struct config *con, char *user, char *token);
 extern char *express_github_user_keys(struct config *con, char *user);
 
