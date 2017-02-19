@@ -8,7 +8,7 @@ RUN sed -i "s;%_build_name_fmt.*;%_build_name_fmt\t%%{ARCH}/%%{NAME}-%%{VERSION}
 
 RUN mkdir /octopass
 ADD . /octopass
-WORKDIR /octopass/nss
+WORKDIR /octopass
 
 CMD make dist && mv octopass-*.tar.gz /root/rpmbuild/SOURCES && \
     spectool -g -R ../rpm/octopass.spec && rpmbuild -ba ../rpm/octopass.spec && \
