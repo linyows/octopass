@@ -10,6 +10,6 @@ RUN mkdir /octopass
 ADD . /octopass
 WORKDIR /octopass/nss
 
-CMD make dist && mv octopass-0.1.0.tar.gz /root/rpmbuild/SOURCES && \
+CMD make dist && mv octopass-*.tar.gz /root/rpmbuild/SOURCES && \
     spectool -g -R ../rpm/octopass.spec && rpmbuild -ba ../rpm/octopass.spec && \
     cp /root/rpmbuild/RPMS/*/*.rpm /builds
