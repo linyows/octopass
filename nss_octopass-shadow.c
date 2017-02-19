@@ -1,8 +1,8 @@
-#include "nss_octopass.h"
+#include "octopass.h"
 
-static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
-static json_t *ent_json_root              = NULL;
-static int ent_json_idx                   = 0;
+static pthread_mutex_t OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
+static json_t *ent_json_root          = NULL;
+static int ent_json_idx               = 0;
 
 static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, size_t buflen)
 {
@@ -47,7 +47,7 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stayopen);
   }
@@ -90,9 +90,9 @@ enum nss_status _nss_octopass_setspent(int stayopen)
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_setspent_locked(stayopen);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -116,9 +116,9 @@ enum nss_status _nss_octopass_endspent(void)
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_endspent_locked();
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -167,9 +167,9 @@ enum nss_status _nss_octopass_getspent_r(struct spwd *result, char *buffer, size
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_getspent_r_locked(result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -182,7 +182,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
@@ -252,9 +252,9 @@ enum nss_status _nss_octopass_getspnam_r(const char *name, struct spwd *result, 
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_getspnam_r_locked(name, result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }

@@ -1,5 +1,5 @@
-#ifndef NSS_OCTOPASS_H
-#define NSS_OCTOPASS_H
+#ifndef OCTOPASS_H
+#define OCTOPASS_H
 
 #include <curl/curl.h>
 #include <errno.h>
@@ -19,24 +19,21 @@
 
 #define OCTOPASS_VERSION "0.1.0"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
-#ifndef NSS_OCTOPASS_CONFIG_FILE
-#define NSS_OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
+#ifndef OCTOPASS_CONFIG_FILE
+#define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #endif
-#define NSS_OCTOPASS_CACHE_DIR "/var/cache/octopass"
-#define NSS_OCTOPASS_LOCK()                                                                                            \
+#define OCTOPASS_CACHE_DIR "/var/cache/octopass"
+#define OCTOPASS_LOCK()                                                                                            \
   do {                                                                                                                 \
-    pthread_mutex_lock(&NSS_OCTOPASS_MUTEX);                                                                           \
+    pthread_mutex_lock(&OCTOPASS_MUTEX);                                                                           \
   } while (0);
-#define NSS_OCTOPASS_UNLOCK()                                                                                          \
+#define OCTOPASS_UNLOCK()                                                                                          \
   do {                                                                                                                 \
-    pthread_mutex_unlock(&NSS_OCTOPASS_MUTEX);                                                                         \
+    pthread_mutex_unlock(&OCTOPASS_MUTEX);                                                                         \
   } while (0);
-#ifndef NSS_OCTOPASS_SCRIPT
-#define NSS_OCTOPASS_SCRIPT "/sbin/nss-octopass"
-#endif
 
 // 10MB
-#define NSS_OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
+#define OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
 #define MAXBUF 1024
 #define DELIM " = "
@@ -68,4 +65,4 @@ extern json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root);
 int octopass_autentication_with_token(struct config *con, char *user, char *token);
 extern char *express_github_user_keys(struct config *con, char *user);
 
-#endif /* NSS_OCTOPASS_H */
+#endif /* OCTOPASS_H */

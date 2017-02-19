@@ -1,6 +1,6 @@
-#define NSS_OCTOPASS_CONFIG_FILE "octopass.conf.example"
+#define OCTOPASS_CONFIG_FILE "octopass.conf.example"
 #include <criterion/criterion.h>
-#include "nss_octopass.c"
+#include "octopass.c"
 
 void setup(void)
 {

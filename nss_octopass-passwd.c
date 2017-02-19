@@ -1,8 +1,8 @@
-#include "nss_octopass.h"
+#include "octopass.h"
 
-static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
-static json_t *ent_json_root              = NULL;
-static int ent_json_idx                   = 0;
+static pthread_mutex_t OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
+static json_t *ent_json_root          = NULL;
+static int ent_json_idx               = 0;
 
 static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer, size_t buflen, struct config *con)
 {
@@ -54,7 +54,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
   }
@@ -100,9 +100,9 @@ enum nss_status _nss_octopass_setpwent(int stayopen)
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_setpwent_locked(stayopen);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -126,9 +126,9 @@ enum nss_status _nss_octopass_endpwent(void)
 {
   enum nss_status ret;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   ret = _nss_octopass_endpwent_locked();
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return ret;
 }
@@ -152,7 +152,7 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   }
 
   struct config con;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d]", __func__, __LINE__);
   }
@@ -188,9 +188,9 @@ enum nss_status _nss_octopass_getpwent_r(struct passwd *result, char *buffer, si
 {
   enum nss_status ret;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   ret = _nss_octopass_getpwent_r_locked(result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return ret;
 }
@@ -204,7 +204,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- uid: %d", __func__, __LINE__, uid);
   }
@@ -272,9 +272,9 @@ enum nss_status _nss_octopass_getpwuid_r(uid_t uid, struct passwd *result, char 
 {
   enum nss_status ret;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   ret = _nss_octopass_getpwuid_r_locked(uid, result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return ret;
 }
@@ -287,7 +287,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  nss_octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
@@ -358,9 +358,9 @@ enum nss_status _nss_octopass_getpwnam_r(const char *name, struct passwd *result
 {
   enum nss_status ret;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   ret = _nss_octopass_getpwnam_r_locked(name, result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return ret;
 }

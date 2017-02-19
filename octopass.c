@@ -1,11 +1,11 @@
-#include "nss_octopass.h"
+#include "octopass.h"
 
 static size_t write_response_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize      = size * nmemb;
   struct response *res = (struct response *)userp;
 
-  if (realsize > NSS_OCTOPASS_MAX_BUFFER_SIZE) {
+  if (realsize > OCTOPASS_MAX_BUFFER_SIZE) {
     fprintf(stderr, "Response is too large\n");
     return 0;
   }
@@ -223,7 +223,7 @@ const char *nss_octopass_import_file(char *file)
   char line[MAXBUF];
   char *data;
 
-  if ((data = malloc(NSS_OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
+  if ((data = malloc(OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
     data[0] = '\0';
   } else {
     fprintf(stderr, "Malloc failed\n");
@@ -300,7 +300,7 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
   char *base = curl_escape(url, strlen(url));
   char f[strlen(base) + strlen(con->token) + 6];
   char *file = f;
-  sprintf(f, "%s/%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
+  sprintf(f, "%s/%s-%s", OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
 
   FILE *fp      = fopen(file, "r");
   long *ok_code = (long *)200;
@@ -477,7 +477,7 @@ const char *octopass_only_keys(char *data)
   json_error_t error;
   root = json_loads(data, 0, &error);
 
-  char *keys = malloc(NSS_OCTOPASS_MAX_BUFFER_SIZE);
+  char *keys = malloc(OCTOPASS_MAX_BUFFER_SIZE);
 
   size_t i;
   for (i = 0; i < json_array_size(root); i++) {
