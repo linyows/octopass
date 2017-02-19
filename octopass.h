@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define OCTOPASS_VERSION "0.1.0"
+#define OCTOPASS_VERSION "0.2.0"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef OCTOPASS_CONFIG_FILE
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
