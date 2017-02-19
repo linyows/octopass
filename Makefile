@@ -4,10 +4,6 @@ LD_SONAME=-Wl,-soname,libnss_octopass.so.2
 LIBRARY=libnss_octopass.so.2.0
 LINKS=libnss_octopass.so.2 libnss_octopass.so
 
-CFLAGS_TEST=-DOCTOPASS_SCRIPT=\"./nss-octopass\"
-LIBS=-lpthread
-CLI=octopass
-
 PREFIX=/usr
 LIBDIR=$(PREFIX)/lib64
 ifeq ($(wildcard $(LIBDIR)/.*),)
