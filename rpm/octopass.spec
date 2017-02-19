@@ -1,11 +1,10 @@
 Summary:          Management linux user and authentication with the organization/team on Github.
 Name:             octopass
-Version:          0.1.0
+Version:          0.2.0
 Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
-Source0:          %{name}-%{version}.tar.gz
-Source1:          https://github.com/linyows/octopass/releases/download/v%{version}/linux_amd64.zip#/go-octopass-%{version}.zip#/go-%{name}-%{version}.zip
+Source:           %{name}-%{version}.tar.gz
 Group:            System Environment/Base
 Packager:         linyows <linyows@gmail.com>
 Requires:         glibc libcurl-devel jansson-devel
@@ -25,7 +24,6 @@ but features easy handling and ease of operation.
 
 %build
 make
-unzip %{SOURCE1}
 
 %install
 %{__rm} -rf %{buildroot}
@@ -33,7 +31,6 @@ mkdir -p %{buildroot}/usr/{lib64,bin}
 mkdir -p %{buildroot}%{_sysconfdir}
 make PREFIX=%{buildroot}/usr install
 install -d -m 755 %{buildroot}/var/cache/octopass
-install -m 755 octopass %{buildroot}/usr/bin/octopass
 install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.example
 
 %clean

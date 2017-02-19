@@ -13,8 +13,8 @@ BINDIR=$(PREFIX)/bin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
-SOURCES=Makefile nss_octopass.h nss_octopass*.c version octopass.conf.example COPYING
-VERSION="$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)"
+SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
+VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
 
 default: build
@@ -97,10 +97,16 @@ dist_debian:
 	mv octopass-$(VERSION).tar.xz octopass-$(VERSION).orig.tar.xz
 	rm -rf octopass-$(VERSION)
 
+rpm: dist
+	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
+	spectool -g -R rpm/octopass.spec
+	rpmbuild -ba rpm/octopass.spec
+	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
+
 clean:
 	rm -rf $(TMP)
 
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev
+.PHONY: clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev rpm
