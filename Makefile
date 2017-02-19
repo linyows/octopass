@@ -18,7 +18,7 @@ VERSION=$(shell cat version)
 CRITERION_VERSION=2.3.0
 
 default: build
-build: build_nss_octopass build_octopass_cli
+build: nss_octopass octopass_cli
 
 build_dir:
 	test -d $(BUILD) || mkdir -p $(BUILD)
@@ -37,7 +37,7 @@ depsdev: build_dir cache_dir
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
-build_nss_octopass: build_dir cache_dir
+nss_octopass: build_dir cache_dir
 	$(CC) $(CFLAGS) -c nss_octopass-passwd.c -o $(BUILD)/nss_octopass-passwd.o
 	$(CC) $(CFLAGS) -c nss_octopass-group.c -o $(BUILD)/nss_octopass-group.o
 	$(CC) $(CFLAGS) -c nss_octopass-shadow.c -o $(BUILD)/nss_octopass-shadow.o
@@ -49,7 +49,7 @@ build_nss_octopass: build_dir cache_dir
 		$(BUILD)/nss_octopass-shadow.o \
 		-lcurl -ljansson
 
-build_octopass_cli: build_dir cache_dir
+octopass_cli: build_dir cache_dir
 	$(CC) $(CFLAGS) -c nss_octopass-passwd_cli.c -o $(BUILD)/nss_octopass-passwd_cli.o
 	$(CC) $(CFLAGS) -c nss_octopass-group_cli.c -o $(BUILD)/nss_octopass-group_cli.o
 	$(CC) $(CFLAGS) -c nss_octopass-shadow_cli.c -o $(BUILD)/nss_octopass-shadow_cli.o
@@ -103,4 +103,4 @@ clean:
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install build_dir cache_dir nss_octopass dist distclean deps depsdev test testdev
+.PHONY: clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev
