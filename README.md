@@ -68,19 +68,9 @@ With this, even if Github is down, it will work if past caches remain.
 
 ### Architecture
 
-```
-+------------------------+     +--------------------+     +------------------------+
-|           +----------+ |     |                    |     | +----------+           |
-| +-------+ | Octopass | |     | Github API         |     | | Octopass | +-------+ |
-| |       | |          +-----> |                    | <-----+          | |       | |
-| | cache +-+ * NSS    | |     | * org/team members |     | | * NSS    +-+ cache | |
-| |       | | * SSHD   | <-----+ * user public keys +-----> | * SSHD   | |       | |
-| +-------+ | * PAM    | |     | * basic auth       |     | | * PAM    | +-------+ |
-|           +----------+ |     |                    |     | +----------+           |
-+------------------------+     +--------------------+     +------------------------+
-       Linux Server                                              Linux Server
-```
-
+<p align="center">
+  <img alt="Architecture" src="https://github.com/linyows/octopass/blob/master/misc/architecture.png?raw=true" width="400">
+</p>
 
 Installation
 ------------
@@ -98,11 +88,7 @@ Dependency
 - jansson
 
 ```
-$ wget https://github.com/linyows/octopass/releases/download/v0.1.0/linux_amd64.zip
-$ unzip linux_amd64.zip
-$ mv octopass /usr/bin/
 $ git clone https://github.com/linyows/octopass
-$ cd nss
 $ make && make install
 $ mv octopass.conf.example /etc/octopass.conf
 ```
@@ -129,7 +115,6 @@ UidStarts       | start number of uid          | 2000
 Gid             | gid                          | 2000
 Cache           | github api cache sec         | 500
 Syslog          | use syslog                   | false
-MembershipCheck | check membership in auth     | false
 
 Generate token from here: https://github.com/settings/tokens/new.
 Need: Read org and team membership
