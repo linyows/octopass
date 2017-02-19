@@ -68,7 +68,6 @@ Test(nss_octopass, pwent_list, .init = setup)
     cr_assert_eq(status, NSS_STATUS_SUCCESS);
 
     if (strcmp(pwent.pw_name, "linyows") != 0) {
-      printf("Unknown user: %s(%lu)\n", pwent.pw_name, entry_number);
       continue;
     }
 

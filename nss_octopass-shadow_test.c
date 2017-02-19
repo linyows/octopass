@@ -69,7 +69,6 @@ Test(nss_octopass, spent_list, .init = setup)
     cr_assert_eq(status, NSS_STATUS_SUCCESS);
 
     if (strcmp(spent.sp_namp, "linyows") != 0) {
-      printf("Unknown user: %s(%lu)\n", spent.sp_namp, entry_number);
       continue;
     }
 
