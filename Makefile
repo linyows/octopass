@@ -14,7 +14,7 @@ BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
 SOURCES=Makefile nss_octopass.h nss_octopass*.c version octopass.conf.example COPYING
-VERSION=$(shell cat version)
+VERSION="$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)"
 CRITERION_VERSION=2.3.0
 
 default: build
