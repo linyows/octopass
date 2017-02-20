@@ -106,20 +106,29 @@ dist: ## Distribute as archived source
 	gzip -9 octopass-$(VERSION).tar
 	rm -rf octopass-$(VERSION)
 
-dist_debian:
-	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).orig.tar.xz
-	mkdir octopass-$(VERSION)
-	cp $(SOURCES) octopass octopass-$(VERSION)
-	tar cvf octopass-$(VERSION).tar octopass-$(VERSION)
-	xz -v octopass-$(VERSION).tar
-	mv octopass-$(VERSION).tar.xz octopass-$(VERSION).orig.tar.xz
-	rm -rf octopass-$(VERSION)
-
 rpm: dist
 	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
 	spectool -g -R rpm/octopass.spec
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
+
+dist_debian:
+	rm -rf octopass-$(VERSION) octopass_$(VERSION).tar octopass_$(VERSION).orig.tar.xz
+	mkdir octopass-$(VERSION)
+	cp $(SOURCES) octopass-$(VERSION)
+	tar cf octopass_$(VERSION).tar octopass-$(VERSION)
+	xz -v octopass_$(VERSION).tar
+	mv octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
+	rm -rf octopass-$(VERSION)
+
+deb: dist_debian
+	tar xvf octopass_$(VERSION).orig.tar.xz
+	cd octopass-$(VERSION) && \
+		dh_make --single --createorig -y && \
+		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
+		cp -v /octopass/debian/* debian/ && \
+		debuild -uc -us
+	cp *.deb /octopass/builds
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
