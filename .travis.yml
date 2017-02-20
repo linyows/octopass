@@ -15,7 +15,9 @@ addons:
       - autoconf
       - git
       - bzip2
+      - clang-format-3.4
 script:
   - sudo make test
+  - sudo make format
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr

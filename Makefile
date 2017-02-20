@@ -70,6 +70,12 @@ testdev:
 		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
 
+format:
+	for f in $(ls *.{c,h}); do\
+		clang-format -i $f;\
+	done
+	test -z "$$(git status -s -uno)"
+
 install: install_lib install_cli
 
 install_lib:
