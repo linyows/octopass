@@ -17,6 +17,10 @@ SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example CO
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
 
+INFO_COLOR=\033[1;34m
+RESET=\033[0m
+BOLD=\033[1m
+
 default: build
 build: nss_octopass octopass_cli
 
@@ -27,6 +31,7 @@ cache_dir:
 	test -d $(CACHE) || mkdir -p $(CACHE)
 
 deps:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing Dependencies$(RESET)"
 	git clone --depth=1 https://github.com/vstakhov/libucl.git tmp/libucl
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
@@ -64,6 +69,7 @@ octopass_cli: build_dir cache_dir
 test: depsdev testdev
 
 testdev:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Testing$(RESET)"
 	$(CC) octopass_test.c \
 		nss_octopass-passwd_test.c \
 		nss_octopass-group_test.c \
@@ -71,6 +77,7 @@ testdev:
 		$(BUILD)/test --verbose
 
 format:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Formatting$(RESET)"
 	for f in $(ls *.{c,h}); do\
 		clang-format -i $f;\
 	done
@@ -79,14 +86,17 @@ format:
 install: install_lib install_cli
 
 install_lib:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Libraries$(RESET)"
 	[ -d $(LIBDIR) ] || install -d $(LIBDIR)
 	install $(BUILD)/$(LIBRARY) $(LIBDIR)
 	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done;
 
 install_cli:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Command$(RESET)"
 	cp $(BUILD)/octopass $(BINDIR)/octopass
 
 dist:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).tar.gz
 	mkdir octopass-$(VERSION)
 	cp $(SOURCES) octopass-$(VERSION)
@@ -110,6 +120,7 @@ rpm: dist
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
 clean:
+	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
 	rm -rf $(TMP)
 
 distclean: clean
