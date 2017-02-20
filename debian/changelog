@@ -1,4 +1,9 @@
-octopass (0.1.0-1) unstable; urgency=medium
+octopass (0.2.0-1) xenial; urgency=medium
+
+  * Change implementation in Go to C.
+
+ -- linyows <linyows@gmail.com>  Mon, 20 Feb 2017 23:00:00 +0900
+octopass (0.1.0-1) xenial; urgency=medium
 
   * Initial release.
 

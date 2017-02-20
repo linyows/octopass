@@ -4,9 +4,9 @@ rpm:
   volumes:
     - .:/octopass
   command: make rpm
-
-#deb:
-#  dockerfile: dockerfiles/Dockerfile.ubuntu
-#  build: .
-#  volumes:
-#    - .:/builds
+deb:
+  dockerfile: dockerfiles/Dockerfile.ubuntu
+  build: .
+  volumes:
+    - .:/octopass
+  command: make deb

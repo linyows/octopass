@@ -99,21 +99,14 @@ install_cli: ## Install only cli command
 
 dist: ## Distribute as archived source
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
-	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).tar.gz
-	mkdir octopass-$(VERSION)
-	cp $(SOURCES) octopass-$(VERSION)
-	tar cf octopass-$(VERSION).tar octopass-$(VERSION)
-	gzip -9 octopass-$(VERSION).tar
-	rm -rf octopass-$(VERSION)
-
-dist_debian:
-	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).orig.tar.xz
-	mkdir octopass-$(VERSION)
-	cp $(SOURCES) octopass octopass-$(VERSION)
-	tar cvf octopass-$(VERSION).tar octopass-$(VERSION)
-	xz -v octopass-$(VERSION).tar
-	mv octopass-$(VERSION).tar.xz octopass-$(VERSION).orig.tar.xz
-	rm -rf octopass-$(VERSION)
+	rm -rf tmp.rhel octopass-$(VERSION).tar.gz
+	mkdir -p tmp.rhel/octopass-$(VERSION)
+	cp $(SOURCES) tmp.rhel/octopass-$(VERSION)
+	cd tmp.rhel && \
+		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
+		gzip -9 octopass-$(VERSION).tar
+	mv tmp.rhel/octopass-$(VERSION).tar.gz .
+	rm -rf tmp.rhel
 
 rpm: dist
 	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
@@ -121,12 +114,33 @@ rpm: dist
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
+dist_debian:
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
+	rm -rf tmp.debian octopass_$(VERSION).orig.tar.xz
+	mkdir -p tmp.debian/octopass-$(VERSION)
+	cp $(SOURCES) tmp.debian/octopass-$(VERSION)
+	cd tmp.debian && \
+		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
+		xz -v octopass_$(VERSION).tar
+	mv tmp.debian/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
+	rm -rf tmp.debian
+
+deb: dist_debian
+	tar xvf octopass_$(VERSION).orig.tar.xz
+	cd octopass-$(VERSION) && \
+		dh_make --single --createorig -y && \
+		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
+		cp -v /octopass/debian/* debian/ && \
+		debuild -uc -us
+	cp *.deb /octopass/builds
+	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
+
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
 	rm -rf $(TMP)
 
 distclean: clean
-	rm -f *~ \#*
+	rm -f build/octopass*
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'

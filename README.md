@@ -77,7 +77,10 @@ Installation
 
 Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
 
-:cry: Package now has only RPM, so I am glad if someone will help me.
+Available for:
+
+- CentOS 7.x
+- Ubuntu Xenial
 
 ### Building from Source
 

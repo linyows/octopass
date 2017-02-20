@@ -32,7 +32,6 @@ BINDIR=$(PREFIX)/bin
 override_dh_auto_install:
 	mkdir -p $(LIBDIR) $(BINDIR) $(CONFDIR)
 	dh_auto_install -- LIBDIR=$(LIBDIR) PREFIX=$(PREFIX) BINDIR=$(BINDIR)
-	install -pm 755 octopass $(BINDIR)
 	install -pm 644 octopass.conf.example $(CONFDIR)
 	find $(DESTDIR)
 
