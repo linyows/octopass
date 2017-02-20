@@ -133,13 +133,14 @@ deb: dist_debian
 		cp -v /octopass/debian/* debian/ && \
 		debuild -uc -us
 	cp *.deb /octopass/builds
+	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
 	rm -rf $(TMP)
 
 distclean: clean
-	rm -f *~ \#*
+	rm -f build/octopass*
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
