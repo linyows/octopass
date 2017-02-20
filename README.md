@@ -69,7 +69,7 @@ With this, even if Github is down, it will work if past caches remain.
 ### Architecture
 
 <p align="center">
-  <img alt="Architecture" src="https://github.com/linyows/octopass/blob/master/misc/architecture.png?raw=true" width="400">
+  <img alt="Architecture" src="https://github.com/linyows/octopass/blob/master/misc/architecture.png?raw=true" width="600">
 </p>
 
 Installation
