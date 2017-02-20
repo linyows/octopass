@@ -99,12 +99,14 @@ install_cli: ## Install only cli command
 
 dist: ## Distribute as archived source
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
-	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).tar.gz
-	mkdir octopass-$(VERSION)
-	cp $(SOURCES) octopass-$(VERSION)
-	tar cf octopass-$(VERSION).tar octopass-$(VERSION)
-	gzip -9 octopass-$(VERSION).tar
-	rm -rf octopass-$(VERSION)
+	rm -rf tmp.rhel octopass-$(VERSION).tar.gz
+	mkdir -p tmp.rhel/octopass-$(VERSION)
+	cp $(SOURCES) tmp.rhel/octopass-$(VERSION)
+	cd tmp.rhel && \
+		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
+		gzip -9 octopass-$(VERSION).tar
+	mv tmp.rhel/octopass-$(VERSION).tar.gz .
+	rm -rf tmp.rhel
 
 rpm: dist
 	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
@@ -113,13 +115,15 @@ rpm: dist
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
 dist_debian:
-	rm -rf octopass-$(VERSION) octopass_$(VERSION).tar octopass_$(VERSION).orig.tar.xz
-	mkdir octopass-$(VERSION)
-	cp $(SOURCES) octopass-$(VERSION)
-	tar cf octopass_$(VERSION).tar octopass-$(VERSION)
-	xz -v octopass_$(VERSION).tar
-	mv octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
-	rm -rf octopass-$(VERSION)
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
+	rm -rf tmp.debian octopass_$(VERSION).orig.tar.xz
+	mkdir -p tmp.debian/octopass-$(VERSION)
+	cp $(SOURCES) tmp.debian/octopass-$(VERSION)
+	cd tmp.debian && \
+		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
+		xz -v octopass_$(VERSION).tar
+	mv tmp.debian/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
+	rm -rf tmp.debian
 
 deb: dist_debian
 	tar xvf octopass_$(VERSION).orig.tar.xz
