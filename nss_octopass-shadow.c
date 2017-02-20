@@ -1,8 +1,24 @@
-#include "nss_octopass.h"
+/* Management linux user and authentication with the organization/team on Github.
+   Copyright (C) 2017 Tomohisa Oda
 
-static pthread_mutex_t NSS_OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
-static json_t *ent_json_root              = NULL;
-static int ent_json_idx                   = 0;
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#include "octopass.h"
+
+static pthread_mutex_t OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
+static json_t *ent_json_root          = NULL;
+static int ent_json_idx               = 0;
 
 static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, size_t buflen)
 {
@@ -47,11 +63,11 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stayopen);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -90,9 +106,9 @@ enum nss_status _nss_octopass_setspent(int stayopen)
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_setspent_locked(stayopen);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -116,9 +132,9 @@ enum nss_status _nss_octopass_endspent(void)
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_endspent_locked();
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -167,9 +183,9 @@ enum nss_status _nss_octopass_getspent_r(struct spwd *result, char *buffer, size
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_getspent_r_locked(result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }
@@ -182,11 +198,11 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
 
   struct config con;
   struct response res;
-  nss_octopass_config_loading(&con, NSS_OCTOPASS_CONFIG_FILE);
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = nss_octopass_team_members(&con, &res);
+  int status = octopass_team_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -207,7 +223,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
     return NSS_STATUS_UNAVAIL;
   }
 
-  json_t *data = nss_octopass_github_team_member_by_name((char *)name, root);
+  json_t *data = octopass_github_team_member_by_name((char *)name, root);
 
   if (json_object_size(data) == 0) {
     json_decref(root);
@@ -252,9 +268,9 @@ enum nss_status _nss_octopass_getspnam_r(const char *name, struct spwd *result, 
 {
   enum nss_status status;
 
-  NSS_OCTOPASS_LOCK();
+  OCTOPASS_LOCK();
   status = _nss_octopass_getspnam_r_locked(name, result, buffer, buflen, errnop);
-  NSS_OCTOPASS_UNLOCK();
+  OCTOPASS_UNLOCK();
 
   return status;
 }

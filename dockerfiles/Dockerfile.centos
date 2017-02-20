@@ -7,9 +7,4 @@ RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 RUN sed -i "s;%_build_name_fmt.*;%_build_name_fmt\t%%{ARCH}/%%{NAME}-%%{VERSION}-%%{RELEASE}.el7.%%{ARCH}.rpm;" /usr/lib/rpm/macros
 
 RUN mkdir /octopass
-ADD . /octopass
-WORKDIR /octopass/nss
-
-CMD make dist && mv octopass-0.1.0.tar.gz /root/rpmbuild/SOURCES && \
-    spectool -g -R ../rpm/octopass.spec && rpmbuild -ba ../rpm/octopass.spec && \
-    cp /root/rpmbuild/RPMS/*/*.rpm /builds
+WORKDIR /octopass

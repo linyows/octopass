@@ -1,10 +1,12 @@
-#rpm:
-#  dockerfile: dockerfiles/Dockerfile.centos
+rpm:
+  dockerfile: dockerfiles/Dockerfile.centos
+  build: .
+  volumes:
+    - .:/octopass
+  command: make rpm
+
+#deb:
+#  dockerfile: dockerfiles/Dockerfile.ubuntu
 #  build: .
 #  volumes:
 #    - .:/builds
-deb:
-  dockerfile: dockerfiles/Dockerfile.ubuntu
-  build: .
-  volumes:
-    - .:/builds

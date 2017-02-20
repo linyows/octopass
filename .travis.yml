@@ -1,7 +1,7 @@
-language: go
-go:
-  - 1.7
-  - 1.6
+language: c
+compiler:
+  - gcc
+  - clang
 sudo: true
 addons:
   apt:
@@ -12,14 +12,10 @@ addons:
       - linux-libc-dev
       - libtool
       - make
-      - cmake
       - autoconf
       - git
       - bzip2
 script:
-  - pushd cli && make cover && popd
-  - pushd nss && sudo make test && popd
-after_script:
-  - goveralls -coverprofile=coverage.out
+  - sudo make test
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr

@@ -1,4 +1,20 @@
-#define NSS_OCTOPASS_CONFIG_FILE "octopass.conf.example"
+/* Management linux user and authentication with the organization/team on Github.
+   Copyright (C) 2017 Tomohisa Oda
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#define OCTOPASS_CONFIG_FILE "octopass.conf.example"
 #include <criterion/criterion.h>
 #include "nss_octopass-passwd.c"
 
@@ -21,7 +37,7 @@ Test(nss_octopass, getpwnam_r, .init = setup)
   cr_assert_str_eq(pwent.pw_passwd, "x");
   cr_assert_eq(pwent.pw_uid, 74049);
   cr_assert_eq(pwent.pw_gid, 2000);
-  cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+  cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
   cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
   cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
 }
@@ -68,7 +84,6 @@ Test(nss_octopass, pwent_list, .init = setup)
     cr_assert_eq(status, NSS_STATUS_SUCCESS);
 
     if (strcmp(pwent.pw_name, "linyows") != 0) {
-      printf("Unknown user: %s(%lu)\n", pwent.pw_name, entry_number);
       continue;
     }
 
@@ -76,7 +91,7 @@ Test(nss_octopass, pwent_list, .init = setup)
     cr_assert_str_eq(pwent.pw_passwd, "x");
     cr_assert_eq(pwent.pw_uid, 74049);
     cr_assert_eq(pwent.pw_gid, 2000);
-    cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+    cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
     cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
     cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
   }
@@ -170,7 +185,7 @@ Test(nss_octopass, getpwuid_r, .init = setup)
   cr_assert_str_eq(pwent.pw_passwd, "x");
   cr_assert_eq(pwent.pw_uid, 74049);
   cr_assert_eq(pwent.pw_gid, 2000);
-  cr_assert_str_eq(pwent.pw_gecos, "managed by nss-octopass");
+  cr_assert_str_eq(pwent.pw_gecos, "managed by octopass");
   cr_assert_str_eq(pwent.pw_dir, "/home/linyows");
   cr_assert_str_eq(pwent.pw_shell, "/bin/bash");
 }

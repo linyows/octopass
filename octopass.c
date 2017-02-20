@@ -1,11 +1,27 @@
-#include "nss_octopass.h"
+/* Management linux user and authentication with the organization/team on Github.
+   Copyright (C) 2017 Tomohisa Oda
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#include "octopass.h"
 
 static size_t write_response_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize      = size * nmemb;
   struct response *res = (struct response *)userp;
 
-  if (realsize > NSS_OCTOPASS_MAX_BUFFER_SIZE) {
+  if (realsize > OCTOPASS_MAX_BUFFER_SIZE) {
     fprintf(stderr, "Response is too large\n");
     return 0;
   }
@@ -24,7 +40,7 @@ static size_t write_response_callback(void *contents, size_t size, size_t nmemb,
   return realsize;
 }
 
-void nss_octopass_remove_quotes(char *s)
+void octopass_remove_quotes(char *s)
 {
   if (s == NULL) {
     return;
@@ -40,7 +56,7 @@ void nss_octopass_remove_quotes(char *s)
   memcpy(s, &s[i], strlen(s));
 }
 
-const char *nss_octopass_truncate(const char *str, int len)
+const char *octopass_truncate(const char *str, int len)
 {
   char s[len + 1];
   strncpy(s, str, len);
@@ -49,11 +65,11 @@ const char *nss_octopass_truncate(const char *str, int len)
   return res;
 }
 
-const char *nss_octopass_masking(const char *token)
+const char *octopass_masking(const char *token)
 {
   int len = 5;
   char s[strlen(token) + 1];
-  sprintf(s, "%s ************ REDACTED ************", nss_octopass_truncate(token, len));
+  sprintf(s, "%s ************ REDACTED ************", octopass_truncate(token, len));
   char *mask = strdup(s);
   return mask;
 }
@@ -73,7 +89,7 @@ const char *octopass_url_normalization(char *url)
   return url;
 }
 
-void nss_octopass_override_config_by_env(struct config *con)
+void octopass_override_config_by_env(struct config *con)
 {
   char *token = getenv("OCTOPASS_TOKEN");
   if (token) {
@@ -97,7 +113,7 @@ void nss_octopass_override_config_by_env(struct config *con)
   }
 }
 
-void nss_octopass_config_loading(struct config *con, char *filename)
+void octopass_config_loading(struct config *con, char *filename)
 {
   memset(con->endpoint, '\0', sizeof(con->endpoint));
   memset(con->token, '\0', sizeof(con->token));
@@ -136,7 +152,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
       sprintf(v, "%s %s", value, lasts);
       value = v;
     }
-    nss_octopass_remove_quotes(value);
+    octopass_remove_quotes(value);
 
     if (strcmp(key, "Endpoint") == 0) {
       const char *url = octopass_url_normalization(value);
@@ -170,7 +186,7 @@ void nss_octopass_config_loading(struct config *con, char *filename)
 
   fclose(file);
 
-  nss_octopass_override_config_by_env(con);
+  octopass_override_config_by_env(con);
 
   if (strlen(con->endpoint) == 0) {
     char *endpoint = "https://api.github.com/";
@@ -192,16 +208,16 @@ void nss_octopass_config_loading(struct config *con, char *filename)
   }
 
   if (con->syslog) {
-    const char *pg_name = "nss-octopass";
+    const char *pg_name = "octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
                      "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
-           con->endpoint, nss_octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
+           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
            con->gid, con->group_name, con->home, con->shell, con->cache);
   }
 }
 
-void nss_octopass_export_file(char *file, char *data)
+void octopass_export_file(char *file, char *data)
 {
   FILE *fp = fopen(file, "w");
   if (!fp) {
@@ -213,7 +229,7 @@ void nss_octopass_export_file(char *file, char *data)
   fclose(fp);
 }
 
-const char *nss_octopass_import_file(char *file)
+const char *octopass_import_file(char *file)
 {
   FILE *fp = fopen(file, "r");
   if (!fp) {
@@ -223,7 +239,7 @@ const char *nss_octopass_import_file(char *file)
   char line[MAXBUF];
   char *data;
 
-  if ((data = malloc(NSS_OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
+  if ((data = malloc(OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
     data[0] = '\0';
   } else {
     fprintf(stderr, "Malloc failed\n");
@@ -241,14 +257,17 @@ const char *nss_octopass_import_file(char *file)
   return res;
 }
 
-void nss_octopass_github_request_without_cache(struct config *con, char *url, struct response *res)
+void octopass_github_request_without_cache(struct config *con, char *url, struct response *res, char *token)
 {
   if (con->syslog) {
     syslog(LOG_INFO, "http get -- %s", url);
   }
 
   char auth[64];
-  sprintf(auth, "Authorization: token %s", con->token);
+  if (token == NULL) {
+    token = con->token;
+  }
+  sprintf(auth, "Authorization: token %s", token);
 
   CURL *hnd;
   CURLcode result;
@@ -262,7 +281,7 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, NSS_OCTOPASS_VERSION_WITH_NAME);
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, OCTOPASS_VERSION_WITH_NAME);
   curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 3L);
   curl_easy_setopt(hnd, CURLOPT_TIMEOUT, 15L);
@@ -286,25 +305,26 @@ void nss_octopass_github_request_without_cache(struct config *con, char *url, st
   curl_slist_free_all(headers);
 }
 
-void nss_octopass_github_request(struct config *con, char *url, struct response *res)
+void octopass_github_request(struct config *con, char *url, struct response *res)
 {
+  char *token = NULL;
   if (con->cache == 0) {
-    nss_octopass_github_request_without_cache(con, url, res);
+    octopass_github_request_without_cache(con, url, res, token);
     return;
   }
 
   char *base = curl_escape(url, strlen(url));
   char f[strlen(base) + strlen(con->token) + 6];
   char *file = f;
-  sprintf(f, "%s/%s-%s", NSS_OCTOPASS_CACHE_DIR, base, nss_octopass_truncate(con->token, 6));
+  sprintf(f, "%s/%s-%s", OCTOPASS_CACHE_DIR, base, octopass_truncate(con->token, 6));
 
   FILE *fp      = fopen(file, "r");
   long *ok_code = (long *)200;
 
   if (fp == NULL) {
-    nss_octopass_github_request_without_cache(con, url, res);
+    octopass_github_request_without_cache(con, url, res, token);
     if (res->httpstatus == ok_code) {
-      nss_octopass_export_file(file, res->data);
+      octopass_export_file(file, res->data);
     }
   } else {
     fclose(fp);
@@ -314,9 +334,9 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
       unsigned long now  = time(NULL);
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
-        nss_octopass_github_request_without_cache(con, url, res);
+        octopass_github_request_without_cache(con, url, res, token);
         if (res->httpstatus == ok_code) {
-          nss_octopass_export_file(file, res->data);
+          octopass_export_file(file, res->data);
           return;
         }
       }
@@ -326,12 +346,12 @@ void nss_octopass_github_request(struct config *con, char *url, struct response 
       syslog(LOG_INFO, "use cache: %s", file);
     }
 
-    res->data = (char *)nss_octopass_import_file(file);
+    res->data = (char *)octopass_import_file(file);
     res->size = strlen(res->data);
   }
 }
 
-int nss_octopass_github_team_id(char *team, char *data)
+int octopass_github_team_id(char *team, char *data)
 {
   json_t *root;
   json_error_t error;
@@ -353,7 +373,7 @@ int nss_octopass_github_team_id(char *team, char *data)
   return 0;
 }
 
-json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root)
+json_t *octopass_github_team_member_by_name(char *name, json_t *root)
 {
   size_t i;
   json_t *data;
@@ -369,7 +389,7 @@ json_t *nss_octopass_github_team_member_by_name(char *name, json_t *root)
   return json_object();
 }
 
-json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
+json_t *octopass_github_team_member_by_id(int gh_id, json_t *root)
 {
   size_t i;
   json_t *data;
@@ -385,13 +405,13 @@ json_t *nss_octopass_github_team_member_by_id(int gh_id, json_t *root)
   return json_object();
 }
 
-int nss_octopass_team_id(struct config *con)
+int octopass_team_id(struct config *con)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
   sprintf(url, "%sorgs/%s/teams", con->endpoint, con->organization);
 
   struct response res;
-  nss_octopass_github_request(con, url, &res);
+  octopass_github_request(con, url, &res);
 
   if (!res.data) {
     fprintf(stderr, "Request failure\n");
@@ -401,15 +421,15 @@ int nss_octopass_team_id(struct config *con)
     return -1;
   }
 
-  return nss_octopass_github_team_id(con->team, res.data);
+  return octopass_github_team_id(con->team, res.data);
 }
 
-int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
+int octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
   sprintf(url, "%steams/%d/members", con->endpoint, team_id);
 
-  nss_octopass_github_request(con, url, res);
+  octopass_github_request(con, url, res);
 
   if (!res->data) {
     fprintf(stderr, "Request failure\n");
@@ -422,17 +442,88 @@ int nss_octopass_team_members_by_team_id(struct config *con, int team_id, struct
   return 0;
 }
 
-int nss_octopass_team_members(struct config *con, struct response *res)
+int octopass_team_members(struct config *con, struct response *res)
 {
-  int team_id = nss_octopass_team_id(con);
+  int team_id = octopass_team_id(con);
   if (team_id == -1) {
     return -1;
   }
 
-  int status = nss_octopass_team_members_by_team_id(con, team_id, res);
+  int status = octopass_team_members_by_team_id(con, team_id, res);
   if (status == -1) {
     return -1;
   }
 
   return 0;
+}
+
+// OK: 0
+// NG: 1
+int octopass_autentication_with_token(struct config *con, char *user, char *token)
+{
+  struct response res;
+  char url[strlen(con->endpoint) + strlen("user") + 1];
+  sprintf(url, "%suser", con->endpoint);
+  octopass_github_request_without_cache(con, url, &res, token);
+
+  long *ok_code = (long *)200;
+  if (res.httpstatus == ok_code) {
+    json_t *root;
+    json_error_t error;
+    root              = json_loads(res.data, 0, &error);
+    const char *login = json_string_value(json_object_get(root, "login"));
+
+    if (strcmp(login, user) == 0) {
+      json_decref(root);
+      return 0;
+    }
+
+    json_decref(root);
+  }
+
+  if (con->syslog) {
+    closelog();
+  }
+  return 1;
+}
+
+const char *octopass_only_keys(char *data)
+{
+  json_t *root;
+  json_error_t error;
+  root = json_loads(data, 0, &error);
+
+  char *keys = malloc(OCTOPASS_MAX_BUFFER_SIZE);
+
+  size_t i;
+  for (i = 0; i < json_array_size(root); i++) {
+    json_t *obj     = json_array_get(root, i);
+    const char *key = json_string_value(json_object_get(obj, "key"));
+    strcat(keys, strdup(key));
+    strcat(keys, "\n");
+  }
+
+  const char *res = strdup(keys);
+  free(keys);
+  json_decref(root);
+
+  return res;
+}
+
+const char *octopass_github_user_keys(struct config *con, char *user)
+{
+  struct response res;
+  char url[strlen(con->endpoint) + strlen(user) + 64];
+  sprintf(url, "%susers/%s/keys?per_page=100", con->endpoint, user);
+  octopass_github_request(con, url, &res);
+
+  if (!res.data) {
+    fprintf(stderr, "Request failure\n");
+    if (con->syslog) {
+      closelog();
+    }
+    return NULL;
+  }
+
+  return octopass_only_keys(res.data);
 }

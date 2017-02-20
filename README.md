@@ -9,8 +9,7 @@
 <p align="center">
   <a href="https://travis-ci.org/linyows/octopass" title="travis"><img src="https://img.shields.io/travis/linyows/octopass.svg?style=flat-square"></a>
   <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=flat-square"></a>
-  <a href="https://github.com/linyows/octopass/blob/master/LICENSE" title="MIT License"><img src="http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"></a>
-  <a href="http://godoc.org/github.com/linyows/octopass" title="Go Documentation"><img src="http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square"></a>
+  <a href="https://github.com/linyows/octopass/blob/master/LICENSE" title="MIT License"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square"></a>
 </p>
 
 Description
@@ -37,17 +36,17 @@ By octopass name resolution, you can check the id of team members of github orga
 $ id ken
 uid=5458(ken) gid=2000(operators) groups=2000(operators)
 ```
-You can also see a list like `/etc/passwd,shadow,group` by the `nss-octopass`.
+You can also see a list like `/etc/passwd,shadow,group` by the `octopass`.
 For detail `--help`.
 
 ```sh
-$ nss-octopass passwd
-chun-li:x:14301:2000:managed by nss-octopass:/home/chun-li:/bin/bash
-dhalsim:x:8875:2000:managed by nss-octopass:/home/dhalsim:/bin/bash
-ken:x:5458:2000:managed by nss-octopass:/home/ken:/bin/bash
-ryu:x:74049:2000:managed by nss-octopass:/home/ryu:/bin/bash
-sagat:x:93011:2000:managed by nss-octopass:/home/sagat:/bin/bash
-zangief:x:8305:2000:managed by nss-octopass:/home/zangief:/bin/bash
+$ octopass passwd
+chun-li:x:14301:2000:managed by octopass:/home/chun-li:/bin/bash
+dhalsim:x:8875:2000:managed by octopass:/home/dhalsim:/bin/bash
+ken:x:5458:2000:managed by octopass:/home/ken:/bin/bash
+ryu:x:74049:2000:managed by octopass:/home/ryu:/bin/bash
+sagat:x:93011:2000:managed by octopass:/home/sagat:/bin/bash
+zangief:x:8305:2000:managed by octopass:/home/zangief:/bin/bash
 ```
 
 And octopass gets the public key from github for key authentication.
@@ -69,19 +68,9 @@ With this, even if Github is down, it will work if past caches remain.
 
 ### Architecture
 
-```
-+------------------------+     +--------------------+     +------------------------+
-|           +----------+ |     |                    |     | +----------+           |
-| +-------+ | Octopass | |     | Github API         |     | | Octopass | +-------+ |
-| |       | |          +-----> |                    | <-----+          | |       | |
-| | cache +-+ * NSS    | |     | * org/team members |     | | * NSS    +-+ cache | |
-| |       | | * SSHD   | <-----+ * user public keys +-----> | * SSHD   | |       | |
-| +-------+ | * PAM    | |     | * basic auth       |     | | * PAM    | +-------+ |
-|           +----------+ |     |                    |     | +----------+           |
-+------------------------+     +--------------------+     +------------------------+
-       Linux Server                                              Linux Server
-```
-
+<p align="center">
+  <img alt="Architecture" src="https://github.com/linyows/octopass/blob/master/misc/architecture.png?raw=true" width="400">
+</p>
 
 Installation
 ------------
@@ -99,11 +88,7 @@ Dependency
 - jansson
 
 ```
-$ wget https://github.com/linyows/octopass/releases/download/v0.1.0/linux_amd64.zip
-$ unzip linux_amd64.zip
-$ mv octopass /usr/bin/
 $ git clone https://github.com/linyows/octopass
-$ cd nss
 $ make && make install
 $ mv octopass.conf.example /etc/octopass.conf
 ```
@@ -130,7 +115,6 @@ UidStarts       | start number of uid          | 2000
 Gid             | gid                          | 2000
 Cache           | github api cache sec         | 500
 Syslog          | use syslog                   | false
-MembershipCheck | check membership in auth     | false
 
 Generate token from here: https://github.com/settings/tokens/new.
 Need: Read org and team membership
@@ -154,7 +138,7 @@ PasswordAuthentication no
 
 ```
 #@include common-auth
-auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass
+auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
 session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 ```
@@ -165,7 +149,7 @@ session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 
 ```
 # auth        sufficient    pam_unix.so nullok try_first_pass
-auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass
+auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
 ```
 
