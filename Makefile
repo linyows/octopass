@@ -24,25 +24,26 @@ BOLD=\033[1m
 default: build
 build: nss_octopass octopass_cli
 
-build_dir:
+build_dir: ## Create directory for build
 	test -d $(BUILD) || mkdir -p $(BUILD)
 
-cache_dir:
+cache_dir: ## Create directory for cache
 	test -d $(CACHE) || mkdir -p $(CACHE)
 
-deps:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing Dependencies$(RESET)"
+deps: ## Install dependencies
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing Dependencies$(RESET)"
 	git clone --depth=1 https://github.com/vstakhov/libucl.git tmp/libucl
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-depsdev: build_dir cache_dir
+depsdev: build_dir cache_dir ## Installing dependencies for development
 	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
 	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
-nss_octopass: build_dir cache_dir
+nss_octopass: build_dir cache_dir ## Build nss_octopass
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building nss_octopass$(RESET)"
 	$(CC) $(CFLAGS) -c nss_octopass-passwd.c -o $(BUILD)/nss_octopass-passwd.o
 	$(CC) $(CFLAGS) -c nss_octopass-group.c -o $(BUILD)/nss_octopass-group.o
 	$(CC) $(CFLAGS) -c nss_octopass-shadow.c -o $(BUILD)/nss_octopass-shadow.o
@@ -54,7 +55,8 @@ nss_octopass: build_dir cache_dir
 		$(BUILD)/nss_octopass-shadow.o \
 		-lcurl -ljansson
 
-octopass_cli: build_dir cache_dir
+octopass_cli: build_dir cache_dir ## Build octopass cli
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building octopass cli$(RESET)"
 	$(CC) $(CFLAGS) -c nss_octopass-passwd_cli.c -o $(BUILD)/nss_octopass-passwd_cli.o
 	$(CC) $(CFLAGS) -c nss_octopass-group_cli.c -o $(BUILD)/nss_octopass-group_cli.o
 	$(CC) $(CFLAGS) -c nss_octopass-shadow_cli.c -o $(BUILD)/nss_octopass-shadow_cli.o
@@ -66,37 +68,37 @@ octopass_cli: build_dir cache_dir
 		$(BUILD)/nss_octopass-shadow_cli.o \
 		-lcurl -ljansson
 
-test: depsdev testdev
+test: depsdev testdev ## Test with dependencies installation
 
-testdev:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Testing$(RESET)"
+testdev: ## Test without dependencies installation
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Testing$(RESET)"
 	$(CC) octopass_test.c \
 		nss_octopass-passwd_test.c \
 		nss_octopass-group_test.c \
 		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
 
-format:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Formatting$(RESET)"
+format: ## Format with clang-format
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Formatting$(RESET)"
 	for f in $(ls *.{c,h}); do\
 		clang-format -i $f;\
 	done
 	test -z "$$(git status -s -uno)"
 
-install: install_lib install_cli
+install: install_lib install_cli ## Install octopass
 
-install_lib:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Libraries$(RESET)"
+install_lib: ## Install only shared objects
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Libraries$(RESET)"
 	[ -d $(LIBDIR) ] || install -d $(LIBDIR)
 	install $(BUILD)/$(LIBRARY) $(LIBDIR)
 	cd $(LIBDIR); for link in $(LINKS); do ln -sf $(LIBRARY) $$link ; done;
 
-install_cli:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Command$(RESET)"
+install_cli: ## Install only cli command
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Command$(RESET)"
 	cp $(BUILD)/octopass $(BINDIR)/octopass
 
-dist:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
+dist: ## Distribute as archived source
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf octopass-$(VERSION) octopass-$(VERSION).tar octopass-$(VERSION).tar.gz
 	mkdir octopass-$(VERSION)
 	cp $(SOURCES) octopass-$(VERSION)
@@ -119,11 +121,14 @@ rpm: dist
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
-clean:
-	@echo -e "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
+clean: ## Delete tmp directory
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
 	rm -rf $(TMP)
 
 distclean: clean
 	rm -f *~ \#*
 
-.PHONY: clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev rpm
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
+
+.PHONY: help clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev rpm
