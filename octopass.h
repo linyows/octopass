@@ -39,13 +39,13 @@
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
 #endif
 #define OCTOPASS_CACHE_DIR "/var/cache/octopass"
-#define OCTOPASS_LOCK()                                                                                            \
+#define OCTOPASS_LOCK()                                                                                                \
   do {                                                                                                                 \
-    pthread_mutex_lock(&OCTOPASS_MUTEX);                                                                           \
+    pthread_mutex_lock(&OCTOPASS_MUTEX);                                                                               \
   } while (0);
-#define OCTOPASS_UNLOCK()                                                                                          \
+#define OCTOPASS_UNLOCK()                                                                                              \
   do {                                                                                                                 \
-    pthread_mutex_unlock(&OCTOPASS_MUTEX);                                                                         \
+    pthread_mutex_unlock(&OCTOPASS_MUTEX);                                                                             \
   } while (0);
 
 // 10MB
