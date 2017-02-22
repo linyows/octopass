@@ -105,19 +105,20 @@ Edit octopass.conf:
 $ mv /etc/{octopass.conf.example,octopass.conf}
 ```
 
-Key             | Description                  | Default
----             | ---                          | ---
-Endpoint        | github endpoint              | https://api.github.com
-Token           | github personal access token | -
-Organization    | github organization          | -
-Team            | github team                  | -
-Group           | group on linux               | same as team
-Home            | user home                    | /home/%s
-Shell           | user shell                   | /bin/bash
-UidStarts       | start number of uid          | 2000
-Gid             | gid                          | 2000
-Cache           | github api cache sec         | 500
-Syslog          | use syslog                   | false
+Key          | Description                          | Default
+---          | ---                                  | ---
+Endpoint     | github endpoint                      | https://api.github.com
+Token        | github personal access token         | -
+Organization | github organization                  | -
+Team         | github team                          | -
+Group        | group on linux                       | same as team
+Home         | user home                            | /home/%s
+Shell        | user shell                           | /bin/bash
+UidStarts    | start number of uid                  | 2000
+Gid          | gid                                  | 2000
+Cache        | github api cache sec                 | 500
+Syslog       | use syslog                           | false
+SharedUsers  | share auth of specific users on team | []
 
 Generate token from here: https://github.com/settings/tokens/new.
 Need: Read org and team membership
