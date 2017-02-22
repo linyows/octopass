@@ -97,7 +97,7 @@ install_cli: ## Install only cli command
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing as Command$(RESET)"
 	cp $(BUILD)/octopass $(BINDIR)/octopass
 
-dist: ## Distribute as archived source
+source_for_rpm: ## Create source for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.rhel octopass-$(VERSION).tar.gz
 	mkdir -p tmp.rhel/octopass-$(VERSION)
@@ -105,16 +105,18 @@ dist: ## Distribute as archived source
 	cd tmp.rhel && \
 		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
 		gzip -9 octopass-$(VERSION).tar
+	cp tmp.rhel/octopass-$(VERSION).tar.gz ./builds
 	mv tmp.rhel/octopass-$(VERSION).tar.gz .
 	rm -rf tmp.rhel
 
-rpm: dist
+rpm: source_for_rpm ## Packaging for RPM
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
 	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
 	spectool -g -R rpm/octopass.spec
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
-dist_debian:
+source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.debian octopass_$(VERSION).orig.tar.xz
 	mkdir -p tmp.debian/octopass-$(VERSION)
@@ -125,7 +127,8 @@ dist_debian:
 	mv tmp.debian/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
 	rm -rf tmp.debian
 
-deb: dist_debian
+deb: source_for_deb ## Packaging for DEB
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
 	tar xvf octopass_$(VERSION).orig.tar.xz
 	cd octopass-$(VERSION) && \
 		dh_make --single --createorig -y && \
@@ -134,6 +137,17 @@ deb: dist_debian
 		debuild -uc -us
 	cp *.deb /octopass/builds
 	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
+
+release: pkg ## Upload archives to Github Release on Mac
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing$(RESET)"
+	go get github.com/tcnksm/ghr
+	rm -rf builds/.keep && ghr v$(VERSION) pkg && git checkout builds/.keep
+
+pkgs: ## Create some distribution packages
+	docker-compose up
+
+dist: ## Upload archives to Github Release on Mac
+	@test -z $(GITHUB_TOKEN) || $(MAKE) release
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
