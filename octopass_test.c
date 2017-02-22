@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define OCTOPASS_CONFIG_FILE "octopass.conf.example"
+#define OCTOPASS_CONFIG_FILE "test/octopass.conf"
 #include <criterion/criterion.h>
 #include "octopass.c"
 
@@ -112,7 +112,7 @@ Test(octopass, config_loading)
   clearenv();
 
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
 
   cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
@@ -180,7 +180,7 @@ Test(octopass, github_request_without_cache, .init = setup)
 {
   struct config con;
   struct response res;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *url = "https://api.github.com/";
   char *token;
@@ -218,7 +218,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
 {
   struct config con;
   struct response res;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *url   = "https://api.github.com/";
   char *token = "dummydummydummydummydummydummydummydummy";
@@ -232,7 +232,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
 Test(octopass, team_id, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   int id = octopass_team_id(&con);
 
@@ -242,7 +242,7 @@ Test(octopass, team_id, .init = setup)
 Test(octopass, authentication_with_token, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = getenv("OCTOPASS_TOKEN");
@@ -253,7 +253,7 @@ Test(octopass, authentication_with_token, .init = setup)
 Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "dummy";
   char *token = getenv("OCTOPASS_TOKEN");
@@ -264,7 +264,7 @@ Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
 Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = "dummydummydummydummydummydummydummydummy";
@@ -275,7 +275,7 @@ Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
 Test(octopass, github_user_keys, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user       = "linyows";
   const char *keys = octopass_github_user_keys(&con, user);
