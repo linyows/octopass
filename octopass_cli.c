@@ -140,6 +140,20 @@ int main(int argc, char **argv)
   // PUBLIC KEYS
   struct config con;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+
+  if (con.shared_users_count) {
+    int idx;
+    for (idx = 0; idx < con.shared_users_count; idx++) {
+      if (strcmp(argv[1], con.shared_users[idx]) == 0) {
+        const char *members_keys = octopass_github_team_members_keys(&con);
+        if (members_keys != NULL) {
+          printf("%s", members_keys);
+        }
+        return 0;
+      }
+    }
+  }
+
   const char *keys = octopass_github_user_keys(&con, (char *)argv[1]);
   if (keys != NULL) {
     printf("%s", keys);
