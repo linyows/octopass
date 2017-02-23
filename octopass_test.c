@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define OCTOPASS_CONFIG_FILE "octopass.conf.example"
+#define OCTOPASS_CONFIG_FILE "test/octopass.conf"
 #include <criterion/criterion.h>
 #include "octopass.c"
 
@@ -83,6 +83,21 @@ Test(octopass, url_normalization)
   cr_assert_str_eq(url4, "https://api.github.com/");
 }
 
+Test(octopass, match)
+{
+  char *str     = "[ \"abc\", \"de\", \"F012\" ]";
+  char *pattern = "\"([A-z0-9_-]+)\"";
+  char **matched;
+  matched = malloc(MAXBUF);
+  int cnt = octopass_match(str, pattern, matched);
+
+  cr_assert_eq(cnt, 3);
+  cr_assert_str_eq(matched[0], (char *)"abc");
+  cr_assert_str_eq(matched[1], (char *)"de");
+  cr_assert_str_eq(matched[2], (char *)"F012");
+  free(matched);
+}
+
 Test(octopass, override_config_by_env)
 {
   clearenv();
@@ -92,7 +107,7 @@ Test(octopass, override_config_by_env)
   cr_assert_str_empty(con.token);
   cr_assert_str_empty(con.endpoint);
   cr_assert_str_empty(con.organization);
-  cr_assert_str_empty(con.team);
+  // cr_assert_str_empty(con.team);
 
   putenv("OCTOPASS_TOKEN=secret-token");
   putenv("OCTOPASS_ENDPOINT=https://api.github.com/");
@@ -112,7 +127,7 @@ Test(octopass, config_loading)
   clearenv();
 
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
 
   cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
@@ -126,6 +141,9 @@ Test(octopass, config_loading)
   cr_assert_eq(con.gid, 2000);
   cr_assert_eq(con.cache, 300);
   cr_assert(con.syslog == false);
+  cr_assert_eq(con.shared_users_count, 2);
+  cr_assert_str_eq(con.shared_users[0], (char *)"admin");
+  cr_assert_str_eq(con.shared_users[1], (char *)"deploy");
 }
 
 Test(octopass, export_file)
@@ -180,7 +198,7 @@ Test(octopass, github_request_without_cache, .init = setup)
 {
   struct config con;
   struct response res;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *url = "https://api.github.com/";
   char *token;
@@ -218,7 +236,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
 {
   struct config con;
   struct response res;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *url   = "https://api.github.com/";
   char *token = "dummydummydummydummydummydummydummydummy";
@@ -232,7 +250,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
 Test(octopass, team_id, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   int id = octopass_team_id(&con);
 
@@ -242,7 +260,7 @@ Test(octopass, team_id, .init = setup)
 Test(octopass, authentication_with_token, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = getenv("OCTOPASS_TOKEN");
@@ -253,7 +271,7 @@ Test(octopass, authentication_with_token, .init = setup)
 Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "dummy";
   char *token = getenv("OCTOPASS_TOKEN");
@@ -264,7 +282,7 @@ Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
 Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = "dummydummydummydummydummydummydummydummy";
@@ -275,11 +293,12 @@ Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
 Test(octopass, github_user_keys, .init = setup)
 {
   struct config con;
-  char *f = "octopass.conf.example";
+  char *f = "test/octopass.conf";
   octopass_config_loading(&con, f);
   char *user       = "linyows";
   const char *keys = octopass_github_user_keys(&con, user);
-  cr_assert_str_eq("ssh-rsa "
+  cr_assert_str_eq(keys,
+                   "ssh-rsa "
                    "AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+"
                    "oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/"
                    "muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/"
@@ -295,6 +314,48 @@ Test(octopass, github_user_keys, .init = setup)
                    "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
                    "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
                    "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
-                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n",
-                   keys);
+                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n");
+}
+
+Test(octopass, github_team_members_keys, .init = setup)
+{
+  struct config con;
+  char *f = "test/octopass.conf";
+  octopass_config_loading(&con, f);
+  const char *keys = octopass_github_team_members_keys(&con);
+  cr_assert_str_eq(keys,
+                   "ssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+"
+                   "oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/"
+                   "muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/"
+                   "zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+"
+                   "ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/"
+                   "JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==\nssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/HPOQXsolZYmPQW/"
+                   "xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/"
+                   "awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+"
+                   "PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/"
+                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+"
+                   "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
+                   "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
+                   "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
+                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
+                   "ssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQC6MdOnNjfzN7yLLyVxqWsOgOwsy0jxZMc5C5AxCQ5QCEZcvTQ/"
+                   "mZEwJtjtBLz3JmXwbuiDKDXCxeWI6QGLYfVzjG8Qx4b+WL+M2z6TlcLH22GOVoadiedLg/nyo0YG/"
+                   "UQ5K25mw0cJ7sloW3drG8gXq2IucRQt5xfzQZKov5jzbwezB859Gd4GM+"
+                   "quOPzrL4PlTATWbRzQhCJmD0rfoIpZqoeV2uefKyKPJYd8ZwI3MHY6+"
+                   "WuXSjwYfPobRUddXdlpG5GFpkdh3VFtJbsT6bPbMun6buItENbkvqlhhB1vhUn0YToGuZJmz/"
+                   "2YNovfnERvFYZpqY7wugIy8b8Sj9bH\nssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAACAQCnzpR1gnRCfNTpvMGWiXLqjFxqgMN23hy2Q55ac9KJJXMTf1q1ZOKrt0EC6Bt/"
+                   "r7M7bo3EzmaIbOrTDxPtVpKgqHNpS31n6beVy/"
+                   "pukhcdWq0C6KI1miXpySZoWf2j05foDKMhvO2t15NddU9qmQn7fWwvCEwUKv13lAETSQ6ZKR1A7hFfNAFBxLACCyhvNpvVcVD1p"
+                   "bCymygENBOjtpIFSHFSdCBpm3FpVrH4sFbQZZyTicJW0sLMnHjdqlrM9F/"
+                   "GF+eGRdejSPpjZh6rNX54QMIR+oEyBqatFD6LH0lgWvw+VDwCHFaXQVbdLlRCQDxAH0ocMPHH4ZurYf69oDah73xfh3fCb9v+B+"
+                   "gp+4zN7MqcYZy15zw/"
+                   "PIKHySWitST1hi+uLwa3FXGIgHdMtFFrkR9hrpSqRwPduUanzU01jl1gmq237SKy0fuzmvUKdZPRkrLz4cNfdD++"
+                   "S6v4nrb8JHryp0Hp6NJ02XDtylKQJJX9ZL7lsxE/"
+                   "PCdMiG0CngdSe1MY2TV0tCt3TNvDfmk7zB4pe3GuOdGazIdlv2aukEAnSNmoVUflym08J4Oz676PI0onFUExEfok21AQNtt6WsU"
+                   "bi7Jd84Xx09HLjMFDPYyZQZWn9+u5ZIaAVPwg26T3w8FU/OJmKK+Autdm3VBc2UHTmDlL2qdrtLjcQZAMqw==\n");
 }

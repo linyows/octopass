@@ -32,6 +32,7 @@
 #include <syslog.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <regex.h>
 
 #define OCTOPASS_VERSION "0.2.0"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
@@ -72,6 +73,8 @@ struct config {
   long gid;
   long cache;
   bool syslog;
+  char **shared_users;
+  int shared_users_count;
 };
 
 extern int octopass_team_members(struct config *con, struct response *res);

@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define OCTOPASS_CONFIG_FILE "octopass.conf.example"
+#define OCTOPASS_CONFIG_FILE "test/octopass.conf"
 #include <criterion/criterion.h>
 #include "nss_octopass-passwd.c"
 
