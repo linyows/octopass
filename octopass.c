@@ -234,6 +234,10 @@ void octopass_config_loading(struct config *con, char *filename)
       } else {
         con->syslog = false;
       }
+    } else if (strcmp(key, "SharedUsers") == 0) {
+      char *pattern           = "\"([A-z0-9_-]+)\"";
+      con->shared_users       = calloc(MAXBUF, sizeof(char *));
+      con->shared_users_count = octopass_match(value, pattern, con->shared_users);
     }
   }
 

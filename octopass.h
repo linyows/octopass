@@ -73,6 +73,8 @@ struct config {
   long gid;
   long cache;
   bool syslog;
+  char **shared_users;
+  int shared_users_count;
 };
 
 extern int octopass_team_members(struct config *con, struct response *res);
