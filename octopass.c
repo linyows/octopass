@@ -550,7 +550,7 @@ const char *octopass_only_keys(char *data)
   json_error_t error;
   root = json_loads(data, 0, &error);
 
-  char *keys = malloc(OCTOPASS_MAX_BUFFER_SIZE);
+  char *keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char *));
 
   size_t i;
   for (i = 0; i < json_array_size(root); i++) {
