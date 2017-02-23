@@ -585,6 +585,48 @@ const char *octopass_github_user_keys(struct config *con, char *user)
   return octopass_only_keys(res.data);
 }
 
-void octopass_github_team_members_keys(struct config *con, char *keys)
+const char *octopass_github_team_members_keys(struct config *con)
 {
+  json_t *root;
+  json_error_t error;
+
+  struct response res;
+  int status = octopass_team_members(con, &res);
+
+  if (status != 0) {
+    free(res.data);
+    return NULL;
+  }
+  root = json_loads(res.data, 0, &error);
+  free(res.data);
+
+  if (!json_is_array(root)) {
+    json_decref(root);
+    return NULL;
+  }
+
+  char *members_keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char *));
+  size_t cnt         = json_array_size(root);
+  int i              = 0;
+
+  for (i = 0; i < cnt; i++) {
+    json_t *j_obj = json_array_get(root, i);
+    if (!json_is_object(j_obj)) {
+      continue;
+    }
+    json_t *j_name = json_object_get(j_obj, "login");
+    if (!json_is_string(j_name)) {
+      continue;
+    }
+
+    const char *login = json_string_value(j_name);
+    const char *keys  = octopass_github_user_keys(con, (char *)login);
+    strcat(members_keys, strdup(keys));
+  }
+
+  const char *result = strdup(members_keys);
+  free(members_keys);
+  json_decref(root);
+
+  return (strlen(result) > 0) ? result : NULL;
 }
