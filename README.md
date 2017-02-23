@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass.png?raw=true" width="300">
+  <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass-logo.png?raw=true" width="500">
 </p>
 
 <p align="center">
