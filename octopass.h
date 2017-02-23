@@ -32,6 +32,7 @@
 #include <syslog.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <regex.h>
 
 #define OCTOPASS_VERSION "0.2.0"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION

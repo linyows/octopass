@@ -89,6 +89,59 @@ const char *octopass_url_normalization(char *url)
   return url;
 }
 
+// Unatched: 0
+// Matched: 1
+int octopass_match(char *str, char *pattern, char **matched)
+{
+  int res;
+  regex_t re;
+  regmatch_t pm;
+
+  res = regcomp(&re, pattern, REG_EXTENDED);
+  if (res != 0) {
+    regfree(&re);
+    return 0;
+  }
+
+  int cnt    = 0;
+  int offset = 0;
+  res        = regexec(&re, &str[0], 1, &pm, REG_EXTENDED);
+  if (res != 0) {
+    regfree(&re);
+    return 0;
+  }
+  char *match_word;
+
+  while (res == 0) {
+    int relative_start = pm.rm_so + 1;
+    int relative_end   = pm.rm_eo - 1;
+    int absolute_start = offset + relative_start;
+    int absolute_end   = offset + relative_end;
+
+    int i;
+    match_word = calloc(MAXBUF, sizeof(char *));
+
+    char *tmp;
+    for (i = absolute_start; i < absolute_end; i++) {
+      tmp = calloc(MAXBUF, sizeof(char *));
+      sprintf(tmp, "%c", str[i]);
+      strcat(match_word, tmp);
+      free(tmp);
+    }
+
+    matched[cnt] = strdup(match_word);
+    free(match_word);
+
+    offset += pm.rm_eo;
+    cnt++;
+
+    res = regexec(&re, &str[0] + offset, 1, &pm, 0);
+  }
+
+  regfree(&re);
+  return cnt;
+}
+
 void octopass_override_config_by_env(struct config *con)
 {
   char *token = getenv("OCTOPASS_TOKEN");
