@@ -584,3 +584,7 @@ const char *octopass_github_user_keys(struct config *con, char *user)
 
   return octopass_only_keys(res.data);
 }
+
+void octopass_github_team_members_keys(struct config *con, char *keys)
+{
+}
