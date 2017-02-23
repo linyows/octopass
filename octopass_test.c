@@ -83,6 +83,21 @@ Test(octopass, url_normalization)
   cr_assert_str_eq(url4, "https://api.github.com/");
 }
 
+Test(octopass, match)
+{
+  char *str     = "[ \"abc\", \"de\", \"F012\" ]";
+  char *pattern = "\"([A-z0-9_-]+)\"";
+  char **matched;
+  matched = malloc(MAXBUF);
+  int cnt = octopass_match(str, pattern, matched);
+
+  cr_assert_eq(cnt, 3);
+  cr_assert_str_eq(matched[0], (char *)"abc");
+  cr_assert_str_eq(matched[1], (char *)"de");
+  cr_assert_str_eq(matched[2], (char *)"F012");
+  free(matched);
+}
+
 Test(octopass, override_config_by_env)
 {
   clearenv();
