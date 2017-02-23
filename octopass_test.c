@@ -141,6 +141,9 @@ Test(octopass, config_loading)
   cr_assert_eq(con.gid, 2000);
   cr_assert_eq(con.cache, 300);
   cr_assert(con.syslog == false);
+  cr_assert_eq(con.shared_users_count, 2);
+  cr_assert_str_eq(con.shared_users[0], (char *)"admin");
+  cr_assert_str_eq(con.shared_users[1], (char *)"deploy");
 }
 
 Test(octopass, export_file)
