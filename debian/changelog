@@ -1,3 +1,8 @@
+octopass (0.3.0-1) xenial; urgency=medium
+
+  * Support shared-users option
+
+ -- linyows <linyows@gmail.com>  Sun, 26 Feb 2017 23:00:00 +0900
 octopass (0.2.0-1) xenial; urgency=medium
 
   * Change implementation in Go to C.

@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with the organization/team on Github.
 Name:             octopass
-Version:          0.2.0
+Version:          0.3.0
 Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
@@ -52,6 +52,8 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /etc/octopass.conf.example
 
 %changelog
+* Sun Feb 26 2017 linyows <linyows@gmail.com> - 0.3.0-1
+- Support shared-users option
 * Sun Feb 19 2017 linyows <linyows@gmail.com> - 0.2.0-1
 - Change implementation in Go to C
 * Fri Feb 03 2017 linyows <linyows@gmail.com> - 0.1.0-1
