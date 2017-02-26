@@ -143,7 +143,7 @@ release: pkg ## Upload archives to Github Release on Mac
 	go get github.com/tcnksm/ghr
 	rm -rf builds/.keep && ghr v$(VERSION) pkg && git checkout builds/.keep
 
-pkgs: ## Create some distribution packages
+pkg: ## Create some distribution packages
 	docker-compose up
 
 dist: ## Upload archives to Github Release on Mac
