@@ -111,7 +111,7 @@ source_for_rpm: ## Create source for RPM
 
 rpm: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
-	mv octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
+	mv builds/octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
 	spectool -g -R rpm/octopass.spec
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
@@ -129,7 +129,7 @@ source_for_deb: ## Create source for DEB
 
 deb: source_for_deb ## Packaging for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
-	tar xvf octopass_$(VERSION).orig.tar.xz
+	tar xf octopass_$(VERSION).orig.tar.xz
 	cd octopass-$(VERSION) && \
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
@@ -141,7 +141,7 @@ deb: source_for_deb ## Packaging for DEB
 release: pkg ## Upload archives to Github Release on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing$(RESET)"
 	go get github.com/tcnksm/ghr
-	rm -rf builds/.keep && ghr v$(VERSION) pkg && git checkout builds/.keep
+	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
 pkg: ## Create some distribution packages
 	docker-compose up
