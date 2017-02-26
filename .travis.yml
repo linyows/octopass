@@ -19,8 +19,9 @@ addons:
 script:
   - sudo make test
   - sudo make format
-  - make && sudo make install
-  - sudo mv octopass.conf.example /etc/octopass.conf
+  - sudo make && sudo make install && sudo mv octopass.conf.example /etc/octopass.conf
+  - sudo /usr/bin/octopass passwd
   - id linyows
+  - getent passwd
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
