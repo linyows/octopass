@@ -103,6 +103,7 @@ function test_public_keys() {
 }
 
 function run_test() {
+  test -f /usr/bin/octopass || setup
   self=$(cd $(dirname $0) && pwd)/$(basename $0)
   tests="$(grep "^function test_" $self | sed -E "s/function (.*)\(\) \{/\1/g")"
   for t in $(echo $tests); do
