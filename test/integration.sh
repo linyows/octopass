@@ -15,9 +15,9 @@ function fail() {
   ALL_PASSED=1
   echo -e "[${CLR_FAIL}FAIL${CLR_RESET}] octopass::$(echo $1 | sed -e "s/test_//")"
   echo -e "${CLR_INFO}Expected${CLR_RESET}:"
-  echo    "$2"
+  echo -e "$2"
   echo -e "${CLR_WARN}Actual${CLR_RESET}:"
-  echo -n "$3"
+  echo -e "$3"
 }
 
 function setup() {
@@ -33,7 +33,7 @@ function setup() {
 function test_octopass_passwd() {
   cmd="/usr/bin/octopass passwd linyows"
   actual="$($cmd)"
-  expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash\n"
+  expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
@@ -45,7 +45,7 @@ function test_octopass_passwd() {
 function test_octopass_shadow() {
   cmd="/usr/bin/octopass shadow linyows"
   actual="$($cmd)"
-  expected="linyows:!!::::::::::\n"
+  expected="linyows:!!:::::::"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
@@ -57,7 +57,7 @@ function test_octopass_shadow() {
 function test_getent_passwd() {
   cmd="getent passwd linyows"
   actual="$($cmd)"
-  expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash\n"
+  expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
@@ -69,7 +69,7 @@ function test_getent_passwd() {
 function test_getent_shadow() {
   cmd="getent shadow linyows"
   actual="$($cmd)"
-  expected="linyows:!!::::::::::\n"
+  expected="linyows:!!:::::::"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
@@ -81,7 +81,7 @@ function test_getent_shadow() {
 function test_id() {
   cmd="id linyows"
   actual="$($cmd)"
-  expected="uid=74049(linyows) gid=2000(operators) groups=2000(operators)\n"
+  expected="uid=74049(linyows) gid=2000(operators) groups=2000(operators)"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
