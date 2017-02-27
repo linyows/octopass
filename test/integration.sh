@@ -1,9 +1,9 @@
 #!/bin/bash
 
-CLR_PASS="\\033[1;32m"
-CLR_FAIL="\\033[1;31m"
-CLR_WARN="\\033[1;33m"
-CLR_INFO="\\033[1;34m"
+CLR_PASS="\\033[0;32m"
+CLR_FAIL="\\033[0;31m"
+CLR_WARN="\\033[0;33m"
+CLR_INFO="\\033[0;34m"
 CLR_RESET="\\033[0;39m"
 ALL_PASSED=0
 
