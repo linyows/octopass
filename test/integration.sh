@@ -21,8 +21,7 @@ function fail() {
 }
 
 function test_octopass_passwd() {
-  cmd="/usr/bin/octopass passwd linyows"
-  actual="$($cmd)"
+  actual="$(/usr/bin/octopass passwd linyows)"
   expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash"
 
   if [ "x$actual" == "x$expected" ]; then
@@ -33,8 +32,7 @@ function test_octopass_passwd() {
 }
 
 function test_octopass_shadow() {
-  cmd="/usr/bin/octopass shadow linyows"
-  actual="$($cmd)"
+  actual="$(/usr/bin/octopass shadow linyows)"
   expected="linyows:!!:::::::"
 
   if [ "x$actual" == "x$expected" ]; then
@@ -45,8 +43,7 @@ function test_octopass_shadow() {
 }
 
 function test_getent_passwd() {
-  cmd="getent passwd linyows"
-  actual="$($cmd)"
+  actual="$(getent passwd linyows)"
   expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash"
 
   if [ "x$actual" == "x$expected" ]; then
@@ -57,8 +54,7 @@ function test_getent_passwd() {
 }
 
 function test_getent_shadow() {
-  cmd="getent shadow linyows"
-  actual="$($cmd)"
+  actual="$(getent shadow linyows)"
   expected="linyows:!!:::::::"
 
   if [ "x$actual" == "x$expected" ]; then
@@ -69,8 +65,7 @@ function test_getent_shadow() {
 }
 
 function test_id() {
-  cmd="id linyows"
-  actual="$($cmd)"
+  actual="$(id linyows)"
   expected="uid=74049(linyows) gid=2000(admin) groups=2000(admin)"
 
   if [ "x$actual" == "x$expected" ]; then
@@ -81,9 +76,52 @@ function test_id() {
 }
 
 function test_public_keys() {
-  cmd="/usr/bin/octopass linyows"
-  actual="$($cmd)"
-  expected="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/HPOQXsolZYmPQW/xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
+  actual="$(/usr/bin/octopass linyows | head -1)"
+  expected="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ=="
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+}
+
+function test_public_keys_user_not_on_github() {
+  actual="$(/usr/bin/octopass linyowsfoo | head -1)"
+  expected=""
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+}
+
+function test_authentication() {
+  actual="$(echo $OCTOPASS_TOKEN | /usr/bin/octopass pam linyows; echo $?)"
+  expected="0"
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+}
+
+function test_authentication_wrong_token() {
+  actual="$(echo "1234567890123456789012345678901234567890" | /usr/bin/octopass pam linyows; echo $?)"
+  expected="1"
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+}
+
+function test_authentication_wrong_user() {
+  actual="$(echo $OCTOPASS_TOKEN | /usr/bin/octopass pam foobar; echo $?)"
+  expected="1"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
