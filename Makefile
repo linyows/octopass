@@ -78,6 +78,15 @@ testdev: ## Test without dependencies installation
 		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
 
+test-integration: build install ## Run integration test
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Integration Testing$(RESET)"
+	test -d /usr/lib/x86_64-linux-gnu && ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0
+	mv octopass.conf.example /etc/octopass.conf
+	sed -i -e 's/^passwd:.*/passwd: files octopass/g' /etc/nsswitch.conf
+	sed -i -e 's/^shadow:.*/shadow: files octopass/g' /etc/nsswitch.conf
+	sed -i -e 's/^group:.*/group: files octopass/g' /etc/nsswitch.conf
+	test/integration.sh
+
 format: ## Format with clang-format
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Formatting$(RESET)"
 	for f in $(ls *.{c,h}); do\

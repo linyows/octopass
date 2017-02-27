@@ -19,6 +19,6 @@ addons:
 script:
   - sudo make test
   - sudo make format
-  - sudo test/integration.sh
+  - sudo make integration-test
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
