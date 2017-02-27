@@ -115,12 +115,11 @@ source_for_rpm: ## Create source for RPM
 		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
 		gzip -9 octopass-$(VERSION).tar
 	cp tmp.rhel/octopass-$(VERSION).tar.gz ./builds
-	mv tmp.rhel/octopass-$(VERSION).tar.gz .
 	rm -rf tmp.rhel
 
 rpm: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
-	mv builds/octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
+	cp builds/octopass-$(VERSION).tar.gz /root/rpmbuild/SOURCES
 	spectool -g -R rpm/octopass.spec
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
