@@ -32,7 +32,7 @@ function setup() {
 }
 
 function test_octopass_passwd() {
-  cmd="octopass passwd linyows"
+  cmd="/usr/bin/octopass passwd linyows"
   actual="$($cmd)"
   expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash\n"
 
@@ -44,7 +44,7 @@ function test_octopass_passwd() {
 }
 
 function test_octopass_shadow() {
-  cmd="octopass shadow linyows"
+  cmd="/usr/bin/octopass shadow linyows"
   actual="$($cmd)"
   expected="linyows:!!::::::::::\n"
 
@@ -92,7 +92,7 @@ function test_id() {
 }
 
 function test_public_keys() {
-  cmd="octopass linyows"
+  cmd="/usr/bin/octopass linyows"
   actual="$($cmd)"
   expected="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/HPOQXsolZYmPQW/xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
 
@@ -106,9 +106,7 @@ function test_public_keys() {
 function run_test() {
   self=$(cd $(dirname $0) && pwd)/$(basename $0)
   tests=$(grep "function test_" $self | sed -E "s/function (.*)\(\) \{/\1/g")
-  for t in $(echo $tests); do
-    $t
-  done
+  for t in $(echo $tests); do; $t; done
 }
 
 run_test
