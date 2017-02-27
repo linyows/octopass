@@ -1,3 +1,8 @@
+octopass (0.3.1-1) xenial; urgency=medium
+
+  * Bug fixes
+
+ -- linyows <linyows@gmail.com>  Mon, 27 Feb 2017 23:00:00 +0900
 octopass (0.3.0-1) xenial; urgency=medium
 
   * Support shared-users option
