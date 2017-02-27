@@ -15,6 +15,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "octopass.c"
+static pthread_mutex_t OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 
 #define no_argument 0
 #define required_argument 1
@@ -51,6 +52,73 @@ void help(void)
   printf("  -h, --help     show this help message and exit\n");
   printf("  -v, --version  print the version and exit\n");
   printf("\n");
+}
+
+int public_keys_unlocked(char *name)
+{
+  struct config con;
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+
+  if (con.shared_users_count) {
+    int idx;
+    for (idx = 0; idx < con.shared_users_count; idx++) {
+      if (strcmp(name, con.shared_users[idx]) == 0) {
+        const char *members_keys = octopass_github_team_members_keys(&con);
+        if (members_keys != NULL) {
+          printf("%s", members_keys);
+        }
+        return 0;
+      }
+    }
+  }
+
+  const char *keys = octopass_github_user_keys(&con, name);
+  if (keys != NULL) {
+    printf("%s", keys);
+  }
+
+  return 0;
+}
+
+int public_keys(char *name)
+{
+  OCTOPASS_LOCK();
+  int res = public_keys_unlocked(name);
+  OCTOPASS_UNLOCK();
+  return res;
+}
+
+int authentication_unlocked(int argc, char **argv)
+{
+  char token[40 + 1];
+  fgets(token, sizeof(token), stdin);
+  if (token == NULL) {
+    fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Token is required\n");
+    return 2;
+  }
+
+  char *user;
+  if (argc < 3) {
+    user = getenv("PAM_USER");
+    if (user == NULL) {
+      fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "User is required\n");
+      return 2;
+    }
+  } else {
+    user = argv[2];
+  }
+
+  struct config con;
+  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  return octopass_autentication_with_token(&con, user, token);
+}
+
+int authentication(int argc, char **argv)
+{
+  OCTOPASS_LOCK();
+  int res = authentication_unlocked(argc, argv);
+  OCTOPASS_UNLOCK();
+  return res;
 }
 
 int main(int argc, char **argv)
@@ -114,50 +182,9 @@ int main(int argc, char **argv)
 
   // PAM
   if (strcmp(argv[1], "pam") == 0) {
-    char token[40 + 1];
-    fgets(token, sizeof(token), stdin);
-    if (token == NULL) {
-      fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Token is required\n");
-      return 2;
-    }
-
-    char *user;
-    if (argc < 3) {
-      user = getenv("PAM_USER");
-      if (user == NULL) {
-        fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "User is required\n");
-        return 2;
-      }
-    } else {
-      user = argv[2];
-    }
-
-    struct config con;
-    octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
-    return octopass_autentication_with_token(&con, user, token);
+    return authentication(argc, argv);
   }
 
   // PUBLIC KEYS
-  struct config con;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
-
-  if (con.shared_users_count) {
-    int idx;
-    for (idx = 0; idx < con.shared_users_count; idx++) {
-      if (strcmp(argv[1], con.shared_users[idx]) == 0) {
-        const char *members_keys = octopass_github_team_members_keys(&con);
-        if (members_keys != NULL) {
-          printf("%s", members_keys);
-        }
-        return 0;
-      }
-    }
-  }
-
-  const char *keys = octopass_github_user_keys(&con, (char *)argv[1]);
-  if (keys != NULL) {
-    printf("%s", keys);
-  }
-
-  return 0;
+  return public_keys((char *)argv[1]);
 }
