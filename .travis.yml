@@ -19,10 +19,6 @@ addons:
 script:
   - sudo make test
   - sudo make format
-  - sudo make && sudo make install && sudo mv octopass.conf.example /etc/octopass.conf
-  - sudo find / -name "libnss*"
-  - sudo ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0
-  - octopass passwd linyows
-  - getent passwd
+  - sudo test/integration.sh
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
