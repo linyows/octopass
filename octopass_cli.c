@@ -59,7 +59,7 @@ int public_keys_unlocked(char *name)
   struct config con;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
 
-  if (con.shared_users_count) {
+  if (con.shared_users_count > 0) {
     int idx;
     for (idx = 0; idx < con.shared_users_count; idx++) {
       if (strcmp(name, con.shared_users[idx]) == 0) {
