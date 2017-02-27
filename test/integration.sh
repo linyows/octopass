@@ -103,10 +103,13 @@ function test_public_keys() {
   fi
 }
 
-self=$(cd $(dirname $0) && pwd)/$(basename $0)
-tests=$(grep "function test_" $self | gsed -E "s/function (.*)\(\) \{/\1/g")
-for t in $(echo $tests); do
-  $t
-done
+function run_test() {
+  self=$(cd $(dirname $0) && pwd)/$(basename $0)
+  tests=$(grep "function test_" $self | sed -E "s/function (.*)\(\) \{/\1/g")
+  for t in $(echo $tests); do
+    $t
+  done
+}
 
+run_test
 exit $ALL_PASSED
