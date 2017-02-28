@@ -16,4 +16,4 @@ Team            = "yourteam"
 #Syslog          = false
 
 # Advanced
-#SharedUser      = [ "admin", "deploy" ]
+#SharedUsers     = [ "admin", "deploy" ]
