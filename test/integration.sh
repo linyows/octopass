@@ -97,6 +97,21 @@ function test_public_keys_user_not_on_github() {
   fi
 }
 
+function test_shared_user_public_keys() {
+  sed -i -e 's/^#SharedUser/SharedUser/g' /etc/octopass.conf
+
+  actual="$(/usr/bin/octopass admin | wc -l)"
+  expected="5"
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+
+  sed -i -e 's/^SharedUser/#SharedUser/g' /etc/octopass.conf
+}
+
 function test_authentication() {
   actual="$(echo $OCTOPASS_TOKEN | /usr/bin/octopass pam linyows; echo $?)"
   expected="0"
