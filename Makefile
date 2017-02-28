@@ -152,6 +152,7 @@ release: pkg ## Upload archives to Github Release on Mac
 	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
 pkg: ## Create some distribution packages
+	rm -rf builds && mkdir builds
 	docker-compose up
 
 dist: ## Upload archives to Github Release on Mac
