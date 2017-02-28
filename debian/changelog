@@ -1,3 +1,8 @@
+octopass (0.3.2-1) xenial; urgency=medium
+
+  * Example Typo
+
+ -- linyows <linyows@gmail.com>  Tue, 28 Feb 2017 17:20:00 +0900
 octopass (0.3.1-1) xenial; urgency=medium
 
   * Bug fixes

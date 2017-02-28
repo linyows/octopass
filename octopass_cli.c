@@ -54,7 +54,7 @@ void help(void)
   printf("\n");
 }
 
-int public_keys_unlocked(char *name)
+int octopass_public_keys_unlocked(char *name)
 {
   struct config con;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
@@ -80,15 +80,15 @@ int public_keys_unlocked(char *name)
   return 0;
 }
 
-int public_keys(char *name)
+int octopass_public_keys(char *name)
 {
   OCTOPASS_LOCK();
-  int res = public_keys_unlocked(name);
+  int res = octopass_public_keys_unlocked(name);
   OCTOPASS_UNLOCK();
   return res;
 }
 
-int authentication_unlocked(int argc, char **argv)
+int octopass_authentication_unlocked(int argc, char **argv)
 {
   char token[40 + 1];
   fgets(token, sizeof(token), stdin);
@@ -113,10 +113,10 @@ int authentication_unlocked(int argc, char **argv)
   return octopass_autentication_with_token(&con, user, token);
 }
 
-int authentication(int argc, char **argv)
+int octopass_authentication(int argc, char **argv)
 {
   OCTOPASS_LOCK();
-  int res = authentication_unlocked(argc, argv);
+  int res = octopass_authentication_unlocked(argc, argv);
   OCTOPASS_UNLOCK();
   return res;
 }
@@ -182,9 +182,9 @@ int main(int argc, char **argv)
 
   // PAM
   if (strcmp(argv[1], "pam") == 0) {
-    return authentication(argc, argv);
+    return octopass_authentication(argc, argv);
   }
 
   // PUBLIC KEYS
-  return public_keys((char *)argv[1]);
+  return octopass_public_keys((char *)argv[1]);
 }
