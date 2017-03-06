@@ -204,7 +204,7 @@ Test(octopass, github_request_without_cache, .init = setup)
   char *token;
   octopass_github_request_without_cache(&con, url, &res, token);
 
-  cr_assert_eq(200, res.httpstatus);
+  cr_assert_eq((long *)200, res.httpstatus);
   cr_assert_str_eq(
       "{\"current_user_url\":\"https://api.github.com/user\",\"current_user_authorizations_html_url\":\"https://"
       "github.com/settings/connections/applications{/client_id}\",\"authorizations_url\":\"https://api.github.com/"
@@ -242,7 +242,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
   char *token = "dummydummydummydummydummydummydummydummy";
   octopass_github_request_without_cache(&con, url, &res, token);
 
-  cr_assert_eq(401, res.httpstatus);
+  cr_assert_eq((long *)401, res.httpstatus);
   cr_assert_str_eq("{\"message\":\"Bad credentials\",\"documentation_url\":\"https://developer.github.com/v3\"}",
                    res.data);
 }

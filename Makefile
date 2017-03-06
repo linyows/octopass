@@ -80,7 +80,7 @@ testdev: ## Test without dependencies installation
 
 integration_test: build install ## Run integration test
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Integration Testing$(RESET)"
-	test -d /usr/lib/x86_64-linux-gnu && ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0
+	test -d /usr/lib/x86_64-linux-gnu && ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0 || true
 	cp octopass.conf.example /etc/octopass.conf
 	sed -i -e 's/^passwd:.*/passwd: files octopass/g' /etc/nsswitch.conf
 	sed -i -e 's/^shadow:.*/shadow: files octopass/g' /etc/nsswitch.conf
@@ -146,16 +146,24 @@ deb: source_for_deb ## Packaging for DEB
 	cp *.deb /octopass/builds
 	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
 
-release: pkg ## Upload archives to Github Release on Mac
-	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing$(RESET)"
+github_release: pkg ## Upload archives to Github Release on Mac
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
 	go get github.com/tcnksm/ghr
 	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
+packagecloud_release: pkg ## Upload archives to PackageCloud on Mac
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
+	go get github.com/mlafeldt/pkgcloud/...
+	pkgcloud-push linyows/octopass/ubuntu/xenial octopass_$(VERSION)-1_amd64.deb
+	pkgcloud-push linyows/octopass/el/7 octopass-$(VERSION)-1.x86_64.rpm
+
 pkg: ## Create some distribution packages
+	rm -rf builds && mkdir builds
 	docker-compose up
 
 dist: ## Upload archives to Github Release on Mac
-	@test -z $(GITHUB_TOKEN) || $(MAKE) release
+	@test -z $(GITHUB_TOKEN) || $(MAKE) github_release
+	@test -z $(PACKAGECLOUD_TOKEN) || $(MAKE) packagecloud_release
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
