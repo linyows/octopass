@@ -1,19 +1,19 @@
 Summary:          Management linux user and authentication with the organization/team on Github.
 Name:             octopass
 Version:          0.3.2
-Release:          1
+Release:          1%{?dist}
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
 Source:           %{name}-%{version}.tar.gz
 Group:            System Environment/Base
 Packager:         linyows <linyows@gmail.com>
-%if 0%{?el7}
-Requires:         glibc libcurl-devel jansson-devel
-%else
+%if 0%{?rhel} < 6
 Requires:         glibc curl-devel jansson-devel
+%else
+Requires:         glibc libcurl-devel jansson-devel
 %endif
-BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:    gcc make
+BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:        i386, x86_64
 
 %define debug_package %{nil}
