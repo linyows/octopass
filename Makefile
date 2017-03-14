@@ -128,7 +128,7 @@ rpm5: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
 	mkdir -p /usr/src/redhat/SOURCES
 	cp builds/octopass-$(VERSION).tar.gz /usr/src/redhat/SOURCES
-	rpmbuild -bb rpm/octopass.spec
+	rpmbuild -ba rpm/octopass.spec
 	cp /usr/src/redhat/RPMS/*/*.rpm /octopass/builds
 
 source_for_deb: ## Create source for DEB
