@@ -3,16 +3,30 @@ rpm:
   build: .
   volumes:
     - .:/octopass
+  environment:
+    DIST: el7
   command: make rpm
+rpm6:
+  dockerfile: dockerfiles/Dockerfile.centos-6
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: el6
+  command: make rpm6
 rpm5:
   dockerfile: dockerfiles/Dockerfile.centos-5
   build: .
   volumes:
     - .:/octopass
+  environment:
+    DIST: el6
   command: make rpm5
 deb:
   dockerfile: dockerfiles/Dockerfile.ubuntu
   build: .
   volumes:
     - .:/octopass
+  environment:
+    DIST: ub16
   command: make deb
