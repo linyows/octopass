@@ -4,6 +4,12 @@ rpm:
   volumes:
     - .:/octopass
   command: make rpm
+rpm5:
+  dockerfile: dockerfiles/Dockerfile.centos-5
+  build: .
+  volumes:
+    - .:/octopass
+  command: make rpm5
 deb:
   dockerfile: dockerfiles/Dockerfile.ubuntu
   build: .
