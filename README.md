@@ -80,6 +80,8 @@ Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopas
 Available for:
 
 - CentOS 7.x
+- CentOS 6.x
+- CentOS 5.x
 - Ubuntu Xenial
 
 ### Building from Source
