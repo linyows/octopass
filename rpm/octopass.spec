@@ -7,9 +7,13 @@ URL:              https://github.com/linyows/octopass
 Source:           %{name}-%{version}.tar.gz
 Group:            System Environment/Base
 Packager:         linyows <linyows@gmail.com>
+%if 0%{?rhel} < 6
+Requires:         glibc curl-devel jansson-devel
+%else
 Requires:         glibc libcurl-devel jansson-devel
-BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%endif
 BuildRequires:    gcc make
+BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:        i386, x86_64
 
 %define debug_package %{nil}

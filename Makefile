@@ -13,6 +13,7 @@ BINDIR=$(PREFIX)/bin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
+DIST=unknown
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
@@ -108,14 +109,14 @@ install_cli: ## Install only cli command
 
 source_for_rpm: ## Create source for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
-	rm -rf tmp.rhel octopass-$(VERSION).tar.gz
-	mkdir -p tmp.rhel/octopass-$(VERSION)
-	cp $(SOURCES) tmp.rhel/octopass-$(VERSION)
-	cd tmp.rhel && \
+	rm -rf tmp.$(DIST) octopass-$(VERSION).tar.gz
+	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	cd tmp.$(DIST) && \
 		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
 		gzip -9 octopass-$(VERSION).tar
-	cp tmp.rhel/octopass-$(VERSION).tar.gz ./builds
-	rm -rf tmp.rhel
+	cp tmp.$(DIST)/octopass-$(VERSION).tar.gz ./builds
+	rm -rf tmp.$(DIST)
 
 rpm: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
@@ -124,16 +125,23 @@ rpm: source_for_rpm ## Packaging for RPM
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
+rpm5: source_for_rpm ## Packaging for RPM-5
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
+	mkdir -p /usr/src/redhat/SOURCES
+	cp builds/octopass-$(VERSION).tar.gz /usr/src/redhat/SOURCES
+	rpmbuild -ba rpm/octopass.spec
+	cp /usr/src/redhat/RPMS/*/*.rpm /octopass/builds
+
 source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
-	rm -rf tmp.debian octopass_$(VERSION).orig.tar.xz
-	mkdir -p tmp.debian/octopass-$(VERSION)
-	cp $(SOURCES) tmp.debian/octopass-$(VERSION)
-	cd tmp.debian && \
+	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
+	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		xz -v octopass_$(VERSION).tar
-	mv tmp.debian/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
-	rm -rf tmp.debian
+	mv tmp.$(DIST)/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
+	rm -rf tmp.$(DIST)
 
 deb: source_for_deb ## Packaging for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
@@ -154,8 +162,10 @@ github_release: pkg ## Upload archives to Github Release on Mac
 packagecloud_release: pkg ## Upload archives to PackageCloud on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	go get github.com/mlafeldt/pkgcloud/...
-	pkgcloud-push linyows/octopass/ubuntu/xenial octopass_$(VERSION)-1_amd64.deb
-	pkgcloud-push linyows/octopass/el/7 octopass-$(VERSION)-1.x86_64.rpm
+	pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.deb
+	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.rpm
+	pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.rpm
+	pkgcloud-push linyows/octopass/el/5 builds/octopass-$(VERSION)-1.x86_64.rpm
 
 pkg: ## Create some distribution packages
 	rm -rf builds && mkdir builds
