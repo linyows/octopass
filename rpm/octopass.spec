@@ -1,7 +1,7 @@
 Summary:          Management linux user and authentication with the organization/team on Github.
 Name:             octopass
 Version:          0.3.2
-Release:          1%{?dist}
+Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
 Source:           %{name}-%{version}.tar.gz
