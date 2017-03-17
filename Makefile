@@ -151,6 +151,7 @@ deb: source_for_deb ## Packaging for DEB
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
 		cp -v /octopass/debian/* debian/ && \
 		debuild -uc -us
+	find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\)_amd64.deb\)/mv \1 \2_amd64.$(DIST).deb/g' | sh
 	cp *.deb /octopass/builds
 	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
 
@@ -162,10 +163,12 @@ github_release: pkg ## Upload archives to Github Release on Mac
 packagecloud_release: pkg ## Upload archives to PackageCloud on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	go get github.com/mlafeldt/pkgcloud/...
-	pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.deb
-	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.rpm
-	pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.rpm
-	pkgcloud-push linyows/octopass/el/5 builds/octopass-$(VERSION)-1.x86_64.rpm
+	pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
+	pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
+	pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
+	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.el7.rpm
+	pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.el6.rpm
+	pkgcloud-push linyows/octopass/el/5 builds/octopass-$(VERSION)-1.x86_64.el5.rpm
 
 pkg: ## Create some distribution packages
 	rm -rf builds && mkdir builds
