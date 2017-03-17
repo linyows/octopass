@@ -183,7 +183,7 @@ clean: ## Delete tmp directory
 	rm -rf $(TMP)
 
 distclean: clean
-	rm -f build/octopass*
+	rm -f builds/octopass*
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
