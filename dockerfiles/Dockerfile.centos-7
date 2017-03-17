@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM centos:7
 MAINTAINER linyows <linyows@gmail.com>
 
 RUN yum install -y glibc gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools mock epel-release && \
