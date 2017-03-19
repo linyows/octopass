@@ -46,4 +46,4 @@ deb12:
     - .:/octopass
   environment:
     DIST: precise
-  command: make deb
+  command: make deb12

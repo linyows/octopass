@@ -165,6 +165,27 @@ deb: source_for_deb ## Packaging for DEB
 		cp *.deb /octopass/builds
 	rm -rf tmp.$(DIST)
 
+deb12: ## Packaging for DEB-12
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
+	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
+	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	cd tmp.$(DIST) && \
+		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
+		mv octopass_$(VERSION).tar octopass_$(VERSION).orig.tar
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
+	cd tmp.$(DIST) && \
+		tar xf octopass_$(VERSION).orig.tar && \
+		cd octopass-$(VERSION) && \
+		dh_make --single --createorig && \
+		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
+		cp -v /octopass/debian/* debian/ && \
+		debuild -uc -us
+	cd tmp.$(DIST) && \
+		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
+		cp *.deb /octopass/builds
+	rm -rf tmp.$(DIST)
+
 github_release: pkg ## Upload archives to Github Release on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
 	go get github.com/tcnksm/ghr
