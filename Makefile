@@ -141,6 +141,7 @@ jansson: build_dir ## Build and Install Janson
 	rpmbuild -bb $(BUILD)/jansson.spec
 	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
 	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
+	rm -rf /usr/src/redhat/RPMS/*/jansson-*.rpm
 
 source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
