@@ -139,8 +139,6 @@ jansson: build_dir ## Build and Install Janson
 	test -f $(BUILD)/jansson.spec || curl -sLk https://raw.github.com/nmilford/rpm-jansson/master/jansson.spec -o $(BUILD)/jansson.spec
 	test -f /usr/src/redhat/SOURCES/jansson-$(JANSSON_VERSION).tar.gz || curl -sLk http://www.digip.org/jansson/releases/jansson-$(JANSSON_VERSION).tar.gz -o /usr/src/redhat/SOURCES/jansson-$(JANSSON_VERSION).tar.gz
 	rpmbuild -bb $(BUILD)/jansson.spec
-	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
-	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
 	rm -rf /usr/src/redhat/RPMS/*/jansson-*.rpm
 
 source_for_deb: ## Create source for DEB
