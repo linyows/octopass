@@ -132,7 +132,7 @@ rpm5: jansson source_for_rpm ## Packaging for RPM-5
 	rpmbuild -ba rpm/octopass.spec
 	cp /usr/src/redhat/RPMS/*/*.rpm /octopass/builds
 
-jansson: ## Build and Install Janson
+jansson: build_dir ## Build and Install Janson
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building and Installing Jansson$(RESET)"
 	mkdir -p /usr/src/redhat/SOURCES
 	test -f $(BUILD)/jansson.spec || curl -sLk https://raw.github.com/nmilford/rpm-jansson/master/jansson.spec -o $(BUILD)/jansson.spec
