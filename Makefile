@@ -125,12 +125,21 @@ rpm: source_for_rpm ## Packaging for RPM
 	rpmbuild -ba rpm/octopass.spec
 	cp /root/rpmbuild/RPMS/*/*.rpm /octopass/builds
 
-rpm5: source_for_rpm ## Packaging for RPM-5
+rpm5: jansson source_for_rpm ## Packaging for RPM-5
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
 	mkdir -p /usr/src/redhat/SOURCES
 	cp builds/octopass-$(VERSION).tar.gz /usr/src/redhat/SOURCES
 	rpmbuild -ba rpm/octopass.spec
 	cp /usr/src/redhat/RPMS/*/*.rpm /octopass/builds
+
+jansson: ## Build and Install Janson
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building and Installing Jansson$(RESET)"
+	mkdir -p /usr/src/redhat/SOURCES
+	test -f $(BUILD)/jansson.spec || curl -sLk https://raw.github.com/nmilford/rpm-jansson/master/jansson.spec -o $(BUILD)jansson.spec
+	test -f /usr/src/redhat/SOURCES/jansson-2.4.tar.gz || curl -sLk http://www.digip.org/jansson/releases/jansson-2.4.tar.gz -o /usr/src/redhat/SOURCES/jansson-2.4.tar.gz
+	rpmbuild -bb $(BUILD)/jansson.spec
+	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-2.4-1.x86_64.$(DIST).rpm
+	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-2.4-1.x86_64.$(DIST).rpm
 
 source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
