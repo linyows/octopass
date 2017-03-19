@@ -149,7 +149,6 @@ source_for_deb: ## Create source for DEB
 	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		xz -v octopass_$(VERSION).tar
-	ls -las tmp.$(DIST)
 	mv tmp.$(DIST)/octopass_$(VERSION).tar.xz tmp.$(DIST)/octopass_$(VERSION).orig.tar.xz
 
 deb: source_for_deb ## Packaging for DEB
