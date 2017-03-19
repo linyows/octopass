@@ -1,8 +1,8 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 MAINTAINER linyows <linyows@gmail.com>
 
 RUN apt-get -qq update && \
-    apt-get install -qq gcc make libcurl4-gnutls-dev libjansson-dev \
+    apt-get install -qq glibc-source gcc make libcurl4-gnutls-dev libjansson-dev \
                         bzip2 unzip debhelper dh-make devscripts cdbs clang
 
 ENV USER root

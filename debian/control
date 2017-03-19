@@ -2,7 +2,7 @@ Source: octopass
 Section: admin
 Priority: optional
 Maintainer: linyows <linyow@gmail.com>
-Build-Depends: debhelper (>= 9), glibc-source, libcurl4-gnutls-dev, libjansson-dev
+Build-Depends: debhelper (>= 9), libcurl4-gnutls-dev, libjansson-dev
 Standards-Version: 3.9.7
 Homepage: https://github.com/linyows/octopass
 Vcs-Browser: https://github.com/linyows/octopass/tree/debian

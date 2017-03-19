@@ -81,8 +81,10 @@ Available for:
 
 - CentOS 7.x
 - CentOS 6.x
-- CentOS 5.x ([need to install jansson-devel beforehand](https://github.com/linyows/octopass/blob/master/dockerfiles/Dockerfile.centos-5#L11-L17))
+- CentOS 5.x
 - Ubuntu Xenial
+- Ubuntu Trusty
+- Ubuntu Precise
 
 ### Building from Source
 

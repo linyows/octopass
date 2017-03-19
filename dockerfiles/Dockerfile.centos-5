@@ -2,19 +2,11 @@ FROM centos:5
 MAINTAINER linyows <linyows@gmail.com>
 
 RUN yum install -y glibc gcc make curl-devel bzip2 unzip \
-    rpmdevtools mock epel-release wget && \
+    rpmdevtools mock epel-release && \
     yum install -y clang auto-buildrequires
 
 RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-RUN sed -i "s;%_build_name_fmt.*;%_build_name_fmt\t%%{ARCH}/%%{NAME}-%%{VERSION}-%%{RELEASE}.el5.%%{ARCH}.rpm;" /usr/lib/rpm/macros
-
-RUN wget https://raw.github.com/nmilford/rpm-jansson/master/jansson.spec -O ~/rpmbuild/SPECS/jansson.spec --no-check-certificate && \
-    wget http://www.digip.org/jansson/releases/jansson-2.4.tar.gz -O ~/rpmbuild/SOURCES/jansson-2.4.tar.gz --no-check-certificate && \
-    mkdir -p /usr/src/redhat/SOURCES && \
-    mv ~/rpmbuild/SOURCES/jansson-2.4.tar.gz /usr/src/redhat/SOURCES/jansson-2.4.tar.gz && \
-    rpmbuild -bb ~/rpmbuild/SPECS/jansson.spec && \
-    rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-2.4-1.el5.x86_64.rpm && \
-    rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-2.4-1.el5.x86_64.rpm
+RUN sed -i "s;%_build_name_fmt.*;%_build_name_fmt\t%%{ARCH}/%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.el5.rpm;" /usr/lib/rpm/macros
 
 RUN mkdir /octopass
 WORKDIR /octopass
