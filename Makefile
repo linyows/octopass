@@ -149,20 +149,22 @@ source_for_deb: ## Create source for DEB
 	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		xz -v octopass_$(VERSION).tar
-	mv tmp.$(DIST)/octopass_$(VERSION).tar.xz octopass_$(VERSION).orig.tar.xz
-	rm -rf tmp.$(DIST)
+	ls -las tmp.$(DIST)
+	mv tmp.$(DIST)/octopass_$(VERSION).tar.xz tmp.$(DIST)/octopass_$(VERSION).orig.tar.xz
 
 deb: source_for_deb ## Packaging for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
-	tar xf octopass_$(VERSION).orig.tar.xz
-	cd octopass-$(VERSION) && \
+	cd tmp.$(DIST) && \
+		tar xf octopass_$(VERSION).orig.tar.xz && \
+		cd octopass-$(VERSION) && \
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
 		cp -v /octopass/debian/* debian/ && \
 		debuild -uc -us
-	find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\)_amd64.deb\)/mv \1 \2_amd64.$(DIST).deb/g' | sh
-	cp *.deb /octopass/builds
-	rm -rf octopass-$(VERSION) octopass_$(VERSION)-* octopass_$(VERSION).orig.tar.xz
+	cd tmp.$(DIST) && \
+		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
+		cp *.deb /octopass/builds
+	rm -rf tmp.$(DIST)
 
 github_release: pkg ## Upload archives to Github Release on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
