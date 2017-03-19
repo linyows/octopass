@@ -17,6 +17,7 @@ DIST ?= unknown
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
+JANSSON_VERSION=2.4
 
 INFO_COLOR=\033[1;34m
 RESET=\033[0m
@@ -136,10 +137,10 @@ jansson: build_dir ## Build and Install Janson
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building and Installing Jansson$(RESET)"
 	mkdir -p /usr/src/redhat/SOURCES
 	test -f $(BUILD)/jansson.spec || curl -sLk https://raw.github.com/nmilford/rpm-jansson/master/jansson.spec -o $(BUILD)/jansson.spec
-	test -f /usr/src/redhat/SOURCES/jansson-2.4.tar.gz || curl -sLk http://www.digip.org/jansson/releases/jansson-2.4.tar.gz -o /usr/src/redhat/SOURCES/jansson-2.4.tar.gz
+	test -f /usr/src/redhat/SOURCES/jansson-$(JANSSON_VERSION).tar.gz || curl -sLk http://www.digip.org/jansson/releases/jansson-$(JANSSON_VERSION).tar.gz -o /usr/src/redhat/SOURCES/jansson-$(JANSSON_VERSION).tar.gz
 	rpmbuild -bb $(BUILD)/jansson.spec
-	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-2.4-1.x86_64.$(DIST).rpm
-	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-2.4-1.x86_64.$(DIST).rpm
+	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
+	rpm -ivh /usr/src/redhat/RPMS/x86_64/jansson-devel-$(JANSSON_VERSION)-1.x86_64.$(DIST).rpm
 
 source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
