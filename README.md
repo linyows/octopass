@@ -180,6 +180,13 @@ group:      files octopass sss
 
 Enable octopass as name resolution.
 
+Provisioning
+------------
+
+- Chef cookbook - https://github.com/linyows/octopass-cookbook
+- Ansible playbook - ?
+- Puppet module - ?
+
 Author
 ------
 
