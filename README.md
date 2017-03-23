@@ -15,6 +15,8 @@
 Description
 -----------
 
+[![Join the chat at https://gitter.im/linyows/octopass](https://badges.gitter.im/linyows/octopass.svg)](https://gitter.im/linyows/octopass?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is linux user management tool with the organization/team on github, and authentication.
 Depending on github for user management, there are certain risks,
 but features easy handling and ease of operation.
