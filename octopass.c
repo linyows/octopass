@@ -421,7 +421,7 @@ int octopass_github_team_id(char *team, char *data)
     json_t *data  = json_array_get(root, i);
     const char *t = json_string_value(json_object_get(data, "name"));
 
-    if (strcmp(team, t) == 0) {
+    if (name != NULL && strcmp(team, t) == 0) {
       const json_int_t id = json_integer_value(json_object_get(data, "id"));
       json_decref(root);
       return id;
