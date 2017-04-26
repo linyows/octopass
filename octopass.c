@@ -410,25 +410,21 @@ void octopass_github_request(struct config *con, char *url, struct response *res
   }
 }
 
-int octopass_github_team_id(char *team, char *data)
+int octopass_github_team_id(char *team_name, char *data)
 {
-  json_t *root;
   json_error_t error;
-  root = json_loads(data, 0, &error);
-
-  size_t i;
-  for (i = 0; i < json_array_size(root); i++) {
-    json_t *data  = json_array_get(root, i);
-    const char *t = json_string_value(json_object_get(data, "name"));
-
-    if (name != NULL && strcmp(team, t) == 0) {
-      const json_int_t id = json_integer_value(json_object_get(data, "id"));
-      json_decref(root);
+  json_t *teams = json_loads(data, 0, &error);
+  json_t *team;
+  int i;
+  json_array_foreach(teams, i, team) {
+    const char *name = json_string_value(json_object_get(team, "name"));
+    if (name != NULL && strcmp(team_name, name) == 0) {
+      const json_int_t id = json_integer_value(json_object_get(team, "id"));
+      json_decref(teams);
       return id;
     }
   }
-
-  json_decref(root);
+  json_decref(teams);
   return 0;
 }
 
