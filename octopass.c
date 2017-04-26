@@ -476,7 +476,9 @@ int octopass_team_id(struct config *con)
     return -1;
   }
 
-  return octopass_github_team_id(con->team, res.data);
+  int id = octopass_github_team_id(con->team, res.data);
+  free(res.data);
+  return id;
 }
 
 int octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
