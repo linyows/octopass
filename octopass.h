@@ -55,6 +55,12 @@
 #define MAXBUF 1024
 #define DELIM " = "
 
+// This macro is available with more than 2.5
+#ifndef json_array_foreach
+#define json_array_foreach(array, index, value)                                                                        \
+  for (index = 0; index < json_array_size(array) && (value = json_array_get(array, index)); index++)
+#endif
+
 struct response {
   char *data;
   size_t size;
