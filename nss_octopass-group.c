@@ -116,8 +116,9 @@ enum nss_status _nss_octopass_setgrent(int stayopen)
 enum nss_status _nss_octopass_endgrent_locked(void)
 {
   if (ent_json_root) {
-    while (ent_json_root->refcount > 0)
+    while (ent_json_root->refcount > 0) {
       json_decref(ent_json_root);
+    }
   }
 
   ent_json_root = NULL;
