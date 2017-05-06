@@ -416,6 +416,7 @@ int octopass_github_team_id(char *team_name, char *data)
   json_t *teams = json_loads(data, 0, &error);
   json_t *team;
   int i;
+
   json_array_foreach(teams, i, team) {
     const char *name = json_string_value(json_object_get(team, "name"));
     if (name != NULL && strcmp(team_name, name) == 0) {
@@ -424,20 +425,20 @@ int octopass_github_team_id(char *team_name, char *data)
       return id;
     }
   }
+
   json_decref(teams);
   return 0;
 }
 
-json_t *octopass_github_team_member_by_name(char *name, json_t *root)
+json_t *octopass_github_team_member_by_name(char *name, json_t *members)
 {
-  size_t i;
-  json_t *data;
+  json_t *member;
+  int i;
 
-  for (i = 0; i < json_array_size(root); i++) {
-    data          = json_array_get(root, i);
-    const char *u = json_string_value(json_object_get(data, "login"));
+  json_array_foreach(members, i, member) {
+    const char *u = json_string_value(json_object_get(member, "login"));
     if (strcmp(name, u) == 0) {
-      return data;
+      return member;
     }
   }
 
