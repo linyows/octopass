@@ -445,16 +445,15 @@ json_t *octopass_github_team_member_by_name(char *name, json_t *members)
   return json_object();
 }
 
-json_t *octopass_github_team_member_by_id(int gh_id, json_t *root)
+json_t *octopass_github_team_member_by_id(int gh_id, json_t *members)
 {
-  size_t i;
-  json_t *data;
+  json_t *member;
+  int i;
 
-  for (i = 0; i < json_array_size(root); i++) {
-    data                = json_array_get(root, i);
-    const json_int_t id = json_integer_value(json_object_get(data, "id"));
+  json_array_foreach(members, i, member) {
+    const json_int_t id = json_integer_value(json_object_get(member, "id"));
     if (id == gh_id) {
-      return data;
+      return member;
     }
   }
 
