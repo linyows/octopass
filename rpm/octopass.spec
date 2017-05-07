@@ -56,6 +56,8 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /etc/octopass.conf.example
 
 %changelog
+* Sun May 07 2017 linyows <linyows@gmail.com> - 0.3.3-1
+- Fix segmentation fault
 * Tue Feb 28 2017 linyows <linyows@gmail.com> - 0.3.2-1
 - Example typo
 * Mon Feb 27 2017 linyows <linyows@gmail.com> - 0.3.1-1
