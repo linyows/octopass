@@ -22,3 +22,4 @@ script:
   - sudo make integration_test
 notifications:
   slack: linyows:2oeZ2qcLnaMjbnEYodwEXKTr
+  email: false
