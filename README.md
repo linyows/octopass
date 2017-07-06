@@ -184,6 +184,7 @@ Provisioning
 ------------
 
 - Chef cookbook - https://github.com/linyows/octopass-cookbook
+- Itamae cookbook - https://github.com/hnmx4/octopass-itamae-cookbook
 - Ansible playbook - https://github.com/uchida/ansible-octopass-role
 - Puppet module - ?
 
