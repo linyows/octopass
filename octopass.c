@@ -418,6 +418,9 @@ int octopass_github_team_id(char *team_name, char *data)
   int i;
 
   json_array_foreach(teams, i, team) {
+    if (!json_is_object(team)) {
+      continue;
+    }
     const char *name = json_string_value(json_object_get(team, "name"));
     if (name != NULL && strcmp(team_name, name) == 0) {
       const json_int_t id = json_integer_value(json_object_get(team, "id"));
