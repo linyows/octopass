@@ -1,9 +1,8 @@
 language: c
 dist: precise
+sudo: true
 compiler:
   - gcc
-  - clang
-sudo: true
 addons:
   apt:
     packages:
