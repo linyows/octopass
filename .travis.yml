@@ -1,5 +1,5 @@
 language: c
-dist: precise
+dist: trusty
 sudo: true
 compiler:
   - gcc
