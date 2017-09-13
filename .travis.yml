@@ -1,6 +1,6 @@
 language: c
 dist: trusty
-sudo: true
+sudo: required
 compiler:
   - gcc
 addons:
