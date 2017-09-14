@@ -53,7 +53,7 @@ void octopass_remove_quotes(char *s)
   int i = 0;
   while (s[i] != '\0' && s[i] == '"')
     i++;
-  memcpy(s, &s[i], strlen(s));
+  memmove(s, &s[i], strlen(s));
 }
 
 const char *octopass_truncate(const char *str, int len)
@@ -417,7 +417,8 @@ int octopass_github_team_id(char *team_name, char *data)
   json_t *team;
   int i;
 
-  json_array_foreach(teams, i, team) {
+  json_array_foreach(teams, i, team)
+  {
     const char *name = json_string_value(json_object_get(team, "name"));
     if (name != NULL && strcmp(team_name, name) == 0) {
       const json_int_t id = json_integer_value(json_object_get(team, "id"));
@@ -435,7 +436,8 @@ json_t *octopass_github_team_member_by_name(char *name, json_t *members)
   json_t *member;
   int i;
 
-  json_array_foreach(members, i, member) {
+  json_array_foreach(members, i, member)
+  {
     const char *u = json_string_value(json_object_get(member, "login"));
     if (strcmp(name, u) == 0) {
       return member;
@@ -450,7 +452,8 @@ json_t *octopass_github_team_member_by_id(int gh_id, json_t *members)
   json_t *member;
   int i;
 
-  json_array_foreach(members, i, member) {
+  json_array_foreach(members, i, member)
+  {
     const json_int_t id = json_integer_value(json_object_get(member, "id"));
     if (id == gh_id) {
       return member;

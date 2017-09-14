@@ -1,8 +1,8 @@
 language: c
+dist: trusty
+sudo: required
 compiler:
   - gcc
-  - clang
-sudo: true
 addons:
   apt:
     packages:
