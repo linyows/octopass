@@ -65,6 +65,8 @@ function test_getent_shadow() {
 }
 
 function test_id() {
+  getent passwd
+  cat /etc/passwd
   actual="$(id linyows)"
   expected="uid=74049(linyows) gid=2000(admin) groups=2000(admin)"
 
