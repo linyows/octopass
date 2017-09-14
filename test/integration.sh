@@ -65,9 +65,12 @@ function test_getent_shadow() {
 }
 
 function test_id() {
-  id linyows
   actual="$(id linyows)"
-  expected="uid=74049(linyows) gid=2000(admin) groups=2000(admin)"
+  if [ "x$TRAVIS" == "xtrue" ]; then
+    expected="uid=74049(linyows) gid=2000(travis) groups=2000(travis)"
+  else
+    expected="uid=74049(linyows) gid=2000(admin) groups=2000(admin)"
+  fi
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
