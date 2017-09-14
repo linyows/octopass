@@ -53,7 +53,7 @@ void octopass_remove_quotes(char *s)
   int i = 0;
   while (s[i] != '\0' && s[i] == '"')
     i++;
-  memcpy(s, &s[i], strlen(s));
+  memmove(s, &s[i], strlen(s));
 }
 
 const char *octopass_truncate(const char *str, int len)
