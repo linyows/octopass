@@ -192,7 +192,7 @@ github_release: pkg ## Upload archives to Github Release on Mac
 	go get github.com/tcnksm/ghr
 	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
-packagecloud_release: pkg ## Upload archives to PackageCloud on Mac
+packagecloud_release: ## Upload archives to PackageCloud on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	go get github.com/mlafeldt/pkgcloud/...
 	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.el7.rpm
