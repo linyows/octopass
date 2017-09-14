@@ -419,15 +419,16 @@ int octopass_github_team_id(char *team_name, char *data)
 
   json_array_foreach(teams, i, team)
   {
+    if (!json_is_object(team)) {
+      continue;
+    }
     const char *name = json_string_value(json_object_get(team, "name"));
     if (name != NULL && strcmp(team_name, name) == 0) {
       const json_int_t id = json_integer_value(json_object_get(team, "id"));
-      json_decref(teams);
       return id;
     }
   }
 
-  json_decref(teams);
   return 0;
 }
 
@@ -534,11 +535,8 @@ int octopass_autentication_with_token(struct config *con, char *user, char *toke
     const char *login = json_string_value(json_object_get(root, "login"));
 
     if (strcmp(login, user) == 0) {
-      json_decref(root);
       return 0;
     }
-
-    json_decref(root);
   }
 
   if (con->syslog) {
@@ -565,7 +563,6 @@ const char *octopass_only_keys(char *data)
 
   const char *res = strdup(keys);
   free(keys);
-  json_decref(root);
 
   return res;
 }
@@ -604,7 +601,6 @@ const char *octopass_github_team_members_keys(struct config *con)
   free(res.data);
 
   if (!json_is_array(root)) {
-    json_decref(root);
     return NULL;
   }
 
@@ -629,7 +625,6 @@ const char *octopass_github_team_members_keys(struct config *con)
 
   const char *result = strdup(members_keys);
   free(members_keys);
-  json_decref(root);
 
   return (strlen(result) > 0) ? result : NULL;
 }
