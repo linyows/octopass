@@ -132,6 +132,7 @@ rpm5: jansson source_for_rpm ## Packaging for RPM-5
 	cp builds/octopass-$(VERSION).tar.gz /usr/src/redhat/SOURCES
 	rpmbuild -ba rpm/octopass.spec
 	cp /usr/src/redhat/RPMS/*/*.rpm /octopass/builds
+	mv /octopass/builds/{octopass-$(VERSION)-1.el5.x86_64.rpm,octopass-$(VERSION)-1.x86_64.el5.rpm}
 
 jansson: build_dir ## Build and Install Janson
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Building and Installing Jansson$(RESET)"
@@ -191,7 +192,7 @@ github_release: pkg ## Upload archives to Github Release on Mac
 	go get github.com/tcnksm/ghr
 	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
-packagecloud_release: pkg ## Upload archives to PackageCloud on Mac
+packagecloud_release: ## Upload archives to PackageCloud on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	go get github.com/mlafeldt/pkgcloud/...
 	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.el7.rpm

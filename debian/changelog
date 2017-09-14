@@ -1,3 +1,8 @@
+octopass (0.3.5-1) xenial; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Thu, 14 Sep 2017 19:00:00 +0900
 octopass (0.3.3-1) xenial; urgency=medium
 
   * Fix segmentation fault
