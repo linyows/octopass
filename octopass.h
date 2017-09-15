@@ -72,6 +72,7 @@ struct config {
   char token[MAXBUF];
   char organization[MAXBUF];
   char team[MAXBUF];
+  char repository[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
   char shell[MAXBUF];
