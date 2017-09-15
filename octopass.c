@@ -532,6 +532,7 @@ int octopass_team_members(struct config *con, struct response *res)
 
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
+  return 0;
 }
 
 // OK: 0
