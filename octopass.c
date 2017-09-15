@@ -177,6 +177,7 @@ void octopass_config_loading(struct config *con, char *filename)
   memset(con->token, '\0', sizeof(con->token));
   memset(con->organization, '\0', sizeof(con->organization));
   memset(con->team, '\0', sizeof(con->team));
+  memset(con->repository, '\0', sizeof(con->repository));
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
@@ -223,6 +224,8 @@ void octopass_config_loading(struct config *con, char *filename)
       memcpy(con->organization, value, strlen(value));
     } else if (strcmp(key, "Team") == 0) {
       memcpy(con->team, value, strlen(value));
+    } else if (strcmp(key, "Repository") == 0) {
+      memcpy(con->repository, value, strlen(value));
     } else if (strcmp(key, "Group") == 0) {
       memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Home") == 0) {
@@ -258,7 +261,11 @@ void octopass_config_loading(struct config *con, char *filename)
   }
 
   if (strlen(con->group_name) == 0) {
-    memcpy(con->group_name, con->team, strlen(con->team));
+    if (strlen(con->team) == 0) {
+      memcpy(con->group_name, con->repository, strlen(con->repository));
+    } else {
+      memcpy(con->group_name, con->team, strlen(con->team));
+    }
   }
 
   if (strlen(con->home) == 0) {
@@ -274,10 +281,10 @@ void octopass_config_loading(struct config *con, char *filename)
   if (con->syslog) {
     const char *pg_name = "octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
-                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
-           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
-           con->gid, con->group_name, con->home, con->shell, con->cache);
+    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, repository: %s, "
+                     "syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
+           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->repository,
+           con->syslog, con->uid_starts, con->gid, con->group_name, con->home, con->shell, con->cache);
   }
 }
 
