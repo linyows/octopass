@@ -164,6 +164,11 @@ void octopass_override_config_by_env(struct config *con)
   if (team) {
     sprintf(con->team, "%s", team);
   }
+
+  char *repository = getenv("OCTOPASS_REPOSITORY");
+  if (repository) {
+    sprintf(con->repository, "%s", repository);
+  }
 }
 
 void octopass_config_loading(struct config *con, char *filename)
