@@ -530,6 +530,10 @@ int octopass_team_members(struct config *con, struct response *res)
   return 0;
 }
 
+int octopass_repository_collaborators(struct config *con, struct response *res)
+{
+}
+
 // OK: 0
 // NG: 1
 int octopass_autentication_with_token(struct config *con, char *user, char *token)
