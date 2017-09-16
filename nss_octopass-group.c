@@ -67,7 +67,7 @@ enum nss_status _nss_octopass_setgrent_locked(int stayopen)
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -221,7 +221,7 @@ enum nss_status _nss_octopass_getgrgid_r_locked(gid_t gid, struct group *result,
     return NSS_STATUS_NOTFOUND;
   }
 
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -305,7 +305,7 @@ enum nss_status _nss_octopass_getgrnam_r_locked(const char *name, struct group *
     return NSS_STATUS_NOTFOUND;
   }
 
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);

@@ -67,7 +67,7 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stayopen);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -202,7 +202,7 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);

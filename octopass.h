@@ -84,7 +84,7 @@ struct config {
   int shared_users_count;
 };
 
-extern int octopass_team_members(struct config *con, struct response *res);
+extern int octopass_members(struct config *con, struct response *res);
 extern void octopass_config_loading(struct config *con, char *filename);
 extern json_t *octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *octopass_github_team_member_by_id(int gh_id, json_t *root);
