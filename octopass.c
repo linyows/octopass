@@ -441,7 +441,7 @@ int octopass_github_team_id(char *team_name, char *data)
     }
   }
 
-  return 0;
+  return -1;
 }
 
 json_t *octopass_github_team_member_by_name(char *name, json_t *members)
