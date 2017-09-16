@@ -53,7 +53,7 @@
 #define OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
 #define MAXBUF 1024
-#define DELIM " = "
+#define DELIM "= "
 
 // This macro is available with more than 2.5
 #ifndef json_array_foreach
