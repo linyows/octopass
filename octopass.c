@@ -532,6 +532,19 @@ int octopass_team_members(struct config *con, struct response *res)
 
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
+  char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
+  sprintf(url, "%srepos/%s/%s/collaborators", con->endpoint, con->organization, con->repository);
+
+  octopass_github_request(con, url, res);
+
+  if (!res->data) {
+    fprintf(stderr, "Request failure\n");
+    if (con->syslog) {
+      closelog();
+    }
+    return -1;
+  }
+
   return 0;
 }
 
