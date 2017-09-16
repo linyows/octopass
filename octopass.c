@@ -261,7 +261,7 @@ void octopass_config_loading(struct config *con, char *filename)
   }
 
   if (strlen(con->group_name) == 0) {
-    if (strlen(con->team) == 0) {
+    if (strlen(con->repository) != 0) {
       memcpy(con->group_name, con->repository, strlen(con->repository));
     } else {
       memcpy(con->group_name, con->team, strlen(con->team));
