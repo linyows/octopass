@@ -208,12 +208,14 @@ void octopass_config_loading(struct config *con, char *filename)
     char *lasts;
     char *key   = strtok_r(line, DELIM, &lasts);
     char *value = strtok_r(NULL, DELIM, &lasts);
-    if (strlen(lasts) > 0) {
+
+    if (strcmp(key, "SharedUsers") == 0 && strlen(lasts) > 0) {
       char v[strlen(value) + strlen(lasts)];
       sprintf(v, "%s %s", value, lasts);
-      value = v;
+      value = strdup(v);
+    } else {
+      octopass_remove_quotes(value);
     }
-    octopass_remove_quotes(value);
 
     if (strcmp(key, "Endpoint") == 0) {
       const char *url = octopass_url_normalization(value);
