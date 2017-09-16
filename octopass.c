@@ -515,6 +515,19 @@ int octopass_team_members_by_team_id(struct config *con, int team_id, struct res
   return 0;
 }
 
+int octopass_members(struct config *con, struct response *res)
+{
+  int status = 0;
+
+  if (con->repository) {
+    status = octopass_repository_collaborators(con, res);
+  } else {
+    status = octopass_team_members(con, res);
+  }
+
+  return status;
+}
+
 int octopass_team_members(struct config *con, struct response *res)
 {
   int team_id = octopass_team_id(con);
