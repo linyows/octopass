@@ -178,6 +178,7 @@ void octopass_config_loading(struct config *con, char *filename)
   memset(con->organization, '\0', sizeof(con->organization));
   memset(con->team, '\0', sizeof(con->team));
   memset(con->repository, '\0', sizeof(con->repository));
+  memset(con->permission_level, '\0', sizeof(con->permission_level));
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
@@ -268,6 +269,11 @@ void octopass_config_loading(struct config *con, char *filename)
     } else {
       memcpy(con->group_name, con->team, strlen(con->team));
     }
+  }
+
+  if (strlen(con->repository) != 0 && strlen(con->permission_level) == 0) {
+    char *permission_level = "push";
+    memcpy(con->permission_level, permission_level, strlen(permission_level));
   }
 
   if (strlen(con->home) == 0) {
