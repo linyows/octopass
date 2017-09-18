@@ -538,6 +538,34 @@ int octopass_team_members(struct config *con, struct response *res)
   return 0;
 }
 
+int octopass_restrict_members_with_permission_level(struct config *con, struct response *res)
+{
+  json_error_t error;
+  json_t *members;
+  json_t *member;
+  members = json_loads(res->data, 0, &error);
+  int i;
+
+  json_array_foreach(members, i, member)
+  {
+    if (!json_is_object(member)) {
+      continue;
+    }
+    json_t *permissions = json_object_get(member, "permissions");
+    if (!json_is_object(permissions)) {
+      continue;
+    }
+    json_t * permission = json_object_get(permissions, con->permission_level);
+    if (json_is_false(permission)) {
+      if (0 != json_array_remove(members, i)) {
+        return -1;
+      }
+    }
+  }
+
+  return 0;
+}
+
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
