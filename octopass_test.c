@@ -283,6 +283,16 @@ Test(octopass, team_id, .init = setup)
   cr_assert_eq(id, 2244789);
 }
 
+Test(octopass, repository_collaborators, .init = setup)
+{
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+  octopass_repository_collaborators(&con, &res);
+  //cr_assert_str_eq(res.data, "");
+}
+
 Test(octopass, authentication_with_token, .init = setup)
 {
   struct config con;
