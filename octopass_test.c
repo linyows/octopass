@@ -107,17 +107,20 @@ Test(octopass, override_config_by_env)
   cr_assert_str_empty(con.token);
   cr_assert_str_empty(con.endpoint);
   cr_assert_str_empty(con.organization);
-  // cr_assert_str_empty(con.team);
+  cr_assert_str_empty(con.team);
+  cr_assert_str_empty(con.repository);
 
   putenv("OCTOPASS_TOKEN=secret-token");
   putenv("OCTOPASS_ENDPOINT=https://api.github.com/");
   putenv("OCTOPASS_ORGANIZATION=octopass");
   putenv("OCTOPASS_TEAM=operation");
+  putenv("OCTOPASS_REPOSITORY=foo");
   octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
   cr_assert_str_eq(con.endpoint, "https://api.github.com/");
   cr_assert_str_eq(con.organization, "octopass");
   cr_assert_str_eq(con.team, "operation");
+  cr_assert_str_eq(con.repository, "foo");
 
   clearenv();
 }
