@@ -149,6 +149,29 @@ Test(octopass, config_loading)
   cr_assert_str_eq(con.shared_users[1], (char *)"deploy");
 }
 
+Test(octopass, config_loading__when_use_repository)
+{
+  clearenv();
+
+  struct config con;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+
+  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
+  cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
+  cr_assert_str_eq(con.organization, "yourorganization");
+  cr_assert_str_eq(con.repository, "yourrepo");
+  cr_assert_str_eq(con.permission_level, "push");
+  cr_assert_str_eq(con.group_name, "yourrepo");
+  cr_assert_str_eq(con.home, "/home/%s");
+  cr_assert_str_eq(con.shell, "/bin/bash");
+  cr_assert_eq(con.uid_starts, 2000);
+  cr_assert_eq(con.gid, 2000);
+  cr_assert_eq(con.cache, 300);
+  cr_assert(con.syslog == false);
+  cr_assert_eq(con.shared_users_count, 0);
+}
+
 Test(octopass, export_file)
 {
   char *f = "/tmp/octopass-export_file_test_1.txt";
