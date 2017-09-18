@@ -581,7 +581,7 @@ int octopass_repository_collaborators(struct config *con, struct response *res)
     return -1;
   }
 
-  return 0;
+  return octopass_restrict_members_with_permission_level(con, res);
 }
 
 int octopass_members(struct config *con, struct response *res)
