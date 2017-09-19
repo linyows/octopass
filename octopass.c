@@ -538,32 +538,19 @@ int octopass_team_members(struct config *con, struct response *res)
   return 0;
 }
 
-int octopass_restrict_members_with_permission_level(struct config *con, struct response *res)
+int octopass_is_authorized_member(struct config *con, json_t *member)
 {
-  json_error_t error;
-  json_t *members;
-  json_t *member;
-  members = json_loads(res->data, 0, &error);
-  int i;
-
-  json_array_foreach(members, i, member)
-  {
-    if (!json_is_object(member)) {
-      continue;
-    }
-    json_t *permissions = json_object_get(member, "permissions");
-    if (!json_is_object(permissions)) {
-      continue;
-    }
-    json_t * permission = json_object_get(permissions, con->permission_level);
-    if (json_is_false(permission)) {
-      if (0 != json_array_remove(members, i)) {
-        return -1;
-      }
-    }
+  if (!json_is_object(member)) {
+    return 0;
   }
 
-  return 0;
+  json_t *permissions = json_object_get(member, "permissions");
+  if (!json_is_object(permissions)) {
+    return 0;
+  }
+
+  json_t *permission = json_object_get(permissions, con->permission_level);
+  return json_is_true(permission) ? 1 : 0;
 }
 
 int octopass_repository_collaborators(struct config *con, struct response *res)
@@ -581,7 +568,7 @@ int octopass_repository_collaborators(struct config *con, struct response *res)
     return -1;
   }
 
-  return octopass_restrict_members_with_permission_level(con, res);
+  return 0;
 }
 
 int octopass_members(struct config *con, struct response *res)
