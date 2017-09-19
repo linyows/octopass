@@ -289,8 +289,8 @@ Test(octopass, repository_collaborators, .init = setup)
   struct response res;
   char *f = "test/octopass_repo.conf";
   octopass_config_loading(&con, f);
-  int res = octopass_repository_collaborators(&con, &res);
-  cr_assert_eq(res, 0);
+  int status = octopass_repository_collaborators(&con, &res);
+  cr_assert_eq(status, 0);
 }
 
 Test(octopass, authentication_with_token, .init = setup)
@@ -300,8 +300,8 @@ Test(octopass, authentication_with_token, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = getenv("OCTOPASS_TOKEN");
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 0);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 0);
 }
 
 Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
@@ -311,8 +311,8 @@ Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "dummy";
   char *token = getenv("OCTOPASS_TOKEN");
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 1);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 1);
 }
 
 Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
@@ -322,8 +322,8 @@ Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = "dummydummydummydummydummydummydummydummy";
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 1);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 1);
 }
 
 Test(octopass, github_user_keys, .init = setup)
