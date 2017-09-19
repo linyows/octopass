@@ -289,8 +289,8 @@ Test(octopass, repository_collaborators, .init = setup)
   struct response res;
   char *f = "test/octopass_repo.conf";
   octopass_config_loading(&con, f);
-  octopass_repository_collaborators(&con, &res);
-  //cr_assert_str_eq(res.data, "");
+  int res = octopass_repository_collaborators(&con, &res);
+  cr_assert_eq(res, 0);
 }
 
 Test(octopass, authentication_with_token, .init = setup)
