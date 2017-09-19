@@ -285,6 +285,9 @@ Test(octopass, team_id, .init = setup)
 
 Test(octopass, is_authorized_member, .init = setup)
 {
+  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
   struct config con;
   struct response res;
   char *f = "test/octopass_repo.conf";
@@ -299,18 +302,40 @@ Test(octopass, is_authorized_member, .init = setup)
   members = json_loads(res.data, 0, &error);
   json_array_foreach(members, i, member) {
     int status2 = octopass_is_authorized_member(&con, member);
-    cr_assert_eq(status2, 0);
+    cr_assert_eq(status2, 1);
   }
+
+  clearenv();
 }
 
 Test(octopass, repository_collaborators, .init = setup)
 {
+  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
   struct config con;
   struct response res;
   char *f = "test/octopass_repo.conf";
   octopass_config_loading(&con, f);
   int status = octopass_repository_collaborators(&con, &res);
   cr_assert_eq(status, 0);
+  cr_assert_str_eq(res.data,
+                   "[{\"login\":\"linyows\",\"id\":72049,\"avatar_url\":\""
+                   "https://avatars1.githubusercontent.com/u/72049?v=4\",\""
+                   "gravatar_id\":\"\",\"url\":\"https://api.github.com/users/linyows\","
+                   "\"html_url\":\"https://github.com/linyows\",\"followers_url\":\""
+                   "https://api.github.com/users/linyows/followers\",\"following_url\":\""
+                   "https://api.github.com/users/linyows/following{/other_user}\","
+                   "\"gists_url\":\"https://api.github.com/users/linyows/gists{/gist_id}\","
+                   "\"starred_url\":\"https://api.github.com/users/linyows/starred{/owner}{/repo}\","
+                   "\"subscriptions_url\":\"https://api.github.com/users/linyows/subscriptions\",\""
+                   "organizations_url\":\"https://api.github.com/users/linyows/orgs\",\"repos_url\":"
+                   "\"https://api.github.com/users/linyows/repos\",\"events_url\":\""
+                   "https://api.github.com/users/linyows/events{/privacy}\",\"received_events_url\""
+                   ":\"https://api.github.com/users/linyows/received_events\",\"type\":\"User\",\""
+                   "site_admin\":false,\"permissions\":{\"admin\":true,\"push\":true,\"pull\":true}}]");
+
+  clearenv();
 }
 
 Test(octopass, authentication_with_token, .init = setup)
