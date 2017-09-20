@@ -308,6 +308,31 @@ Test(octopass, is_authorized_collaborator, .init = setup)
   clearenv();
 }
 
+Test(octopass, rebuild_data_with_authorized, .init = setup)
+{
+  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+  octopass_repository_collaborators(&con, &res);
+  octopass_rebuild_data_with_authorized(&con, &res);
+
+  size_t i;
+  json_error_t error;
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+  json_array_foreach(collaborators, i, collaborator) {
+    const char *login = json_string_value(json_object_get(collaborator, "login"));
+    cr_assert_str_eq(login, "linyows");
+  }
+
+  clearenv();
+}
+
 Test(octopass, repository_collaborators, .init = setup)
 {
   putenv("OCTOPASS_ORGANIZATION=linyows");
