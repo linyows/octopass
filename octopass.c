@@ -538,13 +538,13 @@ int octopass_team_members(struct config *con, struct response *res)
   return 0;
 }
 
-int octopass_is_authorized_member(struct config *con, json_t *member)
+int octopass_is_authorized_collaborator(struct config *con, json_t *collaborator)
 {
-  if (!json_is_object(member)) {
+  if (!json_is_object(collaborator)) {
     return 0;
   }
 
-  json_t *permissions = json_object_get(member, "permissions");
+  json_t *permissions = json_object_get(collaborator, "permissions");
   if (!json_is_object(permissions)) {
     return 0;
   }

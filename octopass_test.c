@@ -283,7 +283,7 @@ Test(octopass, team_id, .init = setup)
   cr_assert_eq(id, 2244789);
 }
 
-Test(octopass, is_authorized_member, .init = setup)
+Test(octopass, is_authorized_collaborator, .init = setup)
 {
   putenv("OCTOPASS_ORGANIZATION=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
@@ -297,11 +297,11 @@ Test(octopass, is_authorized_member, .init = setup)
 
   size_t i;
   json_error_t error;
-  json_t *members;
-  json_t *member;
-  members = json_loads(res.data, 0, &error);
-  json_array_foreach(members, i, member) {
-    int status2 = octopass_is_authorized_member(&con, member);
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+  json_array_foreach(collaborators, i, collaborator) {
+    int status2 = octopass_is_authorized_collaborator(&con, collaborator);
     cr_assert_eq(status2, 1);
   }
 
