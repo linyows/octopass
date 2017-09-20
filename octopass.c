@@ -553,6 +553,25 @@ int octopass_is_authorized_collaborator(struct config *con, json_t *collaborator
   return json_is_true(permission) ? 1 : 0;
 }
 
+int octopass_rebuild_data_with_authorized(struct config *con, struct response *res)
+{
+  json_error_t error;
+  json_t *collaborators = json_loads(res->data, 0, &error);
+  json_t *collaborator;
+  json_t *new_data = json_array();
+  int i;
+
+  json_array_foreach(collaborators, i, collaborator)
+  {
+    if (1 == octopass_is_authorized_collaborator(con, collaborator)) {
+      json_array_append_new(new_data, collaborator);
+    }
+  }
+  res->data = json_dumps(new_data, 0);
+
+  return 0;
+}
+
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
