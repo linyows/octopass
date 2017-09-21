@@ -348,21 +348,13 @@ Test(octopass, repository_collaborators, .init = setup)
   octopass_config_loading(&con, f);
   int status = octopass_repository_collaborators(&con, &res);
   cr_assert_eq(status, 0);
-  cr_assert_str_eq(res.data,
-                   "[{\"login\":\"linyows\",\"id\":72049,\"avatar_url\":\""
-                   "https://avatars1.githubusercontent.com/u/72049?v=4\",\""
-                   "gravatar_id\":\"\",\"url\":\"https://api.github.com/users/linyows\","
-                   "\"html_url\":\"https://github.com/linyows\",\"followers_url\":\""
-                   "https://api.github.com/users/linyows/followers\",\"following_url\":\""
-                   "https://api.github.com/users/linyows/following{/other_user}\","
-                   "\"gists_url\":\"https://api.github.com/users/linyows/gists{/gist_id}\","
-                   "\"starred_url\":\"https://api.github.com/users/linyows/starred{/owner}{/repo}\","
-                   "\"subscriptions_url\":\"https://api.github.com/users/linyows/subscriptions\",\""
-                   "organizations_url\":\"https://api.github.com/users/linyows/orgs\",\"repos_url\":"
-                   "\"https://api.github.com/users/linyows/repos\",\"events_url\":\""
-                   "https://api.github.com/users/linyows/events{/privacy}\",\"received_events_url\""
-                   ":\"https://api.github.com/users/linyows/received_events\",\"type\":\"User\",\""
-                   "site_admin\":false,\"permissions\":{\"admin\":true,\"push\":true,\"pull\":true}}]");
+
+  json_error_t error;
+  json_t *collaborators = json_loads(res.data, 0, &error);
+  cr_assert_eq(json_array_size(collaborators), 1);
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login, "linyows");
 
   clearenv();
 }
