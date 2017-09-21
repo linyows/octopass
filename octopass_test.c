@@ -115,12 +115,14 @@ Test(octopass, override_config_by_env)
   putenv("OCTOPASS_ORGANIZATION=octopass");
   putenv("OCTOPASS_TEAM=operation");
   putenv("OCTOPASS_REPOSITORY=foo");
+  putenv("OCTOPASS_PERMISSION_LEVEL=admin");
   octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
   cr_assert_str_eq(con.endpoint, "https://api.github.com/");
   cr_assert_str_eq(con.organization, "octopass");
   cr_assert_str_eq(con.team, "operation");
   cr_assert_str_eq(con.repository, "foo");
+  cr_assert_str_eq(con.permission_level, "admin");
 
   clearenv();
 }

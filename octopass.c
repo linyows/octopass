@@ -169,6 +169,11 @@ void octopass_override_config_by_env(struct config *con)
   if (repository) {
     sprintf(con->repository, "%s", repository);
   }
+
+  char *permission_level = getenv("OCTOPASS_PERMISSION_LEVEL");
+  if (permission_level) {
+    sprintf(con->permission_level, "%s", permission_level);
+  }
 }
 
 void octopass_config_loading(struct config *con, char *filename)
