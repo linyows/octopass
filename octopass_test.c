@@ -317,7 +317,11 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   struct response res;
   char *f = "test/octopass_repo.conf";
   octopass_config_loading(&con, f);
-  octopass_repository_collaborators(&con, &res);
+
+  char *stub = "test/collaborators.json";
+  res.httpstatus = (long *)200;
+  res.data = (char *)octopass_import_file(stub);
+  res.size = strlen(res.data);
   octopass_rebuild_data_with_authorized(&con, &res);
 
   size_t i;
