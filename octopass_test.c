@@ -341,6 +341,39 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   clearenv();
 }
 
+Test(octopass, rebuild_data_with_authorized__when_permission_level_is_pull, .init = setup)
+{
+  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+  putenv("OCTOPASS_PERMISSION_LEVEL=pull");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+
+  char *stub = "test/collaborators.json";
+  res.httpstatus = (long *)200;
+  res.data = (char *)octopass_import_file(stub);
+  res.size = strlen(res.data);
+  octopass_rebuild_data_with_authorized(&con, &res);
+
+  size_t i;
+  json_error_t error;
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+
+  cr_assert_eq(json_array_size(collaborators), 2);
+
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login1 = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login1, "linyows");
+
+  json_t *other = json_array_get(collaborators, 1);
+  const char *login2 = json_string_value(json_object_get(other, "login"));
+  cr_assert_str_eq(login2, "nolinyows");
+
   clearenv();
 }
 
