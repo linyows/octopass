@@ -331,10 +331,15 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   json_t *collaborators;
   json_t *collaborator;
   collaborators = json_loads(res.data, 0, &error);
-  json_array_foreach(collaborators, i, collaborator) {
-    const char *login = json_string_value(json_object_get(collaborator, "login"));
-    cr_assert_str_eq(login, "linyows");
-  }
+
+  cr_assert_eq(json_array_size(collaborators), 1);
+
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login, "linyows");
+
+  clearenv();
+}
 
   clearenv();
 }
