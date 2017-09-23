@@ -163,7 +163,7 @@ Test(octopass, config_loading__when_use_repository)
 
   cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
-  cr_assert_str_eq(con.organization, "yourorganization");
+  cr_assert_str_eq(con.owner, "yourorganization");
   cr_assert_str_eq(con.repository, "yourrepo");
   cr_assert_str_eq(con.permission_level, "push");
   cr_assert_str_eq(con.group_name, "yourrepo");
