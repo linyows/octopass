@@ -241,6 +241,8 @@ void octopass_config_loading(struct config *con, char *filename)
       memcpy(con->owner, value, strlen(value));
     } else if (strcmp(key, "Repository") == 0) {
       memcpy(con->repository, value, strlen(value));
+    } else if (strcmp(key, "PermissionLevel") == 0) {
+      memcpy(con->permission_level, value, strlen(value));
     } else if (strcmp(key, "Group") == 0) {
       memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Home") == 0) {
