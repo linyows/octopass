@@ -283,6 +283,10 @@ void octopass_config_loading(struct config *con, char *filename)
     }
   }
 
+  if (strlen(con->owner) == 0 && strlen(con->organization) != 0) {
+    memcpy(con->owner, con->organization, strlen(con->organization));
+  }
+
   if (strlen(con->repository) != 0 && strlen(con->permission_level) == 0) {
     char *permission_level = "push";
     memcpy(con->permission_level, permission_level, strlen(permission_level));
