@@ -16,9 +16,9 @@
 Description
 -----------
 
-This is linux user management tool with the organization/team on github, and authentication.
-Depending on github for user management, there are certain risks,
-but features easy handling and ease of operation.
+This is user management tool for linux by github.
+The name-resloves and authentication is provided the team or collaborator on github.
+Features easy handling and ease of operation.
 
 Usage
 -----
@@ -76,16 +76,19 @@ With this, even if Github is down, it will work if past caches remain.
 Installation
 ------------
 
+Ubuntu:
+
+```sh
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+```
+
+CentOS:
+
+```sh
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.rpm.sh | sudo bash
+```
+
 Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
-
-Available for:
-
-- CentOS 7.x
-- CentOS 6.x
-- CentOS 5.x
-- Ubuntu Xenial
-- Ubuntu Trusty
-- Ubuntu Precise
 
 ### Building from Source
 
@@ -95,7 +98,7 @@ Dependency
 - libcurl
 - jansson
 
-```
+```sh
 $ git clone https://github.com/linyows/octopass
 $ make && make install
 $ mv octopass.conf.example /etc/octopass.conf
@@ -106,7 +109,7 @@ Configuration
 
 Edit octopass.conf:
 
-```
+```sh
 $ mv /etc/{octopass.conf.example,octopass.conf}
 ```
 
@@ -116,6 +119,9 @@ Endpoint     | github endpoint                      | https://api.github.com
 Token        | github personal access token         | -
 Organization | github organization                  | -
 Team         | github team                          | -
+Owner        | github owner                         | -
+Repository   | github repository                    | -
+Permission   | github collaborator permission       | write
 Group        | group on linux                       | same as team
 Home         | user home                            | /home/%s
 Shell        | user shell                           | /bin/bash
@@ -132,7 +138,7 @@ Need: Read org and team membership
 
 /etc/ssh/sshd_config:
 
-```
+```conf
 AuthorizedKeysCommand /usr/bin/octopass
 AuthorizedKeysCommandUser root
 UsePAM yes
@@ -145,7 +151,7 @@ PasswordAuthentication no
 
 /etc/pam.d/sshd:
 
-```
+```conf
 #@include common-auth
 auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
@@ -156,7 +162,7 @@ session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 
 /etc/pam.d/system-auth-ac:
 
-```
+```conf
 # auth        sufficient    pam_unix.so nullok try_first_pass
 auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
@@ -164,7 +170,7 @@ auth optional pam_unix.so not_set_pass use_first_pass nodelay
 
 /etc/pam.d/sshd:
 
-```
+```conf
 session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 ```
 
@@ -172,7 +178,7 @@ session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 
 /etc/nsswitch.conf:
 
-```
+```conf
 passwd:     files octopass sss
 shadow:     files octopass sss
 group:      files octopass sss

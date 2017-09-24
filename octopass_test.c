@@ -107,17 +107,24 @@ Test(octopass, override_config_by_env)
   cr_assert_str_empty(con.token);
   cr_assert_str_empty(con.endpoint);
   cr_assert_str_empty(con.organization);
-  // cr_assert_str_empty(con.team);
+  cr_assert_str_empty(con.team);
+  cr_assert_str_empty(con.repository);
 
   putenv("OCTOPASS_TOKEN=secret-token");
   putenv("OCTOPASS_ENDPOINT=https://api.github.com/");
   putenv("OCTOPASS_ORGANIZATION=octopass");
   putenv("OCTOPASS_TEAM=operation");
+  putenv("OCTOPASS_OWNER=linyows");
+  putenv("OCTOPASS_REPOSITORY=foo");
+  putenv("OCTOPASS_PERMISSION=admin");
   octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
   cr_assert_str_eq(con.endpoint, "https://api.github.com/");
   cr_assert_str_eq(con.organization, "octopass");
   cr_assert_str_eq(con.team, "operation");
+  cr_assert_str_eq(con.owner, "linyows");
+  cr_assert_str_eq(con.repository, "foo");
+  cr_assert_str_eq(con.permission, "admin");
 
   clearenv();
 }
@@ -144,6 +151,29 @@ Test(octopass, config_loading)
   cr_assert_eq(con.shared_users_count, 2);
   cr_assert_str_eq(con.shared_users[0], (char *)"admin");
   cr_assert_str_eq(con.shared_users[1], (char *)"deploy");
+}
+
+Test(octopass, config_loading__when_use_repository)
+{
+  clearenv();
+
+  struct config con;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+
+  cr_assert_str_eq(con.endpoint, "https://your.github.com/api/v3/");
+  cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
+  cr_assert_str_eq(con.owner, "yourorganization");
+  cr_assert_str_eq(con.repository, "yourrepo");
+  cr_assert_str_eq(con.permission, "write");
+  cr_assert_str_eq(con.group_name, "yourrepo");
+  cr_assert_str_eq(con.home, "/home/%s");
+  cr_assert_str_eq(con.shell, "/bin/bash");
+  cr_assert_eq(con.uid_starts, 2000);
+  cr_assert_eq(con.gid, 2000);
+  cr_assert_eq(con.cache, 300);
+  cr_assert(con.syslog == false);
+  cr_assert_eq(con.shared_users_count, 0);
 }
 
 Test(octopass, export_file)
@@ -257,6 +287,137 @@ Test(octopass, team_id, .init = setup)
   cr_assert_eq(id, 2244789);
 }
 
+Test(octopass, permission_level, .init = setup)
+{
+  char *adm = "admin";
+  char *admin = octopass_permission_level(adm);
+  cr_assert_str_eq(admin, "admin");
+
+  char *write = "write";
+  char *push = octopass_permission_level(write);
+  cr_assert_str_eq(push, "push");
+
+  char *read = "read";
+  char *pull = octopass_permission_level(read);
+  cr_assert_str_eq(pull, "pull");
+}
+
+Test(octopass, is_authorized_collaborator, .init = setup)
+{
+  putenv("OCTOPASS_OWNER=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+  int status1 = octopass_repository_collaborators(&con, &res);
+  cr_assert_eq(status1, 0);
+
+  size_t i;
+  json_error_t error;
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+  cr_assert_eq(json_array_size(collaborators), 1);
+
+  json_array_foreach(collaborators, i, collaborator) {
+    int status2 = octopass_is_authorized_collaborator(&con, collaborator);
+    cr_assert_eq(status2, 1);
+  }
+
+  clearenv();
+}
+
+Test(octopass, rebuild_data_with_authorized, .init = setup)
+{
+  putenv("OCTOPASS_OWNER=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+
+  char *stub = "test/collaborators.json";
+  res.httpstatus = (long *)200;
+  res.data = (char *)octopass_import_file(stub);
+  res.size = strlen(res.data);
+  octopass_rebuild_data_with_authorized(&con, &res);
+
+  size_t i;
+  json_error_t error;
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+
+  cr_assert_eq(json_array_size(collaborators), 1);
+
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login, "linyows");
+
+  clearenv();
+}
+
+Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = setup)
+{
+  putenv("OCTOPASS_OWNER=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+  putenv("OCTOPASS_PERMISSION=read");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+
+  char *stub = "test/collaborators.json";
+  res.httpstatus = (long *)200;
+  res.data = (char *)octopass_import_file(stub);
+  res.size = strlen(res.data);
+  octopass_rebuild_data_with_authorized(&con, &res);
+
+  size_t i;
+  json_error_t error;
+  json_t *collaborators;
+  json_t *collaborator;
+  collaborators = json_loads(res.data, 0, &error);
+
+  cr_assert_eq(json_array_size(collaborators), 2);
+
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login1 = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login1, "linyows");
+
+  json_t *other = json_array_get(collaborators, 1);
+  const char *login2 = json_string_value(json_object_get(other, "login"));
+  cr_assert_str_eq(login2, "nolinyows");
+
+  clearenv();
+}
+
+Test(octopass, repository_collaborators, .init = setup)
+{
+  putenv("OCTOPASS_OWNER=linyows");
+  putenv("OCTOPASS_REPOSITORY=octopass");
+
+  struct config con;
+  struct response res;
+  char *f = "test/octopass_repo.conf";
+  octopass_config_loading(&con, f);
+  int status = octopass_repository_collaborators(&con, &res);
+  cr_assert_eq(status, 0);
+
+  json_error_t error;
+  json_t *collaborators = json_loads(res.data, 0, &error);
+  cr_assert_eq(json_array_size(collaborators), 1);
+  json_t *me = json_array_get(collaborators, 0);
+  const char *login = json_string_value(json_object_get(me, "login"));
+  cr_assert_str_eq(login, "linyows");
+
+  clearenv();
+}
+
 Test(octopass, authentication_with_token, .init = setup)
 {
   struct config con;
@@ -264,8 +425,8 @@ Test(octopass, authentication_with_token, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = getenv("OCTOPASS_TOKEN");
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 0);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 0);
 }
 
 Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
@@ -275,8 +436,8 @@ Test(octopass, authentication_with_token__when_wrong_user, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "dummy";
   char *token = getenv("OCTOPASS_TOKEN");
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 1);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 1);
 }
 
 Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
@@ -286,8 +447,8 @@ Test(octopass, authentication_with_token__when_wrong_token, .init = setup)
   octopass_config_loading(&con, f);
   char *user  = "linyows";
   char *token = "dummydummydummydummydummydummydummydummy";
-  int res     = octopass_autentication_with_token(&con, user, token);
-  cr_assert_eq(res, 1);
+  int status  = octopass_autentication_with_token(&con, user, token);
+  cr_assert_eq(status, 1);
 }
 
 Test(octopass, github_user_keys, .init = setup)

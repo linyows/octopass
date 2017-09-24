@@ -53,7 +53,7 @@
 #define OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
 #define MAXBUF 1024
-#define DELIM " = "
+#define DELIM "= "
 
 // This macro is available with more than 2.5
 #ifndef json_array_foreach
@@ -72,6 +72,9 @@ struct config {
   char token[MAXBUF];
   char organization[MAXBUF];
   char team[MAXBUF];
+  char owner[MAXBUF];
+  char repository[MAXBUF];
+  char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
   char shell[MAXBUF];
@@ -83,7 +86,7 @@ struct config {
   int shared_users_count;
 };
 
-extern int octopass_team_members(struct config *con, struct response *res);
+extern int octopass_members(struct config *con, struct response *res);
 extern void octopass_config_loading(struct config *con, char *filename);
 extern json_t *octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *octopass_github_team_member_by_id(int gh_id, json_t *root);

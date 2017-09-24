@@ -74,7 +74,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -224,7 +224,7 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- uid: %d", __func__, __LINE__, uid);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);
@@ -307,7 +307,7 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = octopass_team_members(&con, &res);
+  int status = octopass_members(&con, &res);
 
   if (status != 0) {
     free(res.data);

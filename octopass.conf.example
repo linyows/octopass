@@ -2,8 +2,14 @@
 
 # Required
 Token           = "iad87dih122ce66a1e20a751664c8a9dkoak87g7"
-Organization    = "yourorganization"
-Team            = "yourteam"
+
+## Use team
+#Organization    = "yourorganization"
+#Team            = "yourteam"
+
+## Use collaborators
+#Owner           = "yourname"
+#Repository      = "yourrepository"
 
 # Default
 #Endpoint        = "https://api.github.com/"

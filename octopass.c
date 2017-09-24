@@ -164,6 +164,21 @@ void octopass_override_config_by_env(struct config *con)
   if (team) {
     sprintf(con->team, "%s", team);
   }
+
+  char *owner = getenv("OCTOPASS_OWNER");
+  if (owner) {
+    sprintf(con->owner, "%s", owner);
+  }
+
+  char *repository = getenv("OCTOPASS_REPOSITORY");
+  if (repository) {
+    sprintf(con->repository, "%s", repository);
+  }
+
+  char *permission = getenv("OCTOPASS_PERMISSION");
+  if (permission) {
+    sprintf(con->permission, "%s", permission);
+  }
 }
 
 void octopass_config_loading(struct config *con, char *filename)
@@ -172,6 +187,8 @@ void octopass_config_loading(struct config *con, char *filename)
   memset(con->token, '\0', sizeof(con->token));
   memset(con->organization, '\0', sizeof(con->organization));
   memset(con->team, '\0', sizeof(con->team));
+  memset(con->repository, '\0', sizeof(con->repository));
+  memset(con->permission, '\0', sizeof(con->permission));
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
@@ -202,12 +219,14 @@ void octopass_config_loading(struct config *con, char *filename)
     char *lasts;
     char *key   = strtok_r(line, DELIM, &lasts);
     char *value = strtok_r(NULL, DELIM, &lasts);
-    if (strlen(lasts) > 0) {
+
+    if (strcmp(key, "SharedUsers") == 0 && strlen(lasts) > 0) {
       char v[strlen(value) + strlen(lasts)];
       sprintf(v, "%s %s", value, lasts);
-      value = v;
+      value = strdup(v);
+    } else {
+      octopass_remove_quotes(value);
     }
-    octopass_remove_quotes(value);
 
     if (strcmp(key, "Endpoint") == 0) {
       const char *url = octopass_url_normalization(value);
@@ -218,6 +237,12 @@ void octopass_config_loading(struct config *con, char *filename)
       memcpy(con->organization, value, strlen(value));
     } else if (strcmp(key, "Team") == 0) {
       memcpy(con->team, value, strlen(value));
+    } else if (strcmp(key, "Owner") == 0) {
+      memcpy(con->owner, value, strlen(value));
+    } else if (strcmp(key, "Repository") == 0) {
+      memcpy(con->repository, value, strlen(value));
+    } else if (strcmp(key, "Permission") == 0) {
+      memcpy(con->permission, value, strlen(value));
     } else if (strcmp(key, "Group") == 0) {
       memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Home") == 0) {
@@ -253,7 +278,20 @@ void octopass_config_loading(struct config *con, char *filename)
   }
 
   if (strlen(con->group_name) == 0) {
-    memcpy(con->group_name, con->team, strlen(con->team));
+    if (strlen(con->repository) != 0) {
+      memcpy(con->group_name, con->repository, strlen(con->repository));
+    } else {
+      memcpy(con->group_name, con->team, strlen(con->team));
+    }
+  }
+
+  if (strlen(con->owner) == 0 && strlen(con->organization) != 0) {
+    memcpy(con->owner, con->organization, strlen(con->organization));
+  }
+
+  if (strlen(con->repository) != 0 && strlen(con->permission) == 0) {
+    char *permission = "write";
+    memcpy(con->permission, permission, strlen(permission));
   }
 
   if (strlen(con->home) == 0) {
@@ -269,10 +307,10 @@ void octopass_config_loading(struct config *con, char *filename)
   if (con->syslog) {
     const char *pg_name = "octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, syslog: %d, "
-                     "uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
-           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->syslog, con->uid_starts,
-           con->gid, con->group_name, con->home, con->shell, con->cache);
+    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, owner: %s, repository: %s, permission: %s "
+                     "syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
+           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->owner, con->repository, con->permission,
+           con->syslog, con->uid_starts, con->gid, con->group_name, con->home, con->shell, con->cache);
   }
 }
 
@@ -429,7 +467,7 @@ int octopass_github_team_id(char *team_name, char *data)
     }
   }
 
-  return 0;
+  return -1;
 }
 
 json_t *octopass_github_team_member_by_name(char *name, json_t *members)
@@ -516,6 +554,85 @@ int octopass_team_members(struct config *con, struct response *res)
   }
 
   return 0;
+}
+
+char *octopass_permission_level(char *permission)
+{
+  char *level;
+
+  if (strcmp(permission, "admin") == 0) {
+    level = "admin";
+  } else if (strcmp(permission, "write") == 0) {
+    level = "push";
+  } else if (strcmp(permission, "read") == 0) {
+    level = "pull";
+  } else {
+    fprintf(stderr, "Unknown permission: %s\n", permission);
+  }
+
+  return level;
+}
+
+int octopass_is_authorized_collaborator(struct config *con, json_t *collaborator)
+{
+  if (!json_is_object(collaborator)) {
+    return 0;
+  }
+
+  json_t *permissions = json_object_get(collaborator, "permissions");
+  if (!json_is_object(permissions)) {
+    return 0;
+  }
+
+  char *level = octopass_permission_level(con->permission);
+  json_t *permission = json_object_get(permissions, level);
+  return json_is_true(permission) ? 1 : 0;
+}
+
+int octopass_rebuild_data_with_authorized(struct config *con, struct response *res)
+{
+  json_error_t error;
+  json_t *collaborators = json_loads(res->data, 0, &error);
+  json_t *collaborator;
+  json_t *new_data = json_array();
+  int i;
+
+  json_array_foreach(collaborators, i, collaborator)
+  {
+    if (1 == octopass_is_authorized_collaborator(con, collaborator)) {
+      json_array_append_new(new_data, collaborator);
+    }
+  }
+  res->data = json_dumps(new_data, 0);
+
+  return 0;
+}
+
+int octopass_repository_collaborators(struct config *con, struct response *res)
+{
+  char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
+  sprintf(url, "%srepos/%s/%s/collaborators", con->endpoint, con->owner, con->repository);
+
+  octopass_github_request(con, url, res);
+
+  if (!res->data) {
+    fprintf(stderr, "Request failure\n");
+    if (con->syslog) {
+      closelog();
+    }
+    return -1;
+  }
+
+  return octopass_rebuild_data_with_authorized(con, res);
+}
+
+int octopass_members(struct config *con, struct response *res)
+{
+  if (strlen(con->repository) != 0) {
+    return octopass_repository_collaborators(con, res);
+  } else {
+    return octopass_team_members(con, res);
+  }
 }
 
 // OK: 0
