@@ -307,9 +307,9 @@ void octopass_config_loading(struct config *con, char *filename)
   if (con->syslog) {
     const char *pg_name = "octopass";
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, repository: %s, "
+    syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, owner: %s, repository: %s, permission: %s "
                      "syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
-           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->repository,
+           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->owner, con->repository, con->permission,
            con->syslog, con->uid_starts, con->gid, con->group_name, con->home, con->shell, con->cache);
   }
 }
@@ -593,7 +593,7 @@ int octopass_rebuild_data_with_authorized(struct config *con, struct response *r
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
-  sprintf(url, "%srepos/%s/%s/collaborators", con->endpoint, con->organization, con->repository);
+  sprintf(url, "%srepos/%s/%s/collaborators", con->endpoint, con->owner, con->repository);
 
   octopass_github_request(con, url, res);
 

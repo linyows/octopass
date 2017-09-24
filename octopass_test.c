@@ -289,7 +289,7 @@ Test(octopass, team_id, .init = setup)
 
 Test(octopass, is_authorized_collaborator, .init = setup)
 {
-  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
 
   struct config con;
@@ -314,7 +314,7 @@ Test(octopass, is_authorized_collaborator, .init = setup)
 
 Test(octopass, rebuild_data_with_authorized, .init = setup)
 {
-  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
 
   struct config con;
@@ -345,7 +345,7 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
 
 Test(octopass, rebuild_data_with_authorized__when_permission_level_is_pull, .init = setup)
 {
-  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
   putenv("OCTOPASS_PERMISSION_LEVEL=pull");
 
@@ -381,7 +381,7 @@ Test(octopass, rebuild_data_with_authorized__when_permission_level_is_pull, .ini
 
 Test(octopass, repository_collaborators, .init = setup)
 {
-  putenv("OCTOPASS_ORGANIZATION=linyows");
+  putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
 
   struct config con;
