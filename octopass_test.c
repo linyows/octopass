@@ -287,6 +287,21 @@ Test(octopass, team_id, .init = setup)
   cr_assert_eq(id, 2244789);
 }
 
+Test(octopass, permission_level, .init = setup)
+{
+  char *adm = "admin";
+  char *admin = octopass_permission_level(adm);
+  cr_assert_str_eq(admin, "admin");
+
+  char *write = "write";
+  char *push = octopass_permission_level(write);
+  cr_assert_str_eq(push, "push");
+
+  char *read = "read";
+  char *pull = octopass_permission_level(read);
+  cr_assert_str_eq(pull, "pull");
+}
+
 Test(octopass, is_authorized_collaborator, .init = setup)
 {
   putenv("OCTOPASS_OWNER=linyows");
