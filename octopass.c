@@ -556,6 +556,23 @@ int octopass_team_members(struct config *con, struct response *res)
   return 0;
 }
 
+char *octopass_permission_level(char *permission)
+{
+  char *level;
+
+  if (strcmp(permission, "admin") == 0) {
+    level = "admin";
+  } else if (strcmp(permission, "write") == 0) {
+    level = "push";
+  } else if (strcmp(permission, "read") == 0) {
+    level = "pull";
+  } else {
+    fprintf(stderr, "Unknown permission: %s\n", permission);
+  }
+
+  return level;
+}
+
 int octopass_is_authorized_collaborator(struct config *con, json_t *collaborator)
 {
   if (!json_is_object(collaborator)) {
