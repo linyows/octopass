@@ -74,7 +74,7 @@ struct config {
   char team[MAXBUF];
   char owner[MAXBUF];
   char repository[MAXBUF];
-  char permission_level[MAXBUF];
+  char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
   char shell[MAXBUF];

@@ -116,7 +116,7 @@ Test(octopass, override_config_by_env)
   putenv("OCTOPASS_TEAM=operation");
   putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=foo");
-  putenv("OCTOPASS_PERMISSION_LEVEL=admin");
+  putenv("OCTOPASS_PERMISSION=admin");
   octopass_override_config_by_env(&con);
   cr_assert_str_eq(con.token, "secret-token");
   cr_assert_str_eq(con.endpoint, "https://api.github.com/");
@@ -124,7 +124,7 @@ Test(octopass, override_config_by_env)
   cr_assert_str_eq(con.team, "operation");
   cr_assert_str_eq(con.owner, "linyows");
   cr_assert_str_eq(con.repository, "foo");
-  cr_assert_str_eq(con.permission_level, "admin");
+  cr_assert_str_eq(con.permission, "admin");
 
   clearenv();
 }
@@ -165,7 +165,7 @@ Test(octopass, config_loading__when_use_repository)
   cr_assert_str_eq(con.token, "iad87dih122ce66a1e20a751664c8a9dkoak87g7");
   cr_assert_str_eq(con.owner, "yourorganization");
   cr_assert_str_eq(con.repository, "yourrepo");
-  cr_assert_str_eq(con.permission_level, "push");
+  cr_assert_str_eq(con.permission, "write");
   cr_assert_str_eq(con.group_name, "yourrepo");
   cr_assert_str_eq(con.home, "/home/%s");
   cr_assert_str_eq(con.shell, "/bin/bash");
@@ -360,11 +360,11 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   clearenv();
 }
 
-Test(octopass, rebuild_data_with_authorized__when_permission_level_is_pull, .init = setup)
+Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = setup)
 {
   putenv("OCTOPASS_OWNER=linyows");
   putenv("OCTOPASS_REPOSITORY=octopass");
-  putenv("OCTOPASS_PERMISSION_LEVEL=pull");
+  putenv("OCTOPASS_PERMISSION=read");
 
   struct config con;
   struct response res;

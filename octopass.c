@@ -175,9 +175,9 @@ void octopass_override_config_by_env(struct config *con)
     sprintf(con->repository, "%s", repository);
   }
 
-  char *permission_level = getenv("OCTOPASS_PERMISSION_LEVEL");
-  if (permission_level) {
-    sprintf(con->permission_level, "%s", permission_level);
+  char *permission = getenv("OCTOPASS_PERMISSION");
+  if (permission) {
+    sprintf(con->permission, "%s", permission);
   }
 }
 
@@ -188,7 +188,7 @@ void octopass_config_loading(struct config *con, char *filename)
   memset(con->organization, '\0', sizeof(con->organization));
   memset(con->team, '\0', sizeof(con->team));
   memset(con->repository, '\0', sizeof(con->repository));
-  memset(con->permission_level, '\0', sizeof(con->permission_level));
+  memset(con->permission, '\0', sizeof(con->permission));
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
@@ -241,8 +241,8 @@ void octopass_config_loading(struct config *con, char *filename)
       memcpy(con->owner, value, strlen(value));
     } else if (strcmp(key, "Repository") == 0) {
       memcpy(con->repository, value, strlen(value));
-    } else if (strcmp(key, "PermissionLevel") == 0) {
-      memcpy(con->permission_level, value, strlen(value));
+    } else if (strcmp(key, "Permission") == 0) {
+      memcpy(con->permission, value, strlen(value));
     } else if (strcmp(key, "Group") == 0) {
       memcpy(con->group_name, value, strlen(value));
     } else if (strcmp(key, "Home") == 0) {
@@ -289,9 +289,9 @@ void octopass_config_loading(struct config *con, char *filename)
     memcpy(con->owner, con->organization, strlen(con->organization));
   }
 
-  if (strlen(con->repository) != 0 && strlen(con->permission_level) == 0) {
-    char *permission_level = "push";
-    memcpy(con->permission_level, permission_level, strlen(permission_level));
+  if (strlen(con->repository) != 0 && strlen(con->permission) == 0) {
+    char *permission = "write";
+    memcpy(con->permission, permission, strlen(permission));
   }
 
   if (strlen(con->home) == 0) {
@@ -584,7 +584,8 @@ int octopass_is_authorized_collaborator(struct config *con, json_t *collaborator
     return 0;
   }
 
-  json_t *permission = json_object_get(permissions, con->permission_level);
+  char *level = octopass_permission_level(con->permission);
+  json_t *permission = json_object_get(permissions, level);
   return json_is_true(permission) ? 1 : 0;
 }
 
