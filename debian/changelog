@@ -1,3 +1,8 @@
+octopass (0.4.0-1) xenial; urgency=medium
+
+  * Support github repository collaborators as name resolve
+
+ -- linyows <linyows@gmail.com>  Mon, 25 Sep 2017 00:30:00 +0900
 octopass (0.3.5-1) xenial; urgency=medium
 
   * Bugfixes
