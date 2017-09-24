@@ -149,6 +149,21 @@ function test_authentication_wrong_user() {
   fi
 }
 
+function test_member_with_collaborators() {
+  export OCTOPASS_OWNER=linyows
+  export OCTOPASS_REPOSITORY=octopass
+  actual="$(getent passwd linyows)"
+  expected="linyows:x:74049:2000:managed by octopass:/home/linyows:/bin/bash"
+
+  if [ "x$actual" == "x$expected" ]; then
+    pass "${FUNCNAME[0]}"
+  else
+    fail "${FUNCNAME[0]}" "$expected" "$actual"
+  fi
+  unset OCTOPASS_OWNER
+  unset OCTOPASS_REPOSITORY
+}
+
 function run_test() {
   self=$(cd $(dirname $0) && pwd)/$(basename $0)
   tests="$(grep "^function test_" $self | sed -E "s/function (.*)\(\) \{/\1/g")"
