@@ -76,16 +76,19 @@ With this, even if Github is down, it will work if past caches remain.
 Installation
 ------------
 
+Ubuntu:
+
+```sh
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+```
+
+CentOS:
+
+```sh
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.rpm.sh | sudo bash
+```
+
 Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
-
-Available for:
-
-- CentOS 7.x
-- CentOS 6.x
-- CentOS 5.x
-- Ubuntu Xenial
-- Ubuntu Trusty
-- Ubuntu Precise
 
 ### Building from Source
 
