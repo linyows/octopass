@@ -16,9 +16,9 @@
 Description
 -----------
 
-This is linux user management tool with the organization/team on github, and authentication.
-Depending on github for user management, there are certain risks,
-but features easy handling and ease of operation.
+This is user management tool for linux by github.
+The name-resloves and authentication is provided the team or collaborator on github.
+Features easy handling and ease of operation.
 
 Usage
 -----
