@@ -304,6 +304,8 @@ Test(octopass, is_authorized_collaborator, .init = setup)
   json_t *collaborators;
   json_t *collaborator;
   collaborators = json_loads(res.data, 0, &error);
+  cr_assert_eq(json_array_size(collaborators), 1);
+
   json_array_foreach(collaborators, i, collaborator) {
     int status2 = octopass_is_authorized_collaborator(&con, collaborator);
     cr_assert_eq(status2, 1);
