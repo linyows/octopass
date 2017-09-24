@@ -98,7 +98,7 @@ Dependency
 - libcurl
 - jansson
 
-```
+```sh
 $ git clone https://github.com/linyows/octopass
 $ make && make install
 $ mv octopass.conf.example /etc/octopass.conf
@@ -138,7 +138,7 @@ Need: Read org and team membership
 
 /etc/ssh/sshd_config:
 
-```
+```conf
 AuthorizedKeysCommand /usr/bin/octopass
 AuthorizedKeysCommandUser root
 UsePAM yes
@@ -151,7 +151,7 @@ PasswordAuthentication no
 
 /etc/pam.d/sshd:
 
-```
+```conf
 #@include common-auth
 auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
@@ -162,7 +162,7 @@ session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 
 /etc/pam.d/system-auth-ac:
 
-```
+```conf
 # auth        sufficient    pam_unix.so nullok try_first_pass
 auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
 auth optional pam_unix.so not_set_pass use_first_pass nodelay
@@ -170,7 +170,7 @@ auth optional pam_unix.so not_set_pass use_first_pass nodelay
 
 /etc/pam.d/sshd:
 
-```
+```conf
 session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 ```
 
@@ -178,7 +178,7 @@ session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
 
 /etc/nsswitch.conf:
 
-```
+```conf
 passwd:     files octopass sss
 shadow:     files octopass sss
 group:      files octopass sss
