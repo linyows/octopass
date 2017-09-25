@@ -2,9 +2,7 @@
   <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass-logo-plain.png?raw=true" width="500">
 </p>
 
-<p align="center">
-  Management linux user and authentication with the organization/team on Github.
-</p>
+<p align="center">Management linux user and authentication with team or collaborator on Github.</p>
 
 <p align="center">
   <a href="https://gitter.im/linyows/octopass" title="gitter"><img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square"></a>
