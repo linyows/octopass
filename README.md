@@ -192,7 +192,7 @@ Provisioning
 - Ansible playbook - https://github.com/uchida/ansible-octopass-role
 - Puppet module - ?
 
-Thank you @uchida and @hnmx4 for some provisioning tools.
+Thank you [@uchida](https://github.com/uchida) and [@hnmx4](https://github.com/hnmx4) for some provisioning tools.
 
 Author
 ------
