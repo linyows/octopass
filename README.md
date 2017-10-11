@@ -77,13 +77,15 @@ Installation
 Ubuntu:
 
 ```sh
-curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+$ curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+$ sudo apt-get install octopass
 ```
 
 CentOS:
 
 ```sh
-curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.rpm.sh | sudo bash
+$ curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.rpm.sh | sudo bash
+$ sudo yum install octopass
 ```
 
 Packages are provided via [packagecloud](https://packagecloud.io/linyows/octopass).
