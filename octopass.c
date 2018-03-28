@@ -505,7 +505,7 @@ json_t *octopass_github_team_member_by_id(int gh_id, json_t *members)
 int octopass_team_id(struct config *con)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%sorgs/%s/teams", con->endpoint, con->organization);
+  sprintf(url, "%sorgs/%s/teams?per_page=100", con->endpoint, con->organization);
 
   struct response res;
   octopass_github_request(con, url, &res);
@@ -526,7 +526,7 @@ int octopass_team_id(struct config *con)
 int octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%steams/%d/members", con->endpoint, team_id);
+  sprintf(url, "%steams/%d/members?per_page=100", con->endpoint, team_id);
 
   octopass_github_request(con, url, res);
 
@@ -611,7 +611,7 @@ int octopass_rebuild_data_with_authorized(struct config *con, struct response *r
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
   char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
-  sprintf(url, "%srepos/%s/%s/collaborators", con->endpoint, con->owner, con->repository);
+  sprintf(url, "%srepos/%s/%s/collaborators?per_page=100", con->endpoint, con->owner, con->repository);
 
   octopass_github_request(con, url, res);
 
