@@ -102,7 +102,7 @@ Test(octopass, override_config_by_env)
 {
   clearenv();
 
-  struct config con;
+  struct config con = { 0 };
   octopass_override_config_by_env(&con);
   cr_assert_str_empty(con.token);
   cr_assert_str_empty(con.endpoint);
