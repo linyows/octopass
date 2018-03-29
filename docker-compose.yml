@@ -55,6 +55,7 @@ deb9:
     - .:/octopass
   environment:
     DIST: stretch
+    DEB_BUILD_OPTIONS: noautodbgsym
   command: make deb
 deb8:
   dockerfile: dockerfiles/Dockerfile.debian-8
