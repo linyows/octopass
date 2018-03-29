@@ -47,3 +47,20 @@ deb12:
   environment:
     DIST: precise
   command: make deb12
+
+deb9:
+  dockerfile: dockerfiles/Dockerfile.debian-9
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: stretch
+  command: make deb
+deb8:
+  dockerfile: dockerfiles/Dockerfile.debian-8
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: jessie
+  command: make deb
