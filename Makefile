@@ -160,6 +160,7 @@ deb: source_for_deb ## Packaging for DEB
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
 		cp -v /octopass/debian/* debian/ && \
+		sed -i -e 's/xenial/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
 		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
@@ -201,6 +202,8 @@ packagecloud_release: ## Upload archives to PackageCloud on Mac
 	pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
 	pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
 	pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
+	pkgcloud-push linyows/octopass/debian/stretch builds/octopass_$(VERSION)-1_amd64.stretch.deb
+	pkgcloud-push linyows/octopass/debian/jessie builds/octopass_$(VERSION)-1_amd64.jessie.deb
 
 pkg: ## Create some distribution packages
 	rm -rf builds && mkdir builds
