@@ -1,4 +1,4 @@
-rpm7:
+centos7:
   dockerfile: dockerfiles/Dockerfile.centos-7
   build: .
   volumes:
@@ -6,7 +6,7 @@ rpm7:
   environment:
     DIST: el7
   command: make rpm
-rpm6:
+centos6:
   dockerfile: dockerfiles/Dockerfile.centos-6
   build: .
   volumes:
@@ -15,7 +15,7 @@ rpm6:
     DIST: el6
   command: make rpm
 
-deb16:
+ubuntu16:
   dockerfile: dockerfiles/Dockerfile.ubuntu-16
   build: .
   volumes:
@@ -23,7 +23,7 @@ deb16:
   environment:
     DIST: xenial
   command: make deb
-deb14:
+ubuntu14:
   dockerfile: dockerfiles/Dockerfile.ubuntu-14
   build: .
   volumes:
@@ -31,7 +31,7 @@ deb14:
   environment:
     DIST: trusty
   command: make deb
-deb12:
+ubuntu12:
   dockerfile: dockerfiles/Dockerfile.ubuntu-12
   build: .
   volumes:
@@ -40,7 +40,7 @@ deb12:
     DIST: precise
   command: make deb12
 
-deb9:
+debian9:
   dockerfile: dockerfiles/Dockerfile.debian-9
   build: .
   volumes:
@@ -49,7 +49,7 @@ deb9:
     DIST: stretch
     DEB_BUILD_OPTIONS: noautodbgsym
   command: make deb
-deb8:
+debian8:
   dockerfile: dockerfiles/Dockerfile.debian-8
   build: .
   volumes:
