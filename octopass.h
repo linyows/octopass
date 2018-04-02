@@ -34,7 +34,7 @@
 #include <sys/stat.h>
 #include <regex.h>
 
-#define OCTOPASS_VERSION "0.4.0"
+#define OCTOPASS_VERSION "0.4.1"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef OCTOPASS_CONFIG_FILE
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
