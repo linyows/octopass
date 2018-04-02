@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          0.4.0
+Version:          0.4.1
 Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
@@ -56,6 +56,8 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /etc/octopass.conf.example
 
 %changelog
+* Mon Apr 02 2018 linyows <linyows@gmail.com> - 0.4.1-1
+- Page size changes to 100 from 30 on Github organization API
 * Mon Sep 25 2017 linyows <linyows@gmail.com> - 0.4.0-1
 - Support github repository collaborators as name resolve
 * Thu Sep 14 2017 linyows <linyows@gmail.com> - 0.3.5-1

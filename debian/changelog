@@ -1,3 +1,9 @@
+octopass (0.4.1-1) xenial; urgency=medium
+
+  * Page size changes to 100 from 30 on Github organization API
+
+ -- linyows <linyows@gmail.com>  Mon, 02 Apr 2018 14:50:00 +0900
+
 octopass (0.4.0-1) xenial; urgency=medium
 
   * Support github repository collaborators as name resolve
