@@ -15,7 +15,7 @@ Description
 -----------
 
 This is user management tool for linux by github.
-The name-resloves and authentication is provided the team or collaborator on github.
+The name-resolves and authentication is provided the team or collaborator on github.
 Features easy handling and ease of operation.
 
 Usage
