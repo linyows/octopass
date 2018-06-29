@@ -2,7 +2,9 @@
   <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/master/misc/octopass-logo-plain.png?raw=true" width="500">
 </p>
 
-<p align="center">Management linux user and authentication with team or collaborator on Github.</p>
+<p align="center">
+  <strong>OCTOPASS</strong>: Management linux user and authentication with team or collaborator on Github.
+</p>
 
 <p align="center">
   <a href="https://gitter.im/linyows/octopass" title="gitter"><img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=for-the-badge"></a>
@@ -25,17 +27,17 @@ Usage
 
 For example, adding "Ken" to a team with github organization ...
 
-Octopass is a valid linux server, Ken will be able to ssh login with the key registered in github.
+OCTOPASS is a valid linux server, Ken will be able to ssh login with the key registered in github.
 
 Wow!?
 
-By octopass name resolution, you can check the id of team members of github organization.
+By OCTOPASS name resolution, you can check the id of team members of github organization.
 
 ```sh
 $ id ken
 uid=5458(ken) gid=2000(operators) groups=2000(operators)
 ```
-You can also see a list like `/etc/passwd,shadow,group` by the `octopass`.
+You can also see a list like `/etc/passwd,shadow,group` by OCTOPASS.
 For detail `--help`.
 
 ```sh
@@ -48,7 +50,7 @@ sagat:x:93011:2000:managed by octopass:/home/sagat:/bin/bash
 zangief:x:8305:2000:managed by octopass:/home/zangief:/bin/bash
 ```
 
-And octopass gets the public key from github for key authentication.
+And OCTOPASS gets the public key from github for key authentication.
 
 ```sh
 $ octopass ken
@@ -184,7 +186,7 @@ shadow:     files octopass sss
 group:      files octopass sss
 ```
 
-Enable octopass as name resolution.
+Enable OCTOPASS as name resolution.
 
 Provisioning
 ------------
