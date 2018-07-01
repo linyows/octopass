@@ -15,6 +15,14 @@ centos6:
     DIST: el6
   command: make rpm
 
+ubuntu18:
+  dockerfile: dockerfiles/Dockerfile.ubuntu-18
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: bionic
+  command: make deb
 ubuntu16:
   dockerfile: dockerfiles/Dockerfile.ubuntu-16
   build: .
