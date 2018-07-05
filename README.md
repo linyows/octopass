@@ -198,6 +198,11 @@ Provisioning
 
 Thank you [@uchida](https://github.com/uchida) and [@hnmx4](https://github.com/hnmx4) for some provisioning tools.
 
+Backers :rocket:
+-------
+
+Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/octopass#backer)]
+
 Author
 ------
 
