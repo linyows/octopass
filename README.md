@@ -194,9 +194,9 @@ Provisioning
 - Chef cookbook - https://github.com/linyows/octopass-cookbook
 - Itamae cookbook - https://github.com/hnmx4/octopass-itamae-cookbook
 - Ansible playbook - https://github.com/uchida/ansible-octopass-role
-- Puppet module - ?
+- Puppet module - https://github.com/hfm/puppet-octopass
 
-Thank you [@uchida](https://github.com/uchida) and [@hnmx4](https://github.com/hnmx4) for some provisioning tools.
+Thank you [@uchida](https://github.com/uchida), [@hnmx4](https://github.com/hnmx4) and [@hfm](https://github.com/hfm) for some provisioning tools.
 
 Backers :rocket:
 -------
