@@ -1,3 +1,8 @@
+octopass (0.5.0-1) bionic; urgency=medium
+
+  * Support slug for GitHub team API
+
+ -- linyows <linyows@gmail.com>  Thu, 02 Oct 2018 14:40:00 +0900
 octopass (0.4.1-1) xenial; urgency=medium
 
   * Page size changes to 100 from 30 on Github organization API
