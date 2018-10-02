@@ -551,6 +551,9 @@ int octopass_team_members(struct config *con, struct response *res)
 {
   int team_id = octopass_team_id(con);
   if (team_id == -1) {
+    if (con->syslog) {
+      syslog(LOG_INFO, "team not found: %s", con->team);
+    }
     return -1;
   }
 
