@@ -465,6 +465,11 @@ int octopass_github_team_id(char *team_name, char *data)
       const json_int_t id = json_integer_value(json_object_get(team, "id"));
       return id;
     }
+    const char *slug = json_string_value(json_object_get(team, "slug"));
+    if (name != NULL && strcmp(team_name, slug) == 0) {
+      const json_int_t id = json_integer_value(json_object_get(team, "id"));
+      return id;
+    }
   }
 
   return -1;
@@ -520,6 +525,7 @@ int octopass_team_id(struct config *con)
 
   int id = octopass_github_team_id(con->team, res.data);
   free(res.data);
+
   return id;
 }
 
