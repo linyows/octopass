@@ -1,12 +1,39 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+unless ENV['GITHUB_TOKEN']
+  puts 'env GITHUB_TOKEN required'
+  exit
+end
+
 Vagrant.configure(2) do |config|
-  config.vm.box = 'linyows/centos-7.1'
-  config.vm.network :private_network, ip: '192.168.10.10'
   config.vm.synced_folder '.', '/octopass'
 
-  config.vm.provision 'shell', inline: <<-SHELL
+  cmd_ubuntu = <<-CMD
+    apt-get -yy update
+    apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim
+    timedatectl set-timezone Asia/Tokyo
+  CMD
+
+  cmd_centos = <<-CMD
     yum install -y glibc gcc make libcurl-devel jansson-devel git vim valgrind
-  SHELL
+  CMD
+
+  cmd = <<-CMD
+    echo 'root:root' | chpasswd
+    cd /octopass && make build && make install
+    cp /octopass/misc/octopass.conf /etc/octopass.conf
+    cp /octopass/misc/nsswitch.conf /etc/nsswitch.conf
+    sed -i 's/GITHUB_TOKEN/#{ENV['GITHUB_TOKEN']}/' /etc/octopass.conf
+  CMD
+
+  config.vm.define :ubuntu do |c|
+    c.vm.box = 'ubuntu/bionic64'
+    c.vm.provision 'shell', inline: cmd_ubuntu + cmd
+  end
+
+  config.vm.define :centos do |c|
+    c.vm.box = 'centos/7'
+    c.vm.provision 'shell', inline: cmd_centos + cmd
+  end
 end
