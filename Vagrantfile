@@ -25,6 +25,8 @@ Vagrant.configure(2) do |config|
     cp /octopass/misc/octopass.conf /etc/octopass.conf
     cp /octopass/misc/nsswitch.conf /etc/nsswitch.conf
     sed -i 's/GITHUB_TOKEN/#{ENV['GITHUB_TOKEN']}/' /etc/octopass.conf
+    sed -ie 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0 \1"/g' /etc/default/grub
+    update-grub
   CMD
 
   config.vm.define :ubuntu do |c|
