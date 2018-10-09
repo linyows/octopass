@@ -265,6 +265,7 @@ void octopass_config_loading(struct config *con, char *filename)
       char *pattern           = "\"([A-z0-9_-]+)\"";
       con->shared_users       = calloc(MAXBUF, sizeof(char *));
       con->shared_users_count = octopass_match(value, pattern, con->shared_users);
+      free(value);
     }
   }
 
