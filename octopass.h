@@ -34,7 +34,7 @@
 #include <sys/stat.h>
 #include <regex.h>
 
-#define OCTOPASS_VERSION "0.5.0"
+#define OCTOPASS_VERSION "0.5.1"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef OCTOPASS_CONFIG_FILE
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
@@ -73,7 +73,7 @@ struct config {
   char organization[MAXBUF];
   char team[MAXBUF];
   char owner[MAXBUF];
-  char repository[MAXBUF];
+  char repository[2048];
   char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];

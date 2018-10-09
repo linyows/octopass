@@ -265,6 +265,7 @@ void octopass_config_loading(struct config *con, char *filename)
       char *pattern           = "\"([A-z0-9_-]+)\"";
       con->shared_users       = calloc(MAXBUF, sizeof(char *));
       con->shared_users_count = octopass_match(value, pattern, con->shared_users);
+      free(value);
     }
   }
 
@@ -388,7 +389,11 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
   result = curl_easy_perform(hnd);
 
   if (result != CURLE_OK) {
-    fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
+    if (con->syslog) {
+      syslog(LOG_ERR, "cURL failed: %s", curl_easy_strerror(result));
+    } else {
+      fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
+    }
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);

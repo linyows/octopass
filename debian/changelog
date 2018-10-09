@@ -1,3 +1,8 @@
+octopass (0.5.1-1) bionic; urgency=medium
+
+  * Fix for systemd-networkd SEGV
+
+ -- linyows <linyows@gmail.com>  Wed, 10 Oct 2018 00:20:00 +0900
 octopass (0.5.0-1) bionic; urgency=medium
 
   * Support slug for GitHub team API
