@@ -389,7 +389,11 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
   result = curl_easy_perform(hnd);
 
   if (result != CURLE_OK) {
-    fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
+    if (con->syslog) {
+      syslog(LOG_ERR, "cURL failed: %s", curl_easy_strerror(result));
+    } else {
+      fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
+    }
   } else {
     long *code;
     curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
