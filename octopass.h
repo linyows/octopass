@@ -73,7 +73,7 @@ struct config {
   char organization[MAXBUF];
   char team[MAXBUF];
   char owner[MAXBUF];
-  char repository[MAXBUF];
+  char repository[2048];
   char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
