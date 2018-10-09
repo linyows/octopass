@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
 
   cmd_ubuntu = <<-CMD
     apt-get -yy update
-    apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim
+    apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim valgrind
     timedatectl set-timezone Asia/Tokyo
   CMD
 
