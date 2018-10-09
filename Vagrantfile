@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
 
   cmd_ubuntu = <<-CMD
     apt-get -yy update
-    apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim valgrind
+    apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim valgrind systemd-coredump
     timedatectl set-timezone Asia/Tokyo
   CMD
 
@@ -25,8 +25,7 @@ Vagrant.configure(2) do |config|
     cp /octopass/misc/octopass.conf /etc/octopass.conf
     cp /octopass/misc/nsswitch.conf /etc/nsswitch.conf
     sed -i 's/GITHUB_TOKEN/#{ENV['GITHUB_TOKEN']}/' /etc/octopass.conf
-    sed -ie 's/GRUB_CMDLINE_LINUX="\(.*\)"/GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0 \1"/g' /etc/default/grub
-    update-grub
+    ulimit -c unlimited
   CMD
 
   config.vm.define :ubuntu do |c|
