@@ -4,3 +4,6 @@ octopass.conf
 exports
 builds
 /*console.log
+/selinux/*.pp
+/selinux/*.fc
+/selinux/*.if
