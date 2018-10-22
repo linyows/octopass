@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          0.5.1
+Version:          0.6.0
 Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
@@ -12,7 +12,7 @@ Requires:         glibc curl-devel jansson-devel
 %else
 Requires:         glibc libcurl-devel jansson-devel
 %endif
-BuildRequires:    gcc make
+BuildRequires:    gcc, make, selinux-policy-devel
 BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:        i386, x86_64
 
@@ -36,15 +36,31 @@ mkdir -p %{buildroot}%{_sysconfdir}
 make PREFIX=%{buildroot}/usr install
 install -d -m 755 %{buildroot}/var/cache/octopass
 install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.example
+mkdir -p %{buildroot}%{_datadir}/selinux/packages/%{name}
+install -m 644 %{name}.pp %{buildroot}%{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %post
+# First install
+if [ "$1" -le "1" ]; then
+  /usr/sbin/semodule -i %{_datadir}/selinux/packages/%{name}/%{name}.pp 2>/dev/null || :
+  fixfiles -R octopass restore
+fi
 
 %preun
+# Final removal
+if [ "$1" -lt "1" ]; then
+  /usr/sbin/semodule -r octopass 2>/dev/null || :
+  fixfiles -R octopass restore
+fi
 
 %postun
+# Upgrade
+if [ "$1" -ge "1" ]; then
+  /usr/sbin/semodule -i %{_datadir}/selinux/packages/%{name}/%{name}.pp 2>/dev/null || :
+fi
 
 %files
 %defattr(-, root, root)
@@ -54,8 +70,11 @@ install -m 644 octopass.conf.example %{buildroot}%{_sysconfdir}/octopass.conf.ex
 /usr/bin/octopass
 /var/cache/octopass
 /etc/octopass.conf.example
+%{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %changelog
+* Mon Oct 22 2018 linyows <linyows@gmail.com> - 0.6.0-1
+- Add policy for SELinux
 * Wed Oct 10 2018 linyows <linyows@gmail.com> - 0.5.1-1
 - Fix for systemd-networkd SEGV
 * Thu Oct 02 2018 linyows <linyows@gmail.com> - 0.5.0-1
