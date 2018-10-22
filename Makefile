@@ -14,7 +14,7 @@ BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
 DIST ?= unknown
-SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
+SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
 JANSSON_VERSION=2.4
@@ -118,6 +118,8 @@ source_for_rpm: ## Create source for RPM
 		gzip -9 octopass-$(VERSION).tar
 	cp tmp.$(DIST)/octopass-$(VERSION).tar.gz ./builds
 	rm -rf tmp.$(DIST)
+	cd selinux && \
+		make -f /usr/share/selinux/devel/Makefile
 
 rpm: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
