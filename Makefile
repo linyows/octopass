@@ -118,8 +118,10 @@ source_for_rpm: ## Create source for RPM
 		gzip -9 octopass-$(VERSION).tar
 	cp tmp.$(DIST)/octopass-$(VERSION).tar.gz ./builds
 	rm -rf tmp.$(DIST)
-	cd selinux && \
-		make -f /usr/share/selinux/devel/Makefile
+	$(MAKE) selinux_policy
+
+selinux_policy: ## Build policy file for SELinux
+	make -C selinux -f /usr/share/selinux/devel/Makefile
 
 rpm: source_for_rpm ## Packaging for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for RPM$(RESET)"
