@@ -149,31 +149,12 @@ PasswordAuthentication no
 
 ### PAM Configuration
 
-#### Ubuntu
-
-/etc/pam.d/sshd:
+Add to top of `/etc/pam.d/sshd` this:
 
 ```conf
-#@include common-auth
-auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
-auth optional pam_unix.so not_set_pass use_first_pass nodelay
-session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
-```
-
-#### CentOS
-
-/etc/pam.d/system-auth-ac:
-
-```conf
-# auth        sufficient    pam_unix.so nullok try_first_pass
-auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
-auth optional pam_unix.so not_set_pass use_first_pass nodelay
-```
-
-/etc/pam.d/sshd:
-
-```conf
-session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
+auth	requisite	pam_exec.so	quiet	expose_authtok	/usr/bin/octopass pam
+auth	optional	pam_unix.so	not_set_pass	use_first_pass	nodelay
+session	required	pam_mkhomedir.so	skel=/etc/skel/	umask=0022
 ```
 
 ### NSS Switch Configuration
