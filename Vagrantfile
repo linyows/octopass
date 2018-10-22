@@ -7,8 +7,6 @@ unless ENV['GITHUB_TOKEN']
 end
 
 Vagrant.configure(2) do |config|
-  config.vm.synced_folder '.', '/octopass'
-
   cmd_ubuntu = <<-CMD
     apt-get -yy update
     apt-get install -yy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev vim valgrind systemd-coredump
@@ -31,10 +29,13 @@ Vagrant.configure(2) do |config|
   config.vm.define :ubuntu do |c|
     c.vm.box = 'ubuntu/bionic64'
     c.vm.provision 'shell', inline: cmd_ubuntu + cmd
+    c.vm.synced_folder '.', '/octopass'
   end
 
   config.vm.define :centos do |c|
+    c.vagrant.plugins = 'vagrant-vbguest'
     c.vm.box = 'centos/7'
     c.vm.provision 'shell', inline: cmd_centos + cmd
+    c.vm.synced_folder '.', '/octopass'
   end
 end
