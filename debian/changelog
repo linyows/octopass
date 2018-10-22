@@ -1,3 +1,8 @@
+octopass (0.6.0-1) bionic; urgency=medium
+
+  * Support SELinux policy
+
+ -- linyows <linyows@gmail.com>  Mon, 22 Oct 2018 16:50:00 +0900
 octopass (0.5.1-1) bionic; urgency=medium
 
   * Fix for systemd-networkd SEGV
