@@ -24,6 +24,27 @@ Vagrant.configure(2) do |config|
     cp /octopass/misc/nsswitch.conf /etc/nsswitch.conf
     sed -i 's/GITHUB_TOKEN/#{ENV['GITHUB_TOKEN']}/' /etc/octopass.conf
     ulimit -c unlimited
+
+    # selinux policy
+    make selinux_policy
+    semodule -i /octopass/selinux/octopass.pp
+
+    # sshd
+    cat << EOS >> /etc/ssh/sshd_config
+AuthorizedKeysCommand /usr/bin/octopass
+AuthorizedKeysCommandUser root
+UsePAM yes
+PasswordAuthentication no
+EOS
+
+    # pam
+    cp /etc/pam.d/sshd /tmp/pam.d-sshd
+    cat << EOS > /etc/pam.d/sshd
+auth requisite pam_exec.so quiet expose_authtok /usr/bin/octopass pam
+auth optional pam_unix.so not_set_pass use_first_pass nodelay
+session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
+EOS
+    cat /tmp/pam.d-sshd >> /etc/pam.d/sshd
   CMD
 
   config.vm.define :ubuntu do |c|
