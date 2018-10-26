@@ -470,7 +470,12 @@ Test(octopass, github_user_keys, .init = setup)
                    "xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/"
                    "awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+"
                    "PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/"
-                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\n");
+                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+"
+                   "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
+                   "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
+                   "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
+                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n");
 }
 
 Test(octopass, github_team_members_keys, .init = setup)
@@ -491,7 +496,12 @@ Test(octopass, github_team_members_keys, .init = setup)
                    "xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/"
                    "awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+"
                    "PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/"
-                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\n"
+                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
+                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+"
+                   "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
+                   "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
+                   "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
+                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
                    "ssh-rsa "
                    "AAAAB3NzaC1yc2EAAAADAQABAAACAQCnzpR1gnRCfNTpvMGWiXLqjFxqgMN23hy2Q55ac9KJJXMTf1q1ZOKrt0EC6Bt/"
                    "r7M7bo3EzmaIbOrTDxPtVpKgqHNpS31n6beVy/"
