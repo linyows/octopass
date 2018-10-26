@@ -470,12 +470,7 @@ Test(octopass, github_user_keys, .init = setup)
                    "xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/"
                    "awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+"
                    "PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/"
-                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+"
-                   "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
-                   "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
-                   "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
-                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n");
+                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\n");
 }
 
 Test(octopass, github_team_members_keys, .init = setup)
@@ -496,19 +491,8 @@ Test(octopass, github_team_members_keys, .init = setup)
                    "xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/"
                    "awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+"
                    "PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/"
-                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+"
-                   "cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+"
-                   "bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/"
-                   "vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+"
-                   "kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
+                   "wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\n"
                    "ssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQC6MdOnNjfzN7yLLyVxqWsOgOwsy0jxZMc5C5AxCQ5QCEZcvTQ/"
-                   "mZEwJtjtBLz3JmXwbuiDKDXCxeWI6QGLYfVzjG8Qx4b+WL+M2z6TlcLH22GOVoadiedLg/nyo0YG/"
-                   "UQ5K25mw0cJ7sloW3drG8gXq2IucRQt5xfzQZKov5jzbwezB859Gd4GM+"
-                   "quOPzrL4PlTATWbRzQhCJmD0rfoIpZqoeV2uefKyKPJYd8ZwI3MHY6+"
-                   "WuXSjwYfPobRUddXdlpG5GFpkdh3VFtJbsT6bPbMun6buItENbkvqlhhB1vhUn0YToGuZJmz/"
-                   "2YNovfnERvFYZpqY7wugIy8b8Sj9bH\nssh-rsa "
                    "AAAAB3NzaC1yc2EAAAADAQABAAACAQCnzpR1gnRCfNTpvMGWiXLqjFxqgMN23hy2Q55ac9KJJXMTf1q1ZOKrt0EC6Bt/"
                    "r7M7bo3EzmaIbOrTDxPtVpKgqHNpS31n6beVy/"
                    "pukhcdWq0C6KI1miXpySZoWf2j05foDKMhvO2t15NddU9qmQn7fWwvCEwUKv13lAETSQ6ZKR1A7hFfNAFBxLACCyhvNpvVcVD1p"
