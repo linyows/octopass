@@ -178,9 +178,14 @@ Test(octopass, config_loading__when_use_repository)
 
 Test(octopass, export_file)
 {
+  struct config con;
+  char *cf = "test/octopass.conf";
+  octopass_config_loading(&con, cf);
+
+  char *dir = "/tmp";
   char *f = "/tmp/octopass-export_file_test_1.txt";
   char *d = "LINE1\nLINE2\nLINE3\n";
-  octopass_export_file(f, d);
+  octopass_export_file(&con, dir, f, d);
 
   FILE *fp = fopen(f, "r");
 
@@ -211,16 +216,21 @@ Test(octopass, export_file)
 
 Test(octopass, import_file)
 {
+  struct config con;
+  char *cf = "test/octopass.conf";
+  octopass_config_loading(&con, cf);
+
+  char *dir = "/tmp";
   char *f1 = "/tmp/octopass-import_file_test_1.txt";
   char *d1 = "LINE1\nLINE2\nLINE3\n";
-  octopass_export_file(f1, d1);
-  const char *data1 = octopass_import_file(f1);
+  octopass_export_file(&con, dir, f1, d1);
+  const char *data1 = octopass_import_file(&con, f1);
   cr_assert_str_eq(data1, d1);
 
   char *f2 = "/tmp/octopass-import_file_test_2.txt";
   char *d2 = "LINEa\nLINEb\nLINEc\n";
-  octopass_export_file(f2, d2);
-  const char *data2 = octopass_import_file(f2);
+  octopass_export_file(&con, dir, f2, d2);
+  const char *data2 = octopass_import_file(&con, f2);
   cr_assert_str_eq(data2, d2);
 }
 
@@ -341,7 +351,7 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
 
   char *stub = "test/collaborators.json";
   res.httpstatus = (long *)200;
-  res.data = (char *)octopass_import_file(stub);
+  res.data = (char *)octopass_import_file(&con, stub);
   res.size = strlen(res.data);
   octopass_rebuild_data_with_authorized(&con, &res);
 
@@ -373,7 +383,7 @@ Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = se
 
   char *stub = "test/collaborators.json";
   res.httpstatus = (long *)200;
-  res.data = (char *)octopass_import_file(stub);
+  res.data = (char *)octopass_import_file(&con, stub);
   res.size = strlen(res.data);
   octopass_rebuild_data_with_authorized(&con, &res);
 
