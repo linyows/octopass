@@ -30,7 +30,7 @@ build_dir: ## Create directory for build
 	test -d $(BUILD) || mkdir -p $(BUILD)
 
 cache_dir: ## Create directory for cache
-	test -d $(CACHE) || mkdir -p $(CACHE)
+	test -d $(CACHE) || mkdir -p $(CACHE) && chmod 777 $(CACHE)
 
 deps: ## Install dependencies
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Installing Dependencies$(RESET)"

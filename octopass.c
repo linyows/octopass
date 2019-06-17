@@ -315,23 +315,45 @@ void octopass_config_loading(struct config *con, char *filename)
   }
 }
 
-void octopass_export_file(char *file, char *data)
+void octopass_export_file(struct config *con, char *dir, char *file, char *data)
 {
+  struct stat statbuf;
+  if (stat(dir, &statbuf) != 0) {
+    mode_t um = {0};
+    um        = umask(0);
+    mkdir(dir, S_IRUSR | S_IWUSR | S_IXUSR);
+    umask(um);
+  }
+
   FILE *fp = fopen(file, "w");
   if (!fp) {
-    fprintf(stderr, "File open failure: %s\n", file);
+    if (con->syslog) {
+      syslog(LOG_ERR, "File open failure: %s %s", file, strerror(errno));
+    } else {
+      fprintf(stderr, "File open failure: %s %s\n", file, strerror(errno));
+    }
     exit(1);
     return;
   }
   fprintf(fp, "%s", data);
+
+  mode_t um = {0};
+  um        = umask(0);
+  fchmod(fileno(fp), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH);
+  umask(um);
+
   fclose(fp);
 }
 
-const char *octopass_import_file(char *file)
+const char *octopass_import_file(struct config *con, char *file)
 {
   FILE *fp = fopen(file, "r");
   if (!fp) {
-    fprintf(stderr, "File open failure: %s\n", file);
+    if (con->syslog) {
+      syslog(LOG_ERR, "File open failure: %s %s", file, strerror(errno));
+    } else {
+      fprintf(stderr, "File open failure: %s %s\n", file, strerror(errno));
+    }
     exit(1);
   }
   char line[MAXBUF];
@@ -416,39 +438,41 @@ void octopass_github_request(struct config *con, char *url, struct response *res
   }
 
   char *base = curl_escape(url, strlen(url));
-  char f[strlen(base) + strlen(con->token) + 6];
-  char *file = f;
-  sprintf(f, "%s/%s-%s", OCTOPASS_CACHE_DIR, base, octopass_truncate(con->token, 6));
+  char dpath[MAXBUF];
+  char fpath[MAXBUF];
+  sprintf(dpath, "%s/%d", OCTOPASS_CACHE_DIR, geteuid());
+  sprintf(fpath, "%s/%s-%s", dpath, base, octopass_truncate(con->token, 6));
+  curl_free(base);
 
-  FILE *fp      = fopen(file, "r");
+  FILE *fp      = fopen(fpath, "r");
   long *ok_code = (long *)200;
 
   if (fp == NULL) {
     octopass_github_request_without_cache(con, url, res, token);
     if (res->httpstatus == ok_code) {
-      octopass_export_file(file, res->data);
+      octopass_export_file(con, dpath, fpath, res->data);
     }
   } else {
     fclose(fp);
 
     struct stat statbuf;
-    if (stat(file, &statbuf) != -1) {
+    if (stat(fpath, &statbuf) != -1) {
       unsigned long now  = time(NULL);
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
         octopass_github_request_without_cache(con, url, res, token);
         if (res->httpstatus == ok_code) {
-          octopass_export_file(file, res->data);
+          octopass_export_file(con, dpath, fpath, res->data);
           return;
         }
       }
     }
 
     if (con->syslog) {
-      syslog(LOG_INFO, "use cache: %s", file);
+      syslog(LOG_INFO, "use cache: %s", fpath);
     }
 
-    res->data = (char *)octopass_import_file(file);
+    res->data = (char *)octopass_import_file(con, fpath);
     res->size = strlen(res->data);
   }
 }

@@ -68,7 +68,7 @@ fi
 /usr/lib64/libnss_octopass.so.2
 /usr/lib64/libnss_octopass.so.2.0
 /usr/bin/octopass
-/var/cache/octopass
+%attr(0777,root,root) /var/cache/octopass
 /etc/octopass.conf.example
 %{_datadir}/selinux/packages/%{name}/%{name}.pp
 
