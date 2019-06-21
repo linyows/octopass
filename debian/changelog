@@ -1,3 +1,8 @@
+octopass (0.7.0-1) bionic; urgency=medium
+
+  * Resolve a problem of cache file permission
+
+ -- linyows <linyows@gmail.com>  Fri, 21 Jun 2019 17:10:00 +0900
 octopass (0.6.0-1) bionic; urgency=medium
 
   * Support SELinux policy
