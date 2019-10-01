@@ -48,6 +48,15 @@ ubuntu12:
     DIST: precise
   command: make deb12
 
+debian10:
+  dockerfile: dockerfiles/Dockerfile.debian-10
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: buster
+    DEB_BUILD_OPTIONS: noautodbgsym
+  command: make deb
 debian9:
   dockerfile: dockerfiles/Dockerfile.debian-9
   build: .

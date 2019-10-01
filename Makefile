@@ -15,6 +15,7 @@ CACHE=/var/cache/octopass
 
 DIST ?= unknown
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
+SOURCES_DEB=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING 
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
 JANSSON_VERSION=2.4
@@ -142,7 +143,7 @@ source_for_deb: ## Create source for DEB
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
 	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
-	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES_DEB) tmp.$(DIST)/octopass-$(VERSION)
 	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		xz -v octopass_$(VERSION).tar
@@ -167,7 +168,7 @@ deb12: ## Packaging for DEB-12
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
 	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
-	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES_DEB) tmp.$(DIST)/octopass-$(VERSION)
 	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		mv octopass_$(VERSION).tar octopass_$(VERSION).orig.tar
