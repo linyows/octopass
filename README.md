@@ -79,7 +79,7 @@ Installation
 Ubuntu:
 
 ```sh
-$ curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+$ curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo -E bash
 $ sudo apt-get install octopass
 ```
 
