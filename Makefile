@@ -168,7 +168,7 @@ deb12: ## Packaging for DEB-12
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
 	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
-	cp $(SOURCES_DEB) tmp.$(DIST)/octopass-$(VERSION)
+	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
 	cd tmp.$(DIST) && \
 		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
 		mv octopass_$(VERSION).tar octopass_$(VERSION).orig.tar
