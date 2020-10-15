@@ -1,3 +1,11 @@
+centos8:
+  dockerfile: dockerfiles/Dockerfile.centos-8
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: el8
+  command: make rpm
 centos7:
   dockerfile: dockerfiles/Dockerfile.centos-7
   build: .
