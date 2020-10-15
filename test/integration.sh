@@ -81,7 +81,7 @@ function test_id() {
 
 function test_public_keys() {
   actual="$(/usr/bin/octopass linyows | head -1)"
-  expected="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ=="
+  expected="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/HPOQXsolZYmPQW/xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/awyCYCJG78Llj2SmqPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+PdxllbBDJv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxWFNyxnb7/wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
@@ -105,7 +105,7 @@ function test_shared_user_public_keys() {
   sed -i -e 's/^#SharedUser/SharedUser/g' /etc/octopass.conf
 
   actual="$(/usr/bin/octopass admin | wc -l)"
-  expected="4"
+  expected="3"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"

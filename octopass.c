@@ -439,7 +439,7 @@ void octopass_github_request(struct config *con, char *url, struct response *res
 
   char *base = curl_escape(url, strlen(url));
   char dpath[MAXBUF];
-  char fpath[MAXBUF+2];
+  char fpath[MAXBUF + 2];
   sprintf(dpath, "%s/%d", OCTOPASS_CACHE_DIR, geteuid());
   sprintf(fpath, "%s/%s-%s", dpath, base, octopass_truncate(con->token, 6));
   curl_free(base);
