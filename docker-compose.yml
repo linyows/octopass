@@ -15,6 +15,14 @@ centos6:
     DIST: el6
   command: make rpm
 
+ubuntu20:
+  dockerfile: dockerfiles/Dockerfile.ubuntu-20
+  build: .
+  volumes:
+    - .:/octopass
+  environment:
+    DIST: focal
+  command: make deb
 ubuntu18:
   dockerfile: dockerfiles/Dockerfile.ubuntu-18
   build: .
