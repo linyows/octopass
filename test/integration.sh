@@ -105,7 +105,7 @@ function test_shared_user_public_keys() {
   sed -i -e 's/^#SharedUser/SharedUser/g' /etc/octopass.conf
 
   actual="$(/usr/bin/octopass admin | wc -l)"
-  expected="4"
+  expected="3"
 
   if [ "x$actual" == "x$expected" ]; then
     pass "${FUNCNAME[0]}"
