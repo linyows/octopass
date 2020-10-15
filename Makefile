@@ -14,7 +14,8 @@ BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
 DIST ?= unknown
-SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
+SOURCES_RPM=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
+SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
 CRITERION_VERSION=2.3.0
 JANSSON_VERSION=2.4
@@ -112,13 +113,13 @@ source_for_rpm: ## Create source for RPM
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
 	rm -rf tmp.$(DIST) octopass-$(VERSION).tar.gz
 	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
-	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
+	$(MAKE) selinux_policy
+	cp $(SOURCES_RPM) tmp.$(DIST)/octopass-$(VERSION)
 	cd tmp.$(DIST) && \
 		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
 		gzip -9 octopass-$(VERSION).tar
 	cp tmp.$(DIST)/octopass-$(VERSION).tar.gz ./builds
 	rm -rf tmp.$(DIST)
-	$(MAKE) selinux_policy
 
 selinux_policy: ## Build policy file for SELinux
 	make -C selinux -f /usr/share/selinux/devel/Makefile
