@@ -14,14 +14,14 @@ centos7:
   environment:
     DIST: el7
   command: make rpm
-centos6:
-  dockerfile: dockerfiles/Dockerfile.centos-6
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: el6
-  command: make rpm
+  #centos6:
+  #  dockerfile: dockerfiles/Dockerfile.centos-6
+  #  build: .
+  #  volumes:
+  #    - .:/octopass
+  #  environment:
+  #    DIST: el6
+  #  command: make rpm
 
 ubuntu20:
   dockerfile: dockerfiles/Dockerfile.ubuntu-20
@@ -39,30 +39,30 @@ ubuntu18:
   environment:
     DIST: bionic
   command: make deb
-ubuntu16:
-  dockerfile: dockerfiles/Dockerfile.ubuntu-16
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: xenial
-  command: make deb
-ubuntu14:
-  dockerfile: dockerfiles/Dockerfile.ubuntu-14
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: trusty
-  command: make deb
-ubuntu12:
-  dockerfile: dockerfiles/Dockerfile.ubuntu-12
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: precise
-  command: make deb12
+  #ubuntu16:
+  #  dockerfile: dockerfiles/Dockerfile.ubuntu-16
+  #  build: .
+  #  volumes:
+  #    - .:/octopass
+  #  environment:
+  #    DIST: xenial
+  #  command: make deb
+  #ubuntu14:
+  #  dockerfile: dockerfiles/Dockerfile.ubuntu-14
+  #  build: .
+  #  volumes:
+  #    - .:/octopass
+  #  environment:
+  #    DIST: trusty
+  #  command: make deb
+  #ubuntu12:
+  #  dockerfile: dockerfiles/Dockerfile.ubuntu-12
+  #  build: .
+  #  volumes:
+  #    - .:/octopass
+  #  environment:
+  #    DIST: precise
+  #  command: make deb12
 
 debian10:
   dockerfile: dockerfiles/Dockerfile.debian-10
@@ -82,11 +82,11 @@ debian9:
     DIST: stretch
     DEB_BUILD_OPTIONS: noautodbgsym
   command: make deb
-debian8:
-  dockerfile: dockerfiles/Dockerfile.debian-8
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: jessie
-  command: make deb
+  #debian8:
+  #  dockerfile: dockerfiles/Dockerfile.debian-8
+  #  build: .
+  #  volumes:
+  #    - .:/octopass
+  #  environment:
+  #    DIST: jessie
+  #  command: make deb
