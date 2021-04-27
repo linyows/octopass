@@ -70,7 +70,6 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
   int status = octopass_members(&con, &res);
 
   if (status != 0) {
-    free(res.data);
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
@@ -205,7 +204,6 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   int status = octopass_members(&con, &res);
 
   if (status != 0) {
-    free(res.data);
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");

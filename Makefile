@@ -193,15 +193,17 @@ github_release: pkg ## Upload archives to Github Release on Mac
 packagecloud_release: ## Upload archives to PackageCloud on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	go get github.com/mlafeldt/pkgcloud/...
+	pkgcloud-push linyows/octopass/el/8 builds/octopass-$(VERSION)-1.x86_64.el8.rpm
 	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.el7.rpm
-	pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.el6.rpm
+	#pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.el6.rpm
+	pkgcloud-push linyows/octopass/ubuntu/focal builds/octopass_$(VERSION)-1_amd64.focal.deb
 	pkgcloud-push linyows/octopass/ubuntu/bionic builds/octopass_$(VERSION)-1_amd64.bionic.deb
-	pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
-	pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
-	pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
-	pkgcloud-push linyows/octopass/debian/stretch builds/octopass_$(VERSION)-1_amd64.stretch.deb
-	pkgcloud-push linyows/octopass/debian/jessie builds/octopass_$(VERSION)-1_amd64.jessie.deb
+	#pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
+	#pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
+	#pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
 	pkgcloud-push linyows/octopass/debian/buster builds/octopass_$(VERSION)-1_amd64.buster.deb
+	pkgcloud-push linyows/octopass/debian/stretch builds/octopass_$(VERSION)-1_amd64.stretch.deb
+	#pkgcloud-push linyows/octopass/debian/jessie builds/octopass_$(VERSION)-1_amd64.jessie.deb
 
 pkg: ## Create some distribution packages
 	rm -rf builds && mkdir builds
