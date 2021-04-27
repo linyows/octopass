@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          0.7.0
+Version:          0.7.1
 Release:          1
 License:          GPLv3
 URL:              https://github.com/linyows/octopass
@@ -73,6 +73,8 @@ fi
 %{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %changelog
+* Thu Apr 27 2021 linyows <linyows@gmail.com> - 0.7.1-1
+- Bugfixes
 * Fri Jun 21 2019 linyows <linyows@gmail.com> - 0.7.0-1
 - Resolve a problem of cache file permission
 * Mon Oct 22 2018 linyows <linyows@gmail.com> - 0.6.0-1

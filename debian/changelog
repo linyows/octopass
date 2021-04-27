@@ -1,3 +1,8 @@
+octopass (0.7.1-1) focal; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Thu, 27 Apr 2021 15:30:00 +0900
 octopass (0.7.0-1) bionic; urgency=medium
 
   * Resolve a problem of cache file permission

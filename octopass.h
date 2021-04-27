@@ -35,7 +35,7 @@
 #include <regex.h>
 #include <unistd.h>
 
-#define OCTOPASS_VERSION "0.7.0"
+#define OCTOPASS_VERSION "0.7.1"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef OCTOPASS_CONFIG_FILE
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
