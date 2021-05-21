@@ -1,0 +1,19 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test
+      env:
+        OCTOPASS_ENDPOINT: https://api.github.com/
+        OCTOPASS_ORGANIZATION: ${{secrets.OCTOPASS_ORGANIZATION}}
+        OCTOPASS_TEAM: ${{secrets.OCTOPASS_TEAM}}
+        OCTOPASS_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      run: |
+        sudo make test
+        sudo make format
+        sudo make integration_test
