@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        apt-get install gcc-4.6 libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-3.4
+        sudo apt-get install gcc-4.6 libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-3.4
     - name: Test
       env:
         OCTOPASS_ENDPOINT: https://api.github.com/
