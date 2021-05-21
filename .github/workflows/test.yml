@@ -17,7 +17,7 @@ jobs:
         OCTOPASS_TEAM: ${{secrets.OCTOPASS_TEAM}}
         OCTOPASS_TOKEN: ${{secrets.GITHUB_TOKEN}}
       run: |
-        sudo make test PREFIX=''
-        sudo make format PREFIX=''
-        sudo make integration_test PREFIX=''
+        sudo make test LIBDIR=/usr/lib/x86_64-linux-gnu
+        sudo make format LIBDIR=/usr/lib/x86_64-linux-gnu
+        sudo make integration_test LIBDIR=/usr/lib/x86_64-linux-gnu
 
