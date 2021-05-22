@@ -5,7 +5,8 @@ LIBRARY=libnss_octopass.so.2.0
 LINKS=libnss_octopass.so.2 libnss_octopass.so
 
 PREFIX=/usr
-LIBDIR=$(PREFIX)/lib64
+#LIBDIR=$(PREFIX)/lib64
+LIBDIR=$(PREFIX)/lib/x86_64-linux-gnu
 ifeq ($(wildcard $(LIBDIR)/.*),)
 LIBDIR=$(PREFIX)/lib
 endif
@@ -39,10 +40,10 @@ deps: ## Install dependencies
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-depsdev: build_dir cache_dir ## Installing dependencies for development
+criterion: build_dir cache_dir ## Installing criterion
 	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
 	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
-	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion /usr/include/criterion
+	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion $(PREFIX)/include/criterion
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/lib/libcriterion.* $(LIBDIR)/
 
 nss_octopass: build_dir cache_dir ## Build nss_octopass
@@ -71,19 +72,18 @@ octopass_cli: build_dir cache_dir ## Build octopass cli
 		$(BUILD)/nss_octopass-shadow_cli.o \
 		-lcurl -ljansson
 
-test: depsdev testdev ## Test with dependencies installation
-
-testdev: ## Test without dependencies installation
+test: ## Run unit testing
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Testing$(RESET)"
+	test -d $(PREFIX)/include/criterion || $(MAKE) criterion
 	$(CC) octopass_test.c \
 		nss_octopass-passwd_test.c \
 		nss_octopass-group_test.c \
 		nss_octopass-shadow_test.c -lcurl -ljansson -lcriterion -o $(BUILD)/test && \
 		$(BUILD)/test --verbose
 
-integration_test: build install ## Run integration test
+integration: build install ## Run integration test
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Integration Testing$(RESET)"
-	test -d /usr/lib/x86_64-linux-gnu && ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0 || true
+	#test -d /usr/lib/x86_64-linux-gnu && ln -sf /usr/lib/libnss_octopass.so.2.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2.0 || true
 	cp octopass.conf.example /etc/octopass.conf
 	sed -i -e 's/^passwd:.*/passwd: files octopass/g' /etc/nsswitch.conf
 	sed -i -e 's/^shadow:.*/shadow: files octopass/g' /etc/nsswitch.conf
@@ -223,4 +223,4 @@ distclean: clean
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
 
-.PHONY: help clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps depsdev test testdev rpm
+.PHONY: help clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps test rpm
