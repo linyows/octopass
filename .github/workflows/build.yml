@@ -5,9 +5,9 @@ on: [push, pull_request]
 jobs:
   ubuntu:
     runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [ubuntu-18.04, ubuntu-20.04]
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
@@ -16,9 +16,9 @@ jobs:
         sudo make
   centos:
     runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [centos7, centos8]
+    strategy:
+      matrix:
+        os: [centos7, centos8]
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
