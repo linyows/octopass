@@ -157,7 +157,7 @@ auth	optional	pam_unix.so	not_set_pass	use_first_pass	nodelay
 session	required	pam_mkhomedir.so	skel=/etc/skel/	umask=0022
 ```
 
-### NSS Switch Configuration
+### Name Service Switch Configuration
 
 /etc/nsswitch.conf:
 
