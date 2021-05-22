@@ -7,7 +7,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/linyows/octopass/actions" title="actions"><img src="https://img.shields.io/github/workflow/status/linyows/octopass/Build?style=for-the-badge"></a>
+  <a href="https://github.com/linyows/octopass/actions/workflows/test.yml" title="Test"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/octopass/Test%20and%20Lint?label=Test&style=for-the-badge"></a>
+  <a href="https://github.com/linyows/octopass/actions/workflows/build.yml" title="Build"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/linyows/octopass/Build%20by%20matrix?style=for-the-badge"></a>
   <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=for-the-badge"></a>
   <a href="https://github.com/linyows/octopass/blob/main/LICENSE" title="MIT License"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg?style=for-the-badge"></a>
 </p>
