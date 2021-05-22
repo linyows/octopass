@@ -7,18 +7,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install packages
-      run: |
-        sudo apt install build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
-    - name: Test
+    - name: Install packages and Set envfile
       env:
         OCTOPASS_ENDPOINT: https://api.github.com/
         OCTOPASS_ORGANIZATION: ${{secrets.OCTOPASS_ORGANIZATION}}
         OCTOPASS_TEAM: ${{secrets.OCTOPASS_TEAM}}
         OCTOPASS_TOKEN: ${{secrets.OCTOPASS_TOKEN}}
       run: |
+        sudo apt install build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
         env > .env
-        sudo make test
-        sudo make format
-        sudo make integration
-
+    - name: Unit Test
+      run: sudo make test
+    - name: Lint
+      run: sudo make format
+    - name: Integration Test
+      run: sudo make integration
