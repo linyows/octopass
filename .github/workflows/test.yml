@@ -15,7 +15,7 @@ jobs:
         OCTOPASS_ENDPOINT: https://api.github.com/
         OCTOPASS_ORGANIZATION: ${{secrets.OCTOPASS_ORGANIZATION}}
         OCTOPASS_TEAM: ${{secrets.OCTOPASS_TEAM}}
-        OCTOPASS_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        OCTOPASS_TOKEN: ${{secrets.OCTOPASS_TOKEN}}
       run: |
         env > .env
         sudo make test
