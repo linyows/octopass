@@ -1,0 +1,55 @@
+name: Build by matrix
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: |
+        0 0 * * *
+jobs:
+  ubuntu:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['ubuntu:bionic', 'ubuntu:focal']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: |
+        apt update -qq
+        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
+    - name: Build and Install
+      run: |
+        make build install
+  debian:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['debian:stretch', 'debian:buster']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: |
+        apt update -qq
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+    - name: Build and Install
+      run: |
+        make build install
+  centos:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['centos:7', 'centos:8']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: |
+        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
+    - name: Build and Install
+      run: |
+        make build install

@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/main/misc/octopass-logo-plain.png?raw=true" width="500">
+  <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/main/misc/octopass-logo-plain-2021.svg?raw=true" width="500">
 </p>
 
 <p align="center">
@@ -7,8 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://gitter.im/linyows/octopass" title="gitter"><img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=for-the-badge"></a>
-  <a href="https://travis-ci.org/linyows/octopass" title="travis"><img src="https://img.shields.io/travis/linyows/octopass.svg?style=for-the-badge"></a>
+  <a href="https://github.com/linyows/octopass/actions" title="actions"><img src="https://img.shields.io/github/workflow/status/linyows/octopass/Build?style=for-the-badge"></a>
   <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=for-the-badge"></a>
   <a href="https://github.com/linyows/octopass/blob/main/LICENSE" title="MIT License"><img src="https://img.shields.io/badge/license-GPLv3-blue.svg?style=for-the-badge"></a>
 </p>
