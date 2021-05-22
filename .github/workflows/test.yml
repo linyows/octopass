@@ -1,9 +1,9 @@
-name: Test
+name: Test and Lint
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -16,9 +16,9 @@ jobs:
       run: |
         sudo apt install build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
         env > .env
-    - name: Unit Test
-      run: sudo make test
     - name: Lint
       run: sudo make format
+    - name: Unit Test
+      run: sudo make test
     - name: Integration Test
       run: sudo make integration
