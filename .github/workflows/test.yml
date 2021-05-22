@@ -17,7 +17,8 @@ jobs:
         OCTOPASS_TEAM: ${{secrets.OCTOPASS_TEAM}}
         OCTOPASS_TOKEN: ${{secrets.GITHUB_TOKEN}}
       run: |
-        sudo make test LIBDIR=/usr/lib/x86_64-linux-gnu OCTOPASS_ENDPOINT=$OCTOPASS_ENDPOINT OCTOPASS_TOKEN=$OCTOPASS_TOKEN OCTOPASS_ORGANIZATION=$OCTOPASS_ORGANIZATION OCTOPASS_TEAM=$OCTOPASS_TEAM
-        sudo make format LIBDIR=/usr/lib/x86_64-linux-gnu
-        sudo make integration_test LIBDIR=/usr/lib/x86_64-linux-gnu OCTOPASS_ENDPOINT=$OCTOPASS_ENDPOINT OCTOPASS_TOKEN=$OCTOPASS_TOKEN
+        env > .env
+        sudo make test
+        sudo make format
+        sudo make integration
 

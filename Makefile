@@ -25,6 +25,11 @@ INFO_COLOR=\033[1;34m
 RESET=\033[0m
 BOLD=\033[1m
 
+ifeq ("$(shell ls .env)",".env")
+include .env
+export $(shell sed 's/=.*//' .env)
+endif
+
 default: build
 build: nss_octopass octopass_cli
 
