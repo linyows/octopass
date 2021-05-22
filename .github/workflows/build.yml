@@ -1,27 +1,52 @@
-name: Build
+name: Build by matrix
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   ubuntu:
-    runs-on: ${{ matrix.os }}
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
+        container: ['ubuntu:bionic', 'ubuntu:focal']
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        sudo apt install build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
-        sudo make
+        apt update -qq
+        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
+    - name: Build and Install
+      run: |
+        make build install
+  debian:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['debian:stretch', 'debian:buster']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: |
+        apt update -qq
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+    - name: Build and Install
+      run: |
+        make build install
   centos:
-    runs-on: ${{ matrix.os }}
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [centos7, centos8]
+        container: ['centos:7', 'centos:8']
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        sudo yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
-        sudo make
+        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
+    - name: Build and Install
+      run: |
+        make build install
