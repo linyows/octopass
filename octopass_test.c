@@ -471,18 +471,8 @@ Test(octopass, github_user_keys, .init = setup)
   char *user       = "linyows";
   const char *keys = octopass_github_user_keys(&con, user);
   cr_assert_str_eq(keys,
-                   "ssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/"
-                   "HPOQXsolZYmPQW/xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/awyCYCJG78Llj2Sm"
-                   "qPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+PdxllbBD"
-                   "Jv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxW"
-                   "FNyxnb7/wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9"
-                   "BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUv"
-                   "kXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK"
-                   "+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xf"
-                   "udpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODE"
-                   "RYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n");
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
+    "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==\n");
 }
 
 Test(octopass, github_team_members_keys, .init = setup)
@@ -492,27 +482,7 @@ Test(octopass, github_team_members_keys, .init = setup)
   octopass_config_loading(&con, f);
   const char *keys = octopass_github_team_members_keys(&con);
   cr_assert_str_eq(keys,
-                   "ssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQDpfOPDOHf5ZpFLR2dMhK+B3vSMtAlh/"
-                   "HPOQXsolZYmPQW/xGb0U0+rgXVvBEw193q5c236ENdSrk4R2NE/4ipA/awyCYCJG78Llj2Sm"
-                   "qPWbuCtv1K06mXwuh6VM3DP1wPGJmWnzf44Eee4NtTvOzMrORdvGtzQAM044h11N24w07vYwlBvW3P+PdxllbBD"
-                   "Jv0ns2A1v40Oerh/xLqAN6UpUADv5prPAnpGnVmuhiNHElX96FmY4y1RxW"
-                   "FNyxnb7/wRwp0NnjfTAmJtB9SWJK9UABLfre2HHlX0gBbhj1+LSW+U5jXD8F9"
-                   "BZF4XRtVY3Ep0PnUrdDqjttrYE0mBfsMh\nssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUv"
-                   "kXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK"
-                   "+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xf"
-                   "udpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODE"
-                   "RYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
-                   "ssh-rsa "
-                   "AAAAB3NzaC1yc2EAAAADAQABAAACAQCnzpR1gnRCfNTpvMGWiXLqjFxqgMN23hy2Q55ac9KJJXMTf1q1ZOKrt0EC6Bt/"
-                   "r7M7bo3EzmaIbOrTDxPtVpKgqHNpS31n6beVy/"
-                   "pukhcdWq0C6KI1miXpySZoWf2j05foDKMhvO2t15NddU9qmQn7fWwvCEwUKv13lAETSQ6ZKR1A7hFfNAFBxLACCyhvNpvVcVD1p"
-                   "bCymygENBOjtpIFSHFSdCBpm3FpVrH4sFbQZZyTicJW0sLMnHjdqlrM9F/"
-                   "GF+eGRdejSPpjZh6rNX54QMIR+oEyBqatFD6LH0lgWvw+VDwCHFaXQVbdLlRCQDxAH0ocMPHH4ZurYf69oDah73xfh3fCb9v+B+"
-                   "gp+4zN7MqcYZy15zw/"
-                   "PIKHySWitST1hi+uLwa3FXGIgHdMtFFrkR9hrpSqRwPduUanzU01jl1gmq237SKy0fuzmvUKdZPRkrLz4cNfdD++"
-                   "S6v4nrb8JHryp0Hp6NJ02XDtylKQJJX9ZL7lsxE/"
-                   "PCdMiG0CngdSe1MY2TV0tCt3TNvDfmk7zB4pe3GuOdGazIdlv2aukEAnSNmoVUflym08J4Oz676PI0onFUExEfok21AQNtt6WsU"
-                   "bi7Jd84Xx09HLjMFDPYyZQZWn9+u5ZIaAVPwg26T3w8FU/OJmKK+Autdm3VBc2UHTmDlL2qdrtLjcQZAMqw==\n");
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCbBkU87QyUEmecsQjCcMTdS6iARCUXzMo2awb4c+irGPUvkXxQUljmLFRXCIw+cEKajiS7VY5NLCZ6WVCbd4yIK+3jdNzrf74isiG8GdU+m64gNGaXtKGFaQEXBp9uWqqZgSw+bVMX2ArOtoh3lP96WJQOoXsOuX0izNS5qf1Z9E01J6IpE3xfudpaL4/vY1RnljM+KUoiIPFqS1Q7kJ+8LpHvV1T9SRiocpLThXOzifzwwoo9I6emwHr+kGwODERYWYvkMEwFyOh8fKAcTdt8huUz8n6k59V9y5hZWDuxP/zhnArUMwWHiiS1C5im8baX8jxSW6RoHuetBxSUn5vR\n"
+    "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqUJvs1vKgHRMH1dpxYcBBV687njS2YrJ+oeIKvbAbg6yL4QsJMeElcPOlmfWEYsp8vbRLXQCTvv14XJfKmgp8V9es5P/l8r5Came3X1S/muqRMONUTdygCpfyo+BJGIMVKtH8fSsBCWfJJ1EYEesyzxqc2u44yIiczM2b461tRwW+7cHNrQ6bKEY9sRMV0p/zkOdPwle30qQml+AlS1SvbrMiiJLEW75dSSENr5M+P4ciJHYXhsrgLE95+ThFPqbznZYWixxATWEYMLiK6OrSy5aYss4o9mvEBJozyrVdKyKz11zSK2D4Z/JTh8eP+NxAw5otqBmfNx+HhKRH3MhJQ==\n"
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCnzpR1gnRCfNTpvMGWiXLqjFxqgMN23hy2Q55ac9KJJXMTf1q1ZOKrt0EC6Bt/r7M7bo3EzmaIbOrTDxPtVpKgqHNpS31n6beVy/pukhcdWq0C6KI1miXpySZoWf2j05foDKMhvO2t15NddU9qmQn7fWwvCEwUKv13lAETSQ6ZKR1A7hFfNAFBxLACCyhvNpvVcVD1pbCymygENBOjtpIFSHFSdCBpm3FpVrH4sFbQZZyTicJW0sLMnHjdqlrM9F/GF+eGRdejSPpjZh6rNX54QMIR+oEyBqatFD6LH0lgWvw+VDwCHFaXQVbdLlRCQDxAH0ocMPHH4ZurYf69oDah73xfh3fCb9v+B+gp+4zN7MqcYZy15zw/PIKHySWitST1hi+uLwa3FXGIgHdMtFFrkR9hrpSqRwPduUanzU01jl1gmq237SKy0fuzmvUKdZPRkrLz4cNfdD++S6v4nrb8JHryp0Hp6NJ02XDtylKQJJX9ZL7lsxE/PCdMiG0CngdSe1MY2TV0tCt3TNvDfmk7zB4pe3GuOdGazIdlv2aukEAnSNmoVUflym08J4Oz676PI0onFUExEfok21AQNtt6WsUbi7Jd84Xx09HLjMFDPYyZQZWn9+u5ZIaAVPwg26T3w8FU/OJmKK+Autdm3VBc2UHTmDlL2qdrtLjcQZAMqw==\n");
 }
