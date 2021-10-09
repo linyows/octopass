@@ -206,6 +206,7 @@ packagecloud_release: ## Upload archives to PackageCloud on Mac
 	#pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
 	#pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
 	#pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
+	pkgcloud-push linyows/octopass/debian/bullseye builds/octopass_$(VERSION)-1_amd64.bullseye.deb
 	pkgcloud-push linyows/octopass/debian/buster builds/octopass_$(VERSION)-1_amd64.buster.deb
 	pkgcloud-push linyows/octopass/debian/stretch builds/octopass_$(VERSION)-1_amd64.stretch.deb
 	#pkgcloud-push linyows/octopass/debian/jessie builds/octopass_$(VERSION)-1_amd64.jessie.deb
