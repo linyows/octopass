@@ -19,7 +19,7 @@ jobs:
         OCTOPASS_TOKEN: ${{secrets.OCTOPASS_TOKEN}}
       run: |
         sudo apt update -qq
-        sudo apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
+        sudo apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
         env > .env
     - name: Lint
       run: sudo make format
