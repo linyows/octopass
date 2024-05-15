@@ -13,13 +13,13 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['ubuntu:bionic', 'ubuntu:focal']
+        container: ['ubuntu:jammy']
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
         apt update -qq
-        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format-10
+        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
     - name: Build and Install
       run: |
         make build install
@@ -29,13 +29,13 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['debian:stretch', 'debian:buster']
+        container: ['debian:buster']
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        apt update -qq
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+        apt-get update -qq
+        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
     - name: Build and Install
       run: |
         make build install
@@ -45,7 +45,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['centos:7', 'centos:8']
+        container: ['centos:7']
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
