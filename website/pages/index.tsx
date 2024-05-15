@@ -37,7 +37,7 @@ export default function Home({ logo, icon, blocks }: InferGetStaticPropsType<typ
   return (
     <>
       <Head>
-        <title>Warp</title>
+        <title>Octopass</title>
         <link rel="icon" type="image/svg+xml" href={icon} />
       </Head>
       <div className={styles.box}>
