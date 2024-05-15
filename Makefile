@@ -18,7 +18,7 @@ DIST ?= unknown
 SOURCES_RPM=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
-CRITERION_VERSION=2.3.0
+CRITERION_VERSION=2.4.2
 JANSSON_VERSION=2.4
 
 INFO_COLOR=\033[1;34m
