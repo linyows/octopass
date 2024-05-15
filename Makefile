@@ -45,7 +45,7 @@ deps: ## Install dependencies
 	pushd tmp/libucl; ./autogen.sh; ./configure && make && make install; popd
 	git clone --depth=1 https://github.com/allanjude/uclcmd.git tmp/uclcmd
 
-criterion: build_dir cache_dir ## Installing criterion
+criterion: ## Installing criterion
 	test -f $(BUILD)/criterion.tar.bz2 || curl -sL https://github.com/Snaipe/Criterion/releases/download/v$(CRITERION_VERSION)/criterion-v$(CRITERION_VERSION)-linux-x86_64.tar.bz2 -o $(BUILD)/criterion.tar.bz2
 	cd $(BUILD); tar xf criterion.tar.bz2; cd ../
 	mv $(BUILD)/criterion-v$(CRITERION_VERSION)/include/criterion $(PREFIX)/include/criterion
@@ -77,7 +77,7 @@ octopass_cli: build_dir cache_dir ## Build octopass cli
 		$(BUILD)/nss_octopass-shadow_cli.o \
 		-lcurl -ljansson
 
-test: ## Run unit testing
+test: build_dir cache_dir ## Run unit testing
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Testing$(RESET)"
 	test -d $(PREFIX)/include/criterion || $(MAKE) criterion
 	$(CC) octopass_test.c \
