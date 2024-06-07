@@ -47,7 +47,7 @@ jobs:
       matrix:
         container: ['centos:7']
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2
     - name: Install packages
       run: |
         grep "8." /etc/centos-release && \
