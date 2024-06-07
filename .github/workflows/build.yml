@@ -15,7 +15,7 @@ jobs:
       matrix:
         container: ['ubuntu:jammy']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install packages
       run: |
         apt update -qq
@@ -31,7 +31,7 @@ jobs:
       matrix:
         container: ['debian:buster']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install packages
       run: |
         apt-get update -qq
@@ -47,7 +47,7 @@ jobs:
       matrix:
         container: ['centos:7']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install packages
       run: |
         grep "8." /etc/centos-release && \
