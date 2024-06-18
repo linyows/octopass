@@ -285,8 +285,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
   octopass_github_request_without_cache(&con, url, &res, token);
 
   cr_assert_eq((long *)401, res.httpstatus);
-  cr_assert_str_eq("{\"message\":\"Bad credentials\",\"documentation_url\":\"https://docs.github.com/rest\"}",
-                   res.data);
+  cr_assert_str_eq(res.data, "{\"message\":\"Bad credentials\",\"documentation_url\":\"https://docs.github.com/rest\",\"status\":\"401\"}");
 }
 
 Test(octopass, team_id, .init = setup)
