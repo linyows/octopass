@@ -12,7 +12,7 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "rotion": "^0.3.3"
+    "rotion": "^1.5.1"
   },
   "devDependencies": {
     "@types/node": "^20",
