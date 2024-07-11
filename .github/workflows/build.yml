@@ -39,20 +39,20 @@ jobs:
     - name: Build and Install
       run: |
         make build install
-  centos:
-    name: Build on ${{matrix.container }}
-    runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      matrix:
-        container: ['centos:7']
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install packages
-      run: |
-        grep "8." /etc/centos-release && \
-          sed -i -e 's/^mirrorlist/#mirrorlist/g' -e 's/^#baseurl=http:\/\/mirror/baseurl=http:\/\/vault/g' /etc/yum.repos.d/CentOS-*repo
-        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
-    - name: Build and Install
-      run: |
-        make build install
+#  centos:
+#    name: Build on ${{matrix.container }}
+#    runs-on: ubuntu-latest
+#    container: ${{ matrix.container }}
+#    strategy:
+#      matrix:
+#        container: ['centos:7']
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Install packages
+#      run: |
+#        grep "8." /etc/centos-release && \
+#          sed -i -e 's/^mirrorlist/#mirrorlist/g' -e 's/^#baseurl=http:\/\/mirror/baseurl=http:\/\/vault/g' /etc/yum.repos.d/CentOS-*repo
+#        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
+#    - name: Build and Install
+#      run: |
+#        make build install
