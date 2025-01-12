@@ -102,49 +102,51 @@ const char *octopass_url_normalization(char *url)
 // Matched: 1
 int octopass_match(char *str, char *pattern, char **matched)
 {
-  int res;
   regex_t re;
   regmatch_t pm;
-
-  res = regcomp(&re, pattern, REG_EXTENDED);
+  int res = regcomp(&re, pattern, REG_EXTENDED);
   if (res != 0) {
     regfree(&re);
     return 0;
   }
 
-  int cnt    = 0;
+  int cnt = 0;
   int offset = 0;
-  res        = regexec(&re, &str[0], 1, &pm, REG_EXTENDED);
+
+  // try the first match with a regular expression
+  res = regexec(&re, str + offset, 1, &pm, 0);
   if (res != 0) {
     regfree(&re);
     return 0;
   }
-  char *match_word;
 
   while (res == 0) {
-    int relative_start = pm.rm_so + 1;
-    int relative_end   = pm.rm_eo - 1;
-    int absolute_start = offset + relative_start;
-    int absolute_end   = offset + relative_end;
+    // calculate match start and end positions
+    // IMPORTANT: +1, -1 for getting the quotes inside
+    int match_start = pm.rm_so + 1;
+    int match_end = pm.rm_eo - 1;
+    int match_len = match_end - match_start;
 
-    int i;
-    match_word = calloc(MAXBUF, sizeof(char *));
-
-    char *tmp;
-    for (i = absolute_start; i < absolute_end; i++) {
-      tmp = calloc(MAXBUF, sizeof(char *));
-      sprintf(tmp, "%c", str[i]);
-      strcat(match_word, tmp);
-      free(tmp);
+    char *match_word = malloc(match_len + 1);
+    if (!match_word) {
+      fprintf(stderr, "Memory allocation failed in octopass_match\n");
+      regfree(&re);
+      return cnt;
     }
 
-    matched[cnt] = strdup(match_word);
-    free(match_word);
+    // copy for matched
+    strncpy(match_word, str + offset + match_start, match_len);
+    match_word[match_len] = '\0';
 
-    offset += pm.rm_eo;
+    // append matched
+    matched[cnt] = match_word;
     cnt++;
 
-    res = regexec(&re, &str[0] + offset, 1, &pm, 0);
+    // update offset for next match
+    offset += pm.rm_eo;
+
+    // try next match
+    res = regexec(&re, str + offset, 1, &pm, 0);
   }
 
   regfree(&re);
