@@ -90,18 +90,23 @@ int octopass_public_keys(char *name)
 
 int octopass_authentication_unlocked(int argc, char **argv)
 {
-  char token[40 + 1];
-  fgets(token, sizeof(token), stdin);
-  if (token == NULL) {
-    fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Token is required\n");
+  char *token = NULL;
+  size_t token_size = 0;
+
+  if (getline(&token, &token_size, stdin) == -1) {
+    fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Failed to read token from stdin\n");
+    free(token);
     return 2;
   }
+
+  token[strcspn(token, "\n")] = '\0';
 
   char *user;
   if (argc < 3) {
     user = getenv("PAM_USER");
     if (user == NULL) {
       fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "User is required\n");
+      free(token);
       return 2;
     }
   } else {
@@ -110,7 +115,10 @@ int octopass_authentication_unlocked(int argc, char **argv)
 
   struct config con;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
-  return octopass_autentication_with_token(&con, user, token);
+
+  int result = octopass_autentication_with_token(&con, user, token);
+  free(token);
+  return result;
 }
 
 int octopass_authentication(int argc, char **argv)
