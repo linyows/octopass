@@ -618,8 +618,13 @@ json_t *octopass_github_team_member_by_id(int gh_id, json_t *members)
 
 int octopass_team_id(struct config *con)
 {
-  char url[strlen(con->endpoint) + strlen(con->organization) + 64];
-  sprintf(url, "%sorgs/%s/teams?per_page=100", con->endpoint, con->organization);
+  size_t url_size = snprintf(NULL, 0, OCTOPASS_TEAMS_URL, con->endpoint, con->organization) + 1;
+  char *url = malloc(url_size);
+  if (!url) {
+    fprintf(stderr, "Memory allocation failed for teams URL\n");
+    return -1;
+  }
+  snprintf(url, url_size, OCTOPASS_TEAMS_URL, con->endpoint, con->organization);
 
   struct response res;
   octopass_github_request(con, url, &res);
