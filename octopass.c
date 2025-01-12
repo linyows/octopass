@@ -356,21 +356,48 @@ const char *octopass_import_file(struct config *con, char *file)
     }
     exit(1);
   }
-  char line[MAXBUF];
-  char *data;
 
-  if ((data = malloc(OCTOPASS_MAX_BUFFER_SIZE)) != NULL) {
-    data[0] = '\0';
-  } else {
+  char *data = NULL;
+  size_t data_size = 0;
+  size_t data_capacity = MAXBUF;
+
+  data = malloc(data_capacity);
+  if (!data) {
     fprintf(stderr, "Malloc failed\n");
     fclose(fp);
     return NULL;
   }
+  data[0] = '\0';
 
-  while (fgets(line, sizeof(line), fp) != NULL) {
-    strcat(data, strdup(line));
+  char *line = NULL;
+  size_t line_len = 0;
+
+  while (getline(&line, &line_len, fp) != -1) {
+    size_t line_size = strlen(line);
+
+    // Expand buffers when over data_capacity
+    if (data_size + line_size + 1 > data_capacity) {
+      data_capacity *= 2;
+      char *new_data = realloc(data, data_capacity);
+      if (!new_data) {
+        fprintf(stderr, "Realloc failed\n");
+        free(data);
+        free(line);
+        fclose(fp);
+        return NULL;
+      }
+      data = new_data;
+    }
+
+    // append a row to data
+    strcat(data, line);
+    data_size += line_size;
   }
+
+  free(line);
   fclose(fp);
+
+  // return copy
   const char *res = strdup(data);
   free(data);
 
