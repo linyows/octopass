@@ -772,9 +772,15 @@ int octopass_members(struct config *con, struct response *res)
 // NG: 1
 int octopass_autentication_with_token(struct config *con, char *user, char *token)
 {
+  size_t url_size = snprintf(NULL, 0, OCTOPASS_USER_URL, con->endpoint) + 1;
+  char *url = malloc(url_size);
+  if (!url) {
+    fprintf(stderr, "Memory allocation failed for user URL\n");
+    return 1;
+  }
+  snprintf(url, url_size, OCTOPASS_USER_URL, con->endpoint);
+
   struct response res;
-  char url[strlen(con->endpoint) + strlen("user") + 1];
-  sprintf(url, "%suser", con->endpoint);
   octopass_github_request_without_cache(con, url, &res, token);
 
   long *ok_code = (long *)200;
