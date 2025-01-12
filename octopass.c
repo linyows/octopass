@@ -423,14 +423,6 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
   }
   snprintf(auth, auth_size, "Authorization: token %s", token ? token : con->token);
 
-  /*
-  char auth[64];
-  if (token == NULL) {
-    token = con->token;
-  }
-  sprintf(auth, "Authorization: token %s", token);
-  */
-
   CURL *hnd = curl_easy_init();
   if (!hnd) {
     fprintf(stderr, "Failed to initialize cURL\n");
