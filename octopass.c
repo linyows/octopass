@@ -492,13 +492,34 @@ void octopass_github_request(struct config *con, char *url, struct response *res
   }
 
   char *base = curl_escape(url, strlen(url));
-  char dpath[MAXBUF];
-  char fpath[MAXBUF + 2];
-  sprintf(dpath, "%s/%d", OCTOPASS_CACHE_DIR, geteuid());
-  sprintf(fpath, "%s/%s-%s", dpath, base, octopass_truncate(con->token, 6));
-  curl_free(base);
+  if (!base) {
+    fprintf(stderr, "Failed to escape URL\n");
+    exit(1);
+  }
 
-  FILE *fp      = fopen(fpath, "r");
+  // create dir path with dynamic buffers
+  size_t dpath_size = snprintf(NULL, 0, "%s/%d", OCTOPASS_CACHE_DIR, geteuid()) + 1;
+  char *dpath = malloc(dpath_size);
+  if (!dpath) {
+    fprintf(stderr, "Memory allocation failed for dpath\n");
+    curl_free(base);
+    exit(1);
+  }
+  snprintf(dpath, dpath_size, "%s/%d", OCTOPASS_CACHE_DIR, geteuid());
+
+  // create file path with dynamic buffers
+  size_t fpath_size = snprintf(NULL, 0, "%s/%s-%s", dpath, base, octopass_truncate(con->token, 6)) + 1;
+  char *fpath = malloc(fpath_size);
+  if (!fpath) {
+    fprintf(stderr, "Memory allocation failed for fpath\n");
+    free(dpath);
+    curl_free(base);
+    exit(1);
+  }
+  snprintf(fpath, fpath_size, "%s/%s-%s", dpath, base, octopass_truncate(con->token, 6));
+
+  curl_free(base);
+  FILE *fp = fopen(fpath, "r");
   long *ok_code = (long *)200;
 
   if (fp == NULL) {
@@ -511,14 +532,16 @@ void octopass_github_request(struct config *con, char *url, struct response *res
 
     struct stat statbuf;
     if (stat(fpath, &statbuf) != -1) {
-      unsigned long now  = time(NULL);
+      unsigned long now = time(NULL);
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
         octopass_github_request_without_cache(con, url, res, token);
         if (res->httpstatus == ok_code) {
           octopass_export_file(con, dpath, fpath, res->data);
-          return;
         }
+        free(dpath);
+        free(fpath);
+        return;
       }
     }
 
@@ -529,6 +552,9 @@ void octopass_github_request(struct config *con, char *url, struct response *res
     res->data = (char *)octopass_import_file(con, fpath);
     res->size = strlen(res->data);
   }
+
+  free(dpath);
+  free(fpath);
 }
 
 int octopass_github_team_id(char *team_name, char *data)
