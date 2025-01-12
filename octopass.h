@@ -53,6 +53,13 @@
 // 10MB
 #define OCTOPASS_MAX_BUFFER_SIZE (10 * 1024 * 1024)
 
+#define OCTOPASS_API_ENDPOINT "https://api.github.com/"
+#define OCTOPASS_USER_URL "%suser"
+#define OCTOPASS_TEAMS_URL "%sorgs/%s/teams?per_page=100"
+#define OCTOPASS_TEAMS_MEMBERS_URL "%steams/%d/members?per_page=100"
+#define OCTOPASS_COLLABORATORS_URL "%srepos/%s/%s/collaborators?per_page=100"
+#define OCTOPASS_USERS_KEYS_URL "%susers/%s/keys?per_page=100"
+
 #define MAXBUF 1024
 #define DELIM "= "
 
