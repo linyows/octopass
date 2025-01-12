@@ -76,13 +76,22 @@ const char *octopass_masking(const char *token)
 
 const char *octopass_url_normalization(char *url)
 {
-  char *slash;
-  slash = strrchr(url, (int)'/');
+  char *slash = strrchr(url, '/');
 
+  // only if the URL has no slashes and does not end with a slash
   if (slash != NULL && strcmp(slash, "/") != 0) {
-    char tmp[MAXBUF];
-    sprintf(tmp, "%s/", url);
-    char *res = strdup(tmp);
+    size_t url_length = strlen(url);
+    // add a trailing slash and terminator
+    size_t new_length = url_length + 2;
+
+    char *res = malloc(new_length);
+    if (!res) {
+      fprintf(stderr, "Memory allocation failed in octopass_url_normalization\n");
+      exit(1);
+    }
+
+    // add URL and slash to dynamic buffer
+    snprintf(res, new_length, "%s/", url);
     return res;
   }
 
