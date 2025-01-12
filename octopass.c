@@ -825,9 +825,15 @@ const char *octopass_only_keys(char *data)
 
 const char *octopass_github_user_keys(struct config *con, char *user)
 {
+  size_t url_size = snprintf(NULL, 0, OCTOPASS_USERS_KEYS_URL, con->endpoint, user) + 1;
+  char *url = malloc(url_size);
+  if (!url) {
+    fprintf(stderr, "Memory allocation failed for user keys URL\n");
+    return NULL;
+  }
+  snprintf(url, url_size, OCTOPASS_USERS_KEYS_URL, con->endpoint, user);
+
   struct response res;
-  char url[strlen(con->endpoint) + strlen(user) + 64];
-  sprintf(url, "%susers/%s/keys?per_page=100", con->endpoint, user);
   octopass_github_request(con, url, &res);
 
   if (!res.data) {
