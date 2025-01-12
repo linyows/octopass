@@ -406,17 +406,38 @@ const char *octopass_import_file(struct config *con, char *file)
 
 void octopass_github_request_without_cache(struct config *con, char *url, struct response *res, char *token)
 {
+  if (!con || !url || !res) {
+    fprintf(stderr, "Invalid arguments passed to octopass_github_request_without_cache\n");
+    return;
+  }
+
   if (con->syslog) {
     syslog(LOG_INFO, "http get -- %s", url);
   }
 
+  size_t auth_size = snprintf(NULL, 0, "Authorization: token %s", token ? token : con->token) + 1;
+  char *auth = malloc(auth_size);
+  if (!auth) {
+    fprintf(stderr, "Memory allocation failed for auth header\n");
+    return;
+  }
+  snprintf(auth, auth_size, "Authorization: token %s", token ? token : con->token);
+
+  /*
   char auth[64];
   if (token == NULL) {
     token = con->token;
   }
   sprintf(auth, "Authorization: token %s", token);
+  */
 
-  CURL *hnd;
+  CURL *hnd = curl_easy_init();
+  if (!hnd) {
+    fprintf(stderr, "Failed to initialize cURL\n");
+    free(auth);
+    return;
+  }
+
   CURLcode result;
   struct curl_slist *headers = NULL;
   res->data                  = malloc(1);
@@ -424,8 +445,13 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
   res->httpstatus            = (long *)0;
 
   headers = curl_slist_append(headers, auth);
+  if (!headers) {
+    fprintf(stderr, "Failed to set cURL headers\n");
+    curl_easy_cleanup(hnd);
+    free(auth);
+    return;
+  }
 
-  hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, OCTOPASS_VERSION_WITH_NAME);
@@ -452,8 +478,17 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
     }
   }
 
+  // clean-up
   curl_easy_cleanup(hnd);
   curl_slist_free_all(headers);
+  free(auth);
+
+  if (!res->data) {
+    res->data = malloc(1);
+    if (res->data) {
+      res->data[0] = '\0';
+    }
+  }
 }
 
 void octopass_github_request(struct config *con, char *url, struct response *res)
