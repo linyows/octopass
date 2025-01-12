@@ -738,8 +738,13 @@ int octopass_rebuild_data_with_authorized(struct config *con, struct response *r
 
 int octopass_repository_collaborators(struct config *con, struct response *res)
 {
-  char url[strlen(con->endpoint) + strlen(con->organization) + strlen(con->repository) + 64];
-  sprintf(url, "%srepos/%s/%s/collaborators?per_page=100", con->endpoint, con->owner, con->repository);
+  size_t url_size = snprintf(NULL, 0, OCTOPASS_COLLABORATORS_URL, con->endpoint, con->owner, con->repository) + 1;
+  char *url = malloc(url_size);
+  if (!url) {
+    fprintf(stderr, "Memory allocation failed for collaborators URL\n");
+    return -1;
+  }
+  snprintf(url, url_size, OCTOPASS_COLLABORATORS_URL, con->endpoint, con->owner, con->repository);
 
   octopass_github_request(con, url, res);
 
