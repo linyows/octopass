@@ -14,7 +14,7 @@ BINDIR=$(PREFIX)/bin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
-DIST ?= unknown
+DIST ?= $(shell grep VERSION_CODENAME /etc/os-release | awk -F '=' '{print $$2}' ORS='')
 SOURCES_RPM=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
@@ -161,72 +161,41 @@ deb: source_for_deb ## Packaging for DEB
 		cd octopass-$(VERSION) && \
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
-		cp -v /octopass/debian/* debian/ && \
-		sed -i -e 's/xenial/$(DIST)/g' debian/changelog && \
+		cp -v ../../debian/* debian/ && \
+		sed -i -e 's/DIST/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
-		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
-		cp *.deb /octopass/builds
+		find . -name "*.deb" ! -name "*-dbgsym_*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
+		cp *.deb ../builds
 	rm -rf tmp.$(DIST)
 
-deb12: ## Packaging for DEB-12
-	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Distributing$(RESET)"
-	rm -rf tmp.$(DIST) octopass_$(VERSION).orig.tar.xz
-	mkdir -p tmp.$(DIST)/octopass-$(VERSION)
-	cp $(SOURCES) tmp.$(DIST)/octopass-$(VERSION)
-	cd tmp.$(DIST) && \
-		tar cf octopass_$(VERSION).tar octopass-$(VERSION) && \
-		mv octopass_$(VERSION).tar octopass_$(VERSION).orig.tar
-	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Packaging for DEB$(RESET)"
-	cd tmp.$(DIST) && \
-		tar xf octopass_$(VERSION).orig.tar && \
-		cd octopass-$(VERSION) && \
-		dh_make --single --createorig && \
-		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
-		cp -v /octopass/debian/* debian/ && \
-		debuild -uc -us
-	cd tmp.$(DIST) && \
-		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
-		cp *.deb /octopass/builds
-	rm -rf tmp.$(DIST)
+deps_for_dist:
+	go install github.com/tcnksm/ghr@latest
+	go install github.com/mlafeldt/pkgcloud/cmd/pkgcloud-push@latest
 
-github_release: pkg ## Upload archives to Github Release on Mac
+github_release: ## Upload archives to Github Release
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
-	go get github.com/tcnksm/ghr
 	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
 
-packagecloud_release: ## Upload archives to PackageCloud on Mac
+packagecloud_release: ## Upload archives to PackageCloud
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
-	go get github.com/mlafeldt/pkgcloud/...
-	pkgcloud-push linyows/octopass/el/8 builds/octopass-$(VERSION)-1.x86_64.el8.rpm
-	pkgcloud-push linyows/octopass/el/7 builds/octopass-$(VERSION)-1.x86_64.el7.rpm
-	#pkgcloud-push linyows/octopass/el/6 builds/octopass-$(VERSION)-1.x86_64.el6.rpm
 	pkgcloud-push linyows/octopass/ubuntu/focal builds/octopass_$(VERSION)-1_amd64.focal.deb
-	pkgcloud-push linyows/octopass/ubuntu/bionic builds/octopass_$(VERSION)-1_amd64.bionic.deb
-	#pkgcloud-push linyows/octopass/ubuntu/xenial builds/octopass_$(VERSION)-1_amd64.xenial.deb
-	#pkgcloud-push linyows/octopass/ubuntu/trusty builds/octopass_$(VERSION)-1_amd64.trusty.deb
-	#pkgcloud-push linyows/octopass/ubuntu/precise builds/octopass_$(VERSION)-1_amd64.precise.deb
 	pkgcloud-push linyows/octopass/debian/bullseye builds/octopass_$(VERSION)-1_amd64.bullseye.deb
-	pkgcloud-push linyows/octopass/debian/buster builds/octopass_$(VERSION)-1_amd64.buster.deb
-	pkgcloud-push linyows/octopass/debian/stretch builds/octopass_$(VERSION)-1_amd64.stretch.deb
-	#pkgcloud-push linyows/octopass/debian/jessie builds/octopass_$(VERSION)-1_amd64.jessie.deb
 
-pkg: ## Create some distribution packages
-	rm -rf builds && mkdir builds
+pkg: clean ## Create some distribution packages
 	docker-compose up
 
-dist: ## Upload archives to Github Release on Mac
+dist: ## Upload archives to GitHub and PackageCloud
 	@test -z $(GITHUB_TOKEN) || $(MAKE) github_release
 	@test -z $(PACKAGECLOUD_TOKEN) || $(MAKE) packagecloud_release
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
-	rm -rf $(TMP)
-
-distclean: clean
-	rm -f builds/octopass*
+	rm -rf builds && mkdir builds
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
+	@echo "$(BOLD)Target Name              Description$(RESET)"
+	@echo "------------------------ ------------------------"
+	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-24s$(RESET) %s\n", $$1, $$2}'
 
-.PHONY: help clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps test rpm
+.PHONY: install dist deps test rpm

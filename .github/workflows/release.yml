@@ -1,11 +1,10 @@
-name: Build by matrix
+name: Release by matrix
 on:
   push:
-  pull_request:
+    tags:
+      - '*'
   workflow_dispatch:
-  schedule:
-    - cron: |
-        0 0 * * *
+
 jobs:
   ubuntu:
     name: Build on ${{matrix.container }}
@@ -26,10 +25,17 @@ jobs:
         useradd -m -s /bin/bash octopass
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
-    - name: Build and Install
+    - name: Create package
       run: |
-        make build install
         make deb
+    - name: Release
+      run: |
+        apt install -qqy golang
+        go install github.com/tcnksm/ghr@latest
+        make github_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   debian:
     name: Build on ${{matrix.container }}
     runs-on: ubuntu-latest
@@ -41,30 +47,19 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install packages
       run: |
-        apt-get update -qq
-        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+        apt update -qq
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
     - name: Set LOGNAME and USER to environment
       run: |
         echo "LOGNAME=root" >> $GITHUB_ENV
         echo "USER=root" >> $GITHUB_ENV
-    - name: Build and Install
+    - name: Create package
       run: |
-        make build install
         make deb
-#  centos:
-#    name: Build on ${{matrix.container }}
-#    runs-on: ubuntu-latest
-#    container: ${{ matrix.container }}
-#    strategy:
-#      matrix:
-#        container: ['centos:7']
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Install packages
-#      run: |
-#        grep "8." /etc/centos-release && \
-#          sed -i -e 's/^mirrorlist/#mirrorlist/g' -e 's/^#baseurl=http:\/\/mirror/baseurl=http:\/\/vault/g' /etc/yum.repos.d/CentOS-*repo
-#        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
-#    - name: Build and Install
-#      run: |
-#        make build install
+    - name: Release
+      run: |
+        apt install -qqy golang
+        go install github.com/tcnksm/ghr@latest
+        make github_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
