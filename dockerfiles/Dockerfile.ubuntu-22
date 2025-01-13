@@ -1,9 +1,9 @@
-FROM ubuntu:xenial
-MAINTAINER linyows <linyows@gmail.com>
+FROM ubuntu:jammy
 
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update && \
     apt-get install -qq glibc-source gcc make libcurl4-gnutls-dev libjansson-dev \
-                        bzip2 unzip debhelper dh-make devscripts cdbs clang
+                        bzip2 unzip debhelper dh-make devscripts cdbs clang libcriterion-dev
 
 ENV USER root
 

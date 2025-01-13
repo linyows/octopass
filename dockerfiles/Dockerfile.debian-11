@@ -1,5 +1,4 @@
 FROM debian:bullseye
-MAINTAINER linyows <linyows@gmail.com>
 
 RUN apt-get -qq update && \
     apt-get install -qq glibc-source gcc make libcurl4-gnutls-dev libjansson-dev \
