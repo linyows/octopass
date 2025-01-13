@@ -27,8 +27,6 @@ jobs:
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
     - name: Build and Install
-      env:
-        DIST: ${{ matrix.os }}
       run: |
         make build install
         make deb
@@ -45,14 +43,11 @@ jobs:
       run: |
         apt-get update -qq
         apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
-        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
     - name: Set LOGNAME and USER to environment
       run: |
         echo "LOGNAME=root" >> $GITHUB_ENV
         echo "USER=root" >> $GITHUB_ENV
     - name: Build and Install
-      env:
-        DIST: ${{ matrix.os }}
       run: |
         make build install
         make deb
