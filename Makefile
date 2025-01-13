@@ -169,6 +169,9 @@ deb: source_for_deb ## Packaging for DEB
 		cp *.deb ../builds
 	rm -rf tmp.$(DIST)
 
+deps_for_dist:
+	go install github.com/tcnksm/ghr@latest
+	go install github.com/mlafeldt/pkgcloud/cmd/pkgcloud-push@latest
 
 github_release: pkg ## Upload archives to Github Release on Mac
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
