@@ -28,14 +28,14 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Release
-      run: |
-        curl -OL https://github.com/tcnksm/ghr/releases/download/v0.17.0/ghr_v0.17.0_linux_amd64.tar.gz
-        tar -xzf ghr_v0.17.0_linux_amd64.tar.gz
-        mv ghr_v0.17.0_linux_amd64/ghr /usr/bin/ghr
-        make github_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: builds/*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
 
   debian:
     name: Build on ${{matrix.container }}
@@ -57,11 +57,11 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Release
-      run: |
-        curl -OL https://github.com/tcnksm/ghr/releases/download/v0.17.0/ghr_v0.17.0_linux_amd64.tar.gz
-        tar -xzf ghr_v0.17.0_linux_amd64.tar.gz
-        mv ghr_v0.17.0_linux_amd64/ghr /usr/bin/ghr
-        make github_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: builds/*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
