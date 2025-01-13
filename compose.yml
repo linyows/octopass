@@ -1,101 +1,28 @@
-centos8:
-  dockerfile: dockerfiles/Dockerfile.centos-8
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: el8
-  command: make rpm
-centos7:
-  dockerfile: dockerfiles/Dockerfile.centos-7
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: el7
-  command: make rpm
-  #centos6:
-  #  dockerfile: dockerfiles/Dockerfile.centos-6
-  #  build: .
-  #  volumes:
-  #    - .:/octopass
-  #  environment:
-  #    DIST: el6
-  #  command: make rpm
-
-ubuntu20:
-  dockerfile: dockerfiles/Dockerfile.ubuntu-20
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: focal
-  command: make deb
-ubuntu18:
-  dockerfile: dockerfiles/Dockerfile.ubuntu-18
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: bionic
-  command: make deb
-  #ubuntu16:
-  #  dockerfile: dockerfiles/Dockerfile.ubuntu-16
-  #  build: .
-  #  volumes:
-  #    - .:/octopass
-  #  environment:
-  #    DIST: xenial
-  #  command: make deb
-  #ubuntu14:
-  #  dockerfile: dockerfiles/Dockerfile.ubuntu-14
-  #  build: .
-  #  volumes:
-  #    - .:/octopass
-  #  environment:
-  #    DIST: trusty
-  #  command: make deb
-  #ubuntu12:
-  #  dockerfile: dockerfiles/Dockerfile.ubuntu-12
-  #  build: .
-  #  volumes:
-  #    - .:/octopass
-  #  environment:
-  #    DIST: precise
-  #  command: make deb12
-
-debian11:
-  dockerfile: dockerfiles/Dockerfile.debian-11
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: bullseye
-    DEB_BUILD_OPTIONS: noautodbgsym
-  command: make deb
-debian10:
-  dockerfile: dockerfiles/Dockerfile.debian-10
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: buster
-    DEB_BUILD_OPTIONS: noautodbgsym
-  command: make deb
-debian9:
-  dockerfile: dockerfiles/Dockerfile.debian-9
-  build: .
-  volumes:
-    - .:/octopass
-  environment:
-    DIST: stretch
-    DEB_BUILD_OPTIONS: noautodbgsym
-  command: make deb
-  #debian8:
-  #  dockerfile: dockerfiles/Dockerfile.debian-8
-  #  build: .
-  #  volumes:
-  #    - .:/octopass
-  #  environment:
-  #    DIST: jessie
-  #  command: make deb
+services:
+  ubuntu24:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.ubuntu-24
+    volumes:
+      - .:/octopass
+    environment:
+      DIST: noble
+    command: make deb
+      #ubuntu22:
+      #  dockerfile: dockerfiles/Dockerfile.ubuntu-22
+      #  build: .
+      #  volumes:
+      #    - .:/octopass
+      #  environment:
+      #    DIST: jammy
+      #  command: make deb
+      #
+      #debian11:
+      #  dockerfile: dockerfiles/Dockerfile.debian-11
+      #  build: .
+      #  volumes:
+      #    - .:/octopass
+      #  environment:
+      #    DIST: bullseye
+      #    DEB_BUILD_OPTIONS: noautodbgsym
+      #  command: make deb
