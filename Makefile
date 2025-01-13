@@ -182,22 +182,20 @@ packagecloud_release: ## Upload archives to PackageCloud
 	pkgcloud-push linyows/octopass/ubuntu/focal builds/octopass_$(VERSION)-1_amd64.focal.deb
 	pkgcloud-push linyows/octopass/debian/bullseye builds/octopass_$(VERSION)-1_amd64.bullseye.deb
 
-pkg: ## Create some distribution packages
-	rm -rf builds && mkdir builds
+pkg: clean ## Create some distribution packages
 	docker-compose up
 
-dist: ## Upload archives to Github Release on Mac
+dist: ## Upload archives to GitHub and PackageCloud
 	@test -z $(GITHUB_TOKEN) || $(MAKE) github_release
 	@test -z $(PACKAGECLOUD_TOKEN) || $(MAKE) packagecloud_release
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"
-	rm -rf $(TMP)
-
-distclean: clean
-	rm -f builds/octopass*
+	rm -rf builds && mkdir builds
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-30s$(RESET) %s\n", $$1, $$2}'
+	@echo "$(BOLD)Target Name              Description$(RESET)"
+	@echo "------------------------ ------------------------"
+	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(INFO_COLOR)%-24s$(RESET) %s\n", $$1, $$2}'
 
-.PHONY: help clean install build_dir cache_dir nss_octopass octopass_cli dist distclean deps test rpm
+.PHONY: install dist deps test rpm
