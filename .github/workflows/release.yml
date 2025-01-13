@@ -28,8 +28,9 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - uses: actions/setup-go@v5
+    - name: Release
       run: |
+        apt install -qqy golang
         go install github.com/tcnksm/ghr@latest
         make github_release
 
@@ -44,8 +45,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install packages
       run: |
-        apt-get update -qq
-        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+        apt update -qq
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
     - name: Set LOGNAME and USER to environment
       run: |
         echo "LOGNAME=root" >> $GITHUB_ENV
@@ -55,5 +56,6 @@ jobs:
         make deb
     - uses: actions/setup-go@v5
       run: |
+        apt install -qqy golang
         go install github.com/tcnksm/ghr@latest
         make github_release
