@@ -1,0 +1,59 @@
+name: Release by matrix
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  ubuntu:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['ubuntu:jammy', 'ubuntu:noble']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install packages
+      run: |
+        apt update -qq
+        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev
+    - name: Add octopass user
+      run: |
+        useradd -m -s /bin/bash octopass
+        echo "LOGNAME=octopass" >> $GITHUB_ENV
+        echo "USER=octopass" >> $GITHUB_ENV
+    - name: Create package
+      run: |
+        make deb
+    - uses: actions/setup-go@v5
+      run: |
+        go install github.com/tcnksm/ghr@latest
+        make github_release
+
+  debian:
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['debian:buster', 'debian:bullseye']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install packages
+      run: |
+        apt-get update -qq
+        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+    - name: Set LOGNAME and USER to environment
+      run: |
+        echo "LOGNAME=root" >> $GITHUB_ENV
+        echo "USER=root" >> $GITHUB_ENV
+    - name: Create package
+      run: |
+        make deb
+    - uses: actions/setup-go@v5
+      run: |
+        go install github.com/tcnksm/ghr@latest
+        make github_release
