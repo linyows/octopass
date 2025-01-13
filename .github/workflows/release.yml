@@ -33,6 +33,8 @@ jobs:
         apt install -qqy golang
         go install github.com/tcnksm/ghr@latest
         make github_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   debian:
     name: Build on ${{matrix.container }}
@@ -54,8 +56,10 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - uses: actions/setup-go@v5
+    - name: Release
       run: |
         apt install -qqy golang
         go install github.com/tcnksm/ghr@latest
         make github_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
