@@ -161,12 +161,12 @@ deb: source_for_deb ## Packaging for DEB
 		cd octopass-$(VERSION) && \
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
-		cp -v /octopass/debian/* debian/ && \
+		cp -v ../../debian/* debian/ && \
 		sed -i -e 's/DIST/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
 		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
-		cp *.deb /octopass/builds
+		cp *.deb ../builds
 	rm -rf tmp.$(DIST)
 
 deb12: ## Packaging for DEB-12
