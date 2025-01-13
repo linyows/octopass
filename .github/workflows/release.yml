@@ -30,8 +30,9 @@ jobs:
         make deb
     - name: Release
       run: |
-        apt install -qqy golang
-        go install github.com/tcnksm/ghr@latest
+        curl -OL https://github.com/tcnksm/ghr/releases/download/v0.17.0/ghr_v0.17.0_linux_amd64.tar.gz
+        tar -xzf ghr_v0.17.0_linux_amd64.tar.gz
+        mv ghr_v0.17.0_linux_amd64/ghr /usr/bin/ghr
         make github_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,8 +59,9 @@ jobs:
         make deb
     - name: Release
       run: |
-        apt install -qqy golang
-        go install github.com/tcnksm/ghr@latest
+        curl -OL https://github.com/tcnksm/ghr/releases/download/v0.17.0/ghr_v0.17.0_linux_amd64.tar.gz
+        tar -xzf ghr_v0.17.0_linux_amd64.tar.gz
+        mv ghr_v0.17.0_linux_amd64/ghr /usr/bin/ghr
         make github_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
