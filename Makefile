@@ -162,7 +162,7 @@ deb: source_for_deb ## Packaging for DEB
 		dh_make --single --createorig -y && \
 		rm -rf debian/*.ex debian/*.EX debian/README.Debian && \
 		cp -v /octopass/debian/* debian/ && \
-		sed -i -e 's/xenial/$(DIST)/g' debian/changelog && \
+		sed -i -e 's/DIST/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
 		find . -name "*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
