@@ -28,7 +28,7 @@ jobs:
         echo "USER=octopass" >> $GITHUB_ENV
     - name: Build and Install
       env:
-        DIST: ${{ matrix.distro }}
+        DIST: ${{ matrix.os }}
       run: |
         make build install
         make deb
@@ -53,7 +53,7 @@ jobs:
         echo "USER=octopass" >> $GITHUB_ENV
     - name: Build and Install
       env:
-        DIST: ${{ matrix.distro }}
+        DIST: ${{ matrix.os }}
       run: |
         make build install
         make deb
