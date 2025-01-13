@@ -1,3 +1,8 @@
+octopass (0.8.1-1) DIST; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Mon, 13 Jun 2025 23:00:00 +0900
 octopass (0.7.1-1) DIST; urgency=medium
 
   * Bugfixes
