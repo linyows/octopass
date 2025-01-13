@@ -21,11 +21,11 @@ jobs:
         apt update -qq
         apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
         apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev
-    - name: Set LOGNAME and USER environment variables
+    - name: Prepare octopass user
       run: |
+        useradd -m -s /bin/bash octopass
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
-        sudo useradd -m -s /bin/bash octopass
     - name: Build and Install
       run: |
         make build install
@@ -44,11 +44,11 @@ jobs:
         apt-get update -qq
         apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
         apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
-    - name: Set LOGNAME and USER environment variables
+    - name: Prepare octopass user
       run: |
+        useradd -m -s /bin/bash octopass
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
-        sudo useradd -m -s /bin/bash octopass
     - name: Build and Install
       run: |
         make build install
