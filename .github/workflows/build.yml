@@ -13,7 +13,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['ubuntu:jammy']
+        container: ['ubuntu:jammy', 'ubuntu:noble']
     steps:
     - uses: actions/checkout@v4
     - name: Install packages
@@ -29,7 +29,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['debian:buster']
+        container: ['debian:buster', 'debian:bullseye']
     steps:
     - uses: actions/checkout@v4
     - name: Install packages
