@@ -25,6 +25,7 @@ jobs:
       run: |
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
+        sudo useradd -m -s /bin/bash octopass
     - name: Build and Install
       run: |
         make build install
@@ -47,6 +48,7 @@ jobs:
       run: |
         echo "LOGNAME=octopass" >> $GITHUB_ENV
         echo "USER=octopass" >> $GITHUB_ENV
+        sudo useradd -m -s /bin/bash octopass
     - name: Build and Install
       run: |
         make build install
