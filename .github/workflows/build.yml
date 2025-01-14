@@ -33,7 +33,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: octopass-${{ matrix.container }}
+        name: octopass-${{ github.job }}
         path: builds/**
   debian:
     name: Build on ${{matrix.container }}
@@ -59,7 +59,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: octopass-${{ matrix.container }}
+        name: octopass-${{ github.job }}
         path: builds/**
 #  centos:
 #    name: Build on ${{matrix.container }}
