@@ -165,6 +165,7 @@ deb: source_for_deb ## Packaging for DEB
 		sed -i -e 's/DIST/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
+		ls -las && rm -f *-dbgsym_*.deb && \
 		find . -name "*.deb" ! -name "*-dbgsym_*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
 		cp *.deb ../builds
 	rm -rf tmp.$(DIST)
