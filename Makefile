@@ -176,7 +176,7 @@ deb: source_for_deb ## Packaging for DEB
 packagecloud: ## Upload archives to PackageCloud
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
 	curl -X POST \
-		-F "package[distro_version]=$(DIST_ID)/$(DIST_CODENAME)" \
+		-F "package[distro_version_id]=$(shell misc/packagecloud.sh $$DIST_ID $$DIST_CODENAME)" \
 		-F "package[package_file]=@builds/$(shell find ./builds -maxdepth 1 -name "*.deb" | head -1 | awk -F '/' '{print $$3}' ORS='')" \
 		-H "Authorization: Bearer $(PACKAGECLOUD_TOKEN)" \
 		https://packagecloud.io/api/v1/repos/linyows/octopass/packages.json
