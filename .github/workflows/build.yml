@@ -30,6 +30,11 @@ jobs:
       run: |
         make build install
         make deb
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: octopass-${{ matrix.container }}
+        path: builds/**
   debian:
     name: Build on ${{matrix.container }}
     runs-on: ubuntu-latest
@@ -51,6 +56,11 @@ jobs:
       run: |
         make build install
         make deb
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: octopass-${{ matrix.container }}
+        path: builds/**
 #  centos:
 #    name: Build on ${{matrix.container }}
 #    runs-on: ubuntu-latest
