@@ -28,7 +28,7 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Upload binaries to Github Releases
+    - name: Upload package to Github Releases
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,13 +36,11 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
-    - name: Upload binaries to Package Cloud
-      uses: TykTechnologies/packagecloud-action@main
+    - name: Upload package to PackageCloud
       env:
         PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      with:
-        repo: linyows/octopass
-        dir: builds
+      run: |
+        make dist
 
   debian:
     name: Build on ${{matrix.container }}
@@ -64,7 +62,7 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Upload binaries to Github Releases
+    - name: Upload package to Github Releases
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,10 +70,8 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
-    - name: Upload binaries to Package Cloud
-      uses: TykTechnologies/packagecloud-action@main
+    - name: Upload package to PackageCloud
       env:
         PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      with:
-        repo: linyows/octopass
-        dir: builds
+      run: |
+        make dist
