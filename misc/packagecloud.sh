@@ -10,7 +10,7 @@ check_jq() {
 }
 
 list() {
-  if [ $PACKAGECLOUD_TOKEN = "" ]; then
+  if [ "$PACKAGECLOUD_TOKEN" = "" ]; then
     echo '$PACKAGECLOUD_TOKEN is required'
     exit 1
   fi
@@ -31,8 +31,7 @@ find() {
   fi
 
   number=$(cat distributions.json | \
-    jq ".deb[] | select(.index_name == \"$os\") | .versions[] | {\"id\":.id,\"name\":.index_name}" | \
-    jq -s | jq ".[] | select(.name == \"$code\") | .id")
+    jq ".deb[] | select(.index_name == \"$os\") | .versions[] | {\"id\":.id,\"name\":.index_name} | select(.name == \"$code\") | .id")
 
   printf "$number"
 }
