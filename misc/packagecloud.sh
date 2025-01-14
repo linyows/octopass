@@ -37,7 +37,7 @@ find() {
   printf "$number"
 }
 
-check_jq
+#check_jq
 list
 find $1 $2
 rm -rf distributions.json
