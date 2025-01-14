@@ -2,14 +2,14 @@
 
 # Returns Distribution ID from PackageCloud
 
-function checkJq() {
+function check_jq () {
   if ! command -v jq &> /dev/null; then
     echo "jq is not installed" >&2
     exit 1
   fi
 }
 
-function list() {
+function list () {
   if [ $PACKAGECLOUD_TOKEN == "" ]; then
     echo '$PACKAGECLOUD_TOKEN is required'
     exit 1
@@ -19,7 +19,7 @@ function list() {
     https://packagecloud.io/api/v1/distributions.json > distributions.json
 }
 
-function find() {
+function find () {
   os=$1
   if [ "$os" = "" ]; then
     os=ubuntu
@@ -37,7 +37,7 @@ function find() {
   printf "$number"
 }
 
-checkJq
+check_jq
 list
 find $1 $2
 rm -rf distributions.json
