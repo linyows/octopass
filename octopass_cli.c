@@ -33,10 +33,6 @@ extern void call_grlist(void);
 extern void call_getspnam_r(const char *name);
 extern void call_splist(void);
 
-void init_mutex() {
-  pthread_mutex_init(&OCTOPASS_MUTEX, NULL);
-}
-
 void help(void)
 {
   printf(ANSI_COLOR_GREEN " _  ____ _ __    _____" ANSI_COLOR_RESET "\n");
@@ -141,8 +137,6 @@ int octopass_authentication(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  init_mutex();
-
   if (argc < 2 || !argv[1] || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
     help();
     return 2;

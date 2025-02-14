@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#include "nss_octopass-shadow.h"
+#include "nss_octopass-shadow.c"
 
 void show_spent(struct spwd *spent)
 {

@@ -95,10 +95,12 @@ struct config {
 };
 
 extern int octopass_members(struct config *con, struct response *res);
-extern void octopass_config_loading(struct config *con, char *filename);
+extern int octopass_config_loading(struct config *con, char *filename);
 extern json_t *octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *octopass_github_team_member_by_id(int gh_id, json_t *root);
 int octopass_autentication_with_token(struct config *con, char *user, char *token);
 extern char *express_github_user_keys(struct config *con, char *user);
+extern const char *octopass_github_team_members_keys(struct config *con);
+extern const char *octopass_github_user_keys(struct config *con, char *user);
 
 #endif /* OCTOPASS_H */

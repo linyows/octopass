@@ -71,6 +71,7 @@ octopass_cli: build_dir cache_dir ## Build octopass cli
 	$(CC) $(CFLAGS) -c nss_octopass-shadow_cli.c -o $(BUILD)/nss_octopass-shadow_cli.o
 	$(CC) $(CFLAGS) -c octopass_cli.c -o $(BUILD)/octopass_cli.o
 	$(CC) -o $(BUILD)/octopass \
+		$(BUILD)/octopass.o \
 		$(BUILD)/octopass_cli.o \
 		$(BUILD)/nss_octopass-passwd_cli.o \
 		$(BUILD)/nss_octopass-group_cli.o \

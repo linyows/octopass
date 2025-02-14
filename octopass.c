@@ -14,6 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <ctype.h>
 #include "octopass.h"
 
 static size_t write_response_callback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -192,8 +193,13 @@ void octopass_override_config_by_env(struct config *con)
   }
 }
 
-void octopass_config_loading(struct config *con, char *filename)
+int octopass_config_loading(struct config *con, char *filename)
 {
+  if (!con || !filename) {
+    fprintf(stderr, "Invalid arguments to octopass_config_loading\n");
+    return -1;
+  }
+
   memset(con->endpoint, '\0', sizeof(con->endpoint));
   memset(con->token, '\0', sizeof(con->token));
   memset(con->organization, '\0', sizeof(con->organization));
@@ -203,17 +209,16 @@ void octopass_config_loading(struct config *con, char *filename)
   memset(con->group_name, '\0', sizeof(con->group_name));
   memset(con->home, '\0', sizeof(con->home));
   memset(con->shell, '\0', sizeof(con->shell));
-  con->uid_starts         = (long)2000;
-  con->gid                = (long)2000;
-  con->cache              = (long)500;
-  con->syslog             = false;
+  con->uid_starts = 2000;
+  con->gid = 2000;
+  con->cache = 500;
+  con->syslog = false;
   con->shared_users_count = 0;
 
   FILE *file = fopen(filename, "r");
-
   if (file == NULL) {
     fprintf(stderr, "Config not found: %s\n", filename);
-    exit(1);
+    return -1;
   }
 
   char *line = NULL;
@@ -223,55 +228,73 @@ void octopass_config_loading(struct config *con, char *filename)
     // delete line-feeds
     line[strcspn(line, "\r\n")] = '\0';
 
-    // skip when empty
-    if (strlen(line) == 0) {
+    // skip empty lines
+    if (line[0] == '\0') {
       continue;
     }
 
     char *lasts;
-    char *key   = strtok_r(line, DELIM, &lasts);
+    char *key = strtok_r(line, DELIM, &lasts);
     char *value = strtok_r(NULL, DELIM, &lasts);
 
-    if (strcmp(key, "SharedUsers") == 0 && strlen(lasts) > 0) {
-      char v[strlen(value) + strlen(lasts)];
-      sprintf(v, "%s %s", value, lasts);
-      value = strdup(v);
+    if (!key || !value) {
+      continue;
+    }
+
+    if (strcmp(key, "SharedUsers") == 0 && lasts && strlen(lasts) > 0) {
+      size_t vlen = strlen(value) + strlen(lasts) + 2;
+      char *v = malloc(vlen);
+      if (!v) {
+        fprintf(stderr, "Memory allocation failed for SharedUsers\n");
+        free(line);
+        fclose(file);
+        return -1;
+      }
+      snprintf(v, vlen, "%s %s", value, lasts);
+      value = v;
     } else {
       octopass_remove_quotes(value);
     }
 
     if (strcmp(key, "Endpoint") == 0) {
       const char *url = octopass_url_normalization(value);
-      strncpy(con->endpoint, url, sizeof(con->endpoint) - 1);
+      snprintf(con->endpoint, sizeof(con->endpoint), "%s", url);
     } else if (strcmp(key, "Token") == 0) {
-      strncpy(con->token, value, sizeof(con->token) - 1);
+      snprintf(con->token, sizeof(con->token), "%s", value);
     } else if (strcmp(key, "Organization") == 0) {
-     strncpy(con->organization, value, sizeof(con->organization) - 1);
+      snprintf(con->organization, sizeof(con->organization), "%s", value);
     } else if (strcmp(key, "Team") == 0) {
-      strncpy(con->team, value, sizeof(con->team) - 1);
+      snprintf(con->team, sizeof(con->team), "%s", value);
     } else if (strcmp(key, "Owner") == 0) {
-      strncpy(con->owner, value, sizeof(con->owner) - 1);
+      snprintf(con->owner, sizeof(con->owner), "%s", value);
     } else if (strcmp(key, "Repository") == 0) {
-      strncpy(con->repository, value, sizeof(con->repository) - 1);
+      snprintf(con->repository, sizeof(con->repository), "%s", value);
     } else if (strcmp(key, "Permission") == 0) {
-      strncpy(con->permission, value, sizeof(con->permission) - 1);
+      snprintf(con->permission, sizeof(con->permission), "%s", value);
     } else if (strcmp(key, "Group") == 0) {
-      strncpy(con->group_name, value, sizeof(con->group_name) - 1);
+      snprintf(con->group_name, sizeof(con->group_name), "%s", value);
     } else if (strcmp(key, "Home") == 0) {
-      strncpy(con->home, value, sizeof(con->home) - 1);
+      snprintf(con->home, sizeof(con->home), "%s", value);
     } else if (strcmp(key, "Shell") == 0) {
-      strncpy(con->shell, value, sizeof(con->shell) - 1);
-    } else if (strcmp(key, "UidStarts") == 0) {
+      snprintf(con->shell, sizeof(con->shell), "%s", value);
+    } else if (strcmp(key, "UidStarts") == 0 && isdigit(value[0])) {
       con->uid_starts = atoi(value);
-    } else if (strcmp(key, "Gid") == 0) {
+    } else if (strcmp(key, "Gid") == 0 && isdigit(value[0])) {
       con->gid = atoi(value);
-    } else if (strcmp(key, "Cache") == 0) {
-      con->cache = (long)atoi(value);
+    } else if (strcmp(key, "Cache") == 0 && isdigit(value[0])) {
+      con->cache = atoi(value);
     } else if (strcmp(key, "Syslog") == 0) {
       con->syslog = (strcmp(value, "true") == 0);
     } else if (strcmp(key, "SharedUsers") == 0) {
-      char *pattern = "\"([A-z0-9_-]+)\"";
+      char *pattern = "\"([A-Za-z0-9_-]+)\"";
       con->shared_users = calloc(MAXBUF, sizeof(char *));
+      if (!con->shared_users) {
+        fprintf(stderr, "Memory allocation failed for shared_users\n");
+        free(value);
+        free(line);
+        fclose(file);
+        return -1;
+      }
       con->shared_users_count = octopass_match(value, pattern, con->shared_users);
       free(value);
     }
@@ -282,27 +305,24 @@ void octopass_config_loading(struct config *con, char *filename)
 
   octopass_override_config_by_env(con);
 
-  if (strlen(con->endpoint) == 0) {
-    strncpy(con->endpoint, OCTOPASS_API_ENDPOINT, sizeof(con->endpoint) - 1);
+  if (con->endpoint[0] == '\0') {
+    snprintf(con->endpoint, sizeof(con->endpoint), "%s", OCTOPASS_API_ENDPOINT);
   }
-  if (strlen(con->group_name) == 0) {
-    if (strlen(con->repository) != 0) {
-      strncpy(con->group_name, con->repository, sizeof(con->group_name) - 1);
-    } else {
-      strncpy(con->group_name, con->team, sizeof(con->group_name) - 1);
-    }
+  if (con->group_name[0] == '\0') {
+    snprintf(con->group_name, sizeof(con->group_name), "%s",
+             con->repository[0] != '\0' ? con->repository : con->team);
   }
-  if (strlen(con->owner) == 0 && strlen(con->organization) != 0) {
-    strncpy(con->owner, con->organization, sizeof(con->owner) - 1);
+  if (con->owner[0] == '\0' && con->organization[0] != '\0') {
+    snprintf(con->owner, sizeof(con->owner), "%s", con->organization);
   }
-  if (strlen(con->repository) != 0 && strlen(con->permission) == 0) {
-    strncpy(con->permission, "write", sizeof(con->permission) - 1);
+  if (con->repository[0] != '\0' && con->permission[0] == '\0') {
+    snprintf(con->permission, sizeof(con->permission), "write");
   }
-  if (strlen(con->home) == 0) {
-    strncpy(con->home, "/home/%s", sizeof(con->home) - 1);
+  if (con->home[0] == '\0') {
+    snprintf(con->home, sizeof(con->home), "%s", "/home/%s");
   }
-  if (strlen(con->shell) == 0) {
-    strncpy(con->shell, "/bin/bash", sizeof(con->shell) - 1);
+  if (con->shell[0] == '\0') {
+    snprintf(con->shell, sizeof(con->shell), "/bin/bash");
   }
 
   if (con->syslog) {
@@ -310,9 +330,11 @@ void octopass_config_loading(struct config *con, char *filename)
     openlog(pg_name, LOG_CONS | LOG_PID, LOG_USER);
     syslog(LOG_INFO, "config {endpoint: %s, token: %s, organization: %s, team: %s, owner: %s, repository: %s, permission: %s "
                      "syslog: %d, uid_starts: %ld, gid: %ld, group_name: %s, home: %s, shell: %s, cache: %ld}",
-      con->endpoint, octopass_masking(con->token), con->organization, con->team, con->owner, con->repository, con->permission,
-      con->syslog, con->uid_starts, con->gid, con->group_name, con->home, con->shell, con->cache);
+           con->endpoint, octopass_masking(con->token), con->organization, con->team, con->owner, con->repository, con->permission,
+           con->syslog, con->uid_starts, con->gid, con->group_name, con->home, con->shell, con->cache);
   }
+
+  return 0;
 }
 
 void octopass_export_file(struct config *con, char *dir, char *file, char *data)
@@ -803,7 +825,7 @@ int octopass_autentication_with_token(struct config *con, char *user, char *toke
   struct response res;
   octopass_github_request_without_cache(con, url, &res, token);
 
-  if (res.httpstatus == 200) {
+  if (*res.httpstatus == 200) {
     json_error_t error;
     json_t *root = json_loads(res.data, 0, &error);
     if (root) {
