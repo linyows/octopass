@@ -337,6 +337,7 @@ Test(octopass, is_authorized_collaborator, .init = setup)
     cr_assert_eq(status2, 1);
   }
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -368,6 +369,7 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   const char *login = json_string_value(json_object_get(me, "login"));
   cr_assert_str_eq(login, "linyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -404,6 +406,7 @@ Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = se
   const char *login2 = json_string_value(json_object_get(other, "login"));
   cr_assert_str_eq(login2, "nolinyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -426,6 +429,7 @@ Test(octopass, repository_collaborators, .init = setup)
   const char *login = json_string_value(json_object_get(me, "login"));
   cr_assert_str_eq(login, "linyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 

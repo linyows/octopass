@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#include "octopass.c"
+#include "octopass.h"
 static pthread_mutex_t OCTOPASS_MUTEX = PTHREAD_MUTEX_INITIALIZER;
 
 #define no_argument 0
@@ -32,6 +32,10 @@ extern void call_getgrgid_r(gid_t gid);
 extern void call_grlist(void);
 extern void call_getspnam_r(const char *name);
 extern void call_splist(void);
+
+void init_mutex() {
+  pthread_mutex_init(&OCTOPASS_MUTEX, NULL);
+}
 
 void help(void)
 {
@@ -57,14 +61,16 @@ void help(void)
 int octopass_public_keys_unlocked(char *name)
 {
   struct config con;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  if (octopass_config_loading(&con, OCTOPASS_CONFIG_FILE) != 0) {
+    fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Failed to load config\n");
+    return 1;
+  }
 
   if (con.shared_users_count > 0) {
-    int idx;
-    for (idx = 0; idx < con.shared_users_count; idx++) {
+    for (int idx = 0; idx < con.shared_users_count; idx++) {
       if (strcmp(name, con.shared_users[idx]) == 0) {
         const char *members_keys = octopass_github_team_members_keys(&con);
-        if (members_keys != NULL) {
+        if (members_keys) {
           printf("%s", members_keys);
         }
         return 0;
@@ -73,7 +79,7 @@ int octopass_public_keys_unlocked(char *name)
   }
 
   const char *keys = octopass_github_user_keys(&con, name);
-  if (keys != NULL) {
+  if (keys) {
     printf("%s", keys);
   }
 
@@ -101,10 +107,10 @@ int octopass_authentication_unlocked(int argc, char **argv)
 
   token[strcspn(token, "\n")] = '\0';
 
-  char *user;
+  char *user = NULL;
   if (argc < 3) {
     user = getenv("PAM_USER");
-    if (user == NULL) {
+    if (!user) {
       fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "User is required\n");
       free(token);
       return 2;
@@ -114,7 +120,11 @@ int octopass_authentication_unlocked(int argc, char **argv)
   }
 
   struct config con;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  if (octopass_config_loading(&con, OCTOPASS_CONFIG_FILE) != 0) {
+    fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Failed to load config\n");
+    free(token);
+    return 2;
+  }
 
   int result = octopass_autentication_with_token(&con, user, token);
   free(token);
@@ -131,7 +141,9 @@ int octopass_authentication(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  if (argc < 2 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+  init_mutex();
+
+  if (argc < 2 || !argv[1] || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
     help();
     return 2;
   }
@@ -142,57 +154,62 @@ int main(int argc, char **argv)
   }
 
   // PASSWD
-  if (strcmp(argv[1], "passwd") == 0) {
+  if (!strcmp(argv[1], "passwd")) {
     if (argc < 3) {
       call_pwlist();
     } else {
-      long id = atol(argv[2]);
-      if (id > 0) {
-        uid_t uid = (uid_t)atol(argv[2]);
-        call_getpwuid_r(uid);
+      char *endptr;
+      long id = strtol(argv[2], &endptr, 10);
+
+      if (*endptr == '\0' && id > 0) {
+        call_getpwuid_r((uid_t)id);
       } else {
-        call_getpwnam_r((char *)argv[2]);
+        call_getpwnam_r(argv[2]);
       }
     }
     return 0;
   }
 
   // GROUP
-  if (strcmp(argv[1], "group") == 0) {
+  if (!strcmp(argv[1], "group")) {
     if (argc < 3) {
       call_grlist();
     } else {
-      long id = atol(argv[2]);
-      if (id > 0) {
-        gid_t gid = (gid_t)atol(argv[2]);
-        call_getgrgid_r(gid);
+      char *endptr;
+      long id = strtol(argv[2], &endptr, 10);
+
+      if (*endptr == '\0' && id > 0) {
+        call_getgrgid_r((gid_t)id);
       } else {
-        call_getgrnam_r((char *)argv[2]);
+        call_getgrnam_r(argv[2]);
       }
     }
     return 0;
   }
 
   // SHADOW
-  if (strcmp(argv[1], "shadow") == 0) {
+  if (!strcmp(argv[1], "shadow")) {
     if (argc < 3) {
       call_splist();
     } else {
-      long id = atol(argv[2]);
-      if (id > 0) {
+      char *endptr;
+      long id = strtol(argv[2], &endptr, 10);
+
+      if (*endptr == '\0' && id > 0) {
         fprintf(stderr, ANSI_COLOR_RED "Error: " ANSI_COLOR_RESET "Invalid arguments: %s\n", argv[2]);
       } else {
-        call_getspnam_r((char *)argv[2]);
+        call_getspnam_r(argv[2]);
       }
     }
     return 0;
   }
 
   // PAM
-  if (strcmp(argv[1], "pam") == 0) {
+  if (!strcmp(argv[1], "pam")) {
     return octopass_authentication(argc, argv);
   }
 
   // PUBLIC KEYS
-  return octopass_public_keys((char *)argv[1]);
+  //return octopass_public_keys((char *)argv[1]);
+  return octopass_public_keys(argv[1]);
 }

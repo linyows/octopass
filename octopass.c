@@ -563,6 +563,11 @@ int octopass_github_team_id(char *team_name, char *data)
   json_t *teams = json_loads(data, 0, &error);
   json_t *team;
   int i;
+  int team_id = -1;
+
+  if (!teams || !json_is_array(teams)) {
+    return -1;
+  }
 
   json_array_foreach(teams, i, team)
   {
@@ -571,17 +576,19 @@ int octopass_github_team_id(char *team_name, char *data)
     }
     const char *name = json_string_value(json_object_get(team, "name"));
     if (name != NULL && strcmp(team_name, name) == 0) {
-      const json_int_t id = json_integer_value(json_object_get(team, "id"));
-      return id;
+      team_id = json_integer_value(json_object_get(team, "id"));
+      break;
     }
     const char *slug = json_string_value(json_object_get(team, "slug"));
-    if (name != NULL && strcmp(team_name, slug) == 0) {
-      const json_int_t id = json_integer_value(json_object_get(team, "id"));
-      return id;
+    if (slug != NULL && strcmp(team_name, slug) == 0) {
+      team_id = json_integer_value(json_object_get(team, "id"));
+      break;
     }
   }
 
-  return -1;
+  json_decref(teams);
+
+  return team_id;
 }
 
 json_t *octopass_github_team_member_by_name(char *name, json_t *members)
@@ -722,16 +729,29 @@ int octopass_rebuild_data_with_authorized(struct config *con, struct response *r
   json_error_t error;
   json_t *collaborators = json_loads(res->data, 0, &error);
   json_t *collaborator;
-  json_t *new_data = json_array();
+  json_t *new_data;
   int i;
+
+  if (!collaborators || !json_is_array(collaborators)) {
+    return -1;
+  }
+  new_data = json_array();
 
   json_array_foreach(collaborators, i, collaborator)
   {
     if (1 == octopass_is_authorized_collaborator(con, collaborator)) {
-      json_array_append_new(new_data, collaborator);
+      json_array_append(new_data, collaborator);
     }
   }
+
+  if (res->data) {
+    free(res->data);
+    res->data = NULL;
+  }
   res->data = json_dumps(new_data, 0);
+
+  json_decref(collaborators);
+  json_decref(new_data);
 
   return 0;
 }
@@ -778,48 +798,61 @@ int octopass_autentication_with_token(struct config *con, char *user, char *toke
     fprintf(stderr, "Memory allocation failed for user URL\n");
     return 1;
   }
-  snprintf(url, url_size, OCTOPASS_USER_URL, con->endpoint);
 
+  snprintf(url, url_size, OCTOPASS_USER_URL, con->endpoint);
   struct response res;
   octopass_github_request_without_cache(con, url, &res, token);
 
-  long *ok_code = (long *)200;
-  if (res.httpstatus == ok_code) {
-    json_t *root;
+  if (res.httpstatus == 200) {
     json_error_t error;
-    root              = json_loads(res.data, 0, &error);
-    const char *login = json_string_value(json_object_get(root, "login"));
-
-    if (strcmp(login, user) == 0) {
-      return 0;
+    json_t *root = json_loads(res.data, 0, &error);
+    if (root) {
+      const char *login = json_string_value(json_object_get(root, "login"));
+      if (login && strcmp(login, user) == 0) {
+        json_decref(root);
+        free(url);
+        return 0;
+      }
+      json_decref(root);
     }
   }
 
   if (con->syslog) {
     closelog();
   }
+  free(url);
   return 1;
 }
 
 const char *octopass_only_keys(char *data)
 {
-  json_t *root;
   json_error_t error;
-  root = json_loads(data, 0, &error);
+  json_t *root = json_loads(data, 0, &error);
+  if (!root || !json_is_array(root)) {
+    return NULL;
+  }
 
-  char *keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char *));
+  char *keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char));
+  if (!keys) {
+    json_decref(root);
+    return NULL;
+  }
 
   size_t i;
   for (i = 0; i < json_array_size(root); i++) {
-    json_t *obj     = json_array_get(root, i);
+    json_t *obj = json_array_get(root, i);
     const char *key = json_string_value(json_object_get(obj, "key"));
-    strcat(keys, strdup(key));
-    strcat(keys, "\n");
+    if (key) {
+      strncat(keys, key, OCTOPASS_MAX_BUFFER_SIZE - strlen(keys) - 1);
+      strncat(keys, "\n", OCTOPASS_MAX_BUFFER_SIZE - strlen(keys) - 1);
+    }
   }
 
-  const char *res = strdup(keys);
+  char *res = strdup(keys);
   free(keys);
+  json_decref(root);
 
+  // needs free
   return res;
 }
 
@@ -859,16 +892,23 @@ const char *octopass_github_team_members_keys(struct config *con)
     free(res.data);
     return NULL;
   }
+
   root = json_loads(res.data, 0, &error);
   free(res.data);
 
-  if (!json_is_array(root)) {
+  if (!root || !json_is_array(root)) {
+    json_decref(root);
     return NULL;
   }
 
-  char *members_keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char *));
-  size_t cnt         = json_array_size(root);
-  int i              = 0;
+  char *members_keys = calloc(OCTOPASS_MAX_BUFFER_SIZE, sizeof(char));
+  if (!members_keys) {
+    json_decref(root);
+    return NULL;
+  }
+
+  size_t cnt = json_array_size(root);
+  int i;
 
   for (i = 0; i < cnt; i++) {
     json_t *j_obj = json_array_get(root, i);
@@ -881,12 +921,22 @@ const char *octopass_github_team_members_keys(struct config *con)
     }
 
     const char *login = json_string_value(j_name);
-    const char *keys  = octopass_github_user_keys(con, (char *)login);
-    strcat(members_keys, strdup(keys));
+    const char *keys = octopass_github_user_keys(con, (char *)login);
+    if (keys) {
+      strncat(members_keys, keys, OCTOPASS_MAX_BUFFER_SIZE - strlen(members_keys) - 1);
+    }
   }
 
-  const char *result = strdup(members_keys);
+  json_decref(root);
+
+  if (strlen(members_keys) == 0) {
+    free(members_keys);
+    return NULL;
+  }
+
+  char *result = strdup(members_keys);
   free(members_keys);
 
-  return (strlen(result) > 0) ? result : NULL;
+  // needs free
+  return result;
 }

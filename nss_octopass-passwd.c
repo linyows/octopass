@@ -43,11 +43,13 @@ static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer,
 
   memset(buffer, '\0', buflen);
 
-  if (bufleft <= strlen(login)) {
+  if (bufleft <= strlen(login) + 1) {
     return -2;
   }
 
-  result->pw_name = strncpy(next_buf, login, bufleft);
+  snprintf(next_buf, bufleft, "%s", login);
+  result->pw_name = next_buf;
+
   next_buf += strlen(result->pw_name) + 1;
   bufleft -= strlen(result->pw_name) + 1;
 
@@ -55,9 +57,11 @@ static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer,
   result->pw_uid    = con->uid_starts + id;
   result->pw_gid    = con->gid;
   result->pw_gecos  = "managed by octopass";
+
   char dir[MAXBUF];
-  sprintf(dir, con->home, result->pw_name);
-  result->pw_dir   = strdup(dir);
+  snprintf(dir, sizeof(dir), con->home, result->pw_name);
+  result->pw_dir = strdup(dir);
+
   result->pw_shell = strdup(con->shell);
 
   return 0;
@@ -65,18 +69,19 @@ static int pack_passwd_struct(json_t *root, struct passwd *result, char *buffer,
 
 enum nss_status _nss_octopass_setpwent_locked(int stayopen)
 {
-  json_t *root;
+  json_t *root = NULL;
   json_error_t error;
 
   struct config con;
   struct response res;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
-  if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
-  }
-  int status = octopass_members(&con, &res);
 
-  if (status != 0) {
+  if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- stayopen: %d", __func__, __LINE__, stayopen);
+  }
+
+  int status = octopass_members(&con, &res);
+  if (status != 0 || res.data == NULL) {
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
@@ -85,6 +90,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
 
   root = json_loads(res.data, 0, &error);
   free(res.data);
+  res.data = NULL;
 
   if (!root) {
     if (con.syslog) {
@@ -94,11 +100,15 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
   }
 
   if (!json_is_array(root)) {
-    json_decref(root);
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
+    json_decref(root);
     return NSS_STATUS_UNAVAIL;
+  }
+
+  if (ent_json_root) {
+    json_decref(ent_json_root);
   }
 
   ent_json_root = root;
@@ -107,6 +117,7 @@ enum nss_status _nss_octopass_setpwent_locked(int stayopen)
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "SUCCESS");
   }
+
   return NSS_STATUS_SUCCESS;
 }
 
@@ -125,9 +136,8 @@ enum nss_status _nss_octopass_setpwent(int stayopen)
 enum nss_status _nss_octopass_endpwent_locked(void)
 {
   if (ent_json_root) {
-    while (ent_json_root->refcount > 0) {
-      json_decref(ent_json_root);
-    }
+    json_decref(ent_json_root);
+    ent_json_root = NULL;
   }
 
   ent_json_root = NULL;
@@ -154,24 +164,36 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
 
   if (ent_json_root == NULL) {
     ret = _nss_octopass_setpwent_locked(0);
+    if (ret != NSS_STATUS_SUCCESS || ent_json_root == NULL) {
+      *errnop = ENOENT;
+      return NSS_STATUS_UNAVAIL;
+    }
   }
 
-  if (ret != NSS_STATUS_SUCCESS) {
-    return ret;
+  size_t json_size = json_array_size(ent_json_root);
+
+  if (ent_json_idx >= json_size) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
   }
 
-  // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
+  json_t *json_entry = json_array_get(ent_json_root, ent_json_idx);
+  if (json_entry == NULL || !json_is_object(json_entry)) {
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;
   }
 
   struct config con;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+  if (octopass_config_loading(&con, OCTOPASS_CONFIG_FILE) != 0) {
+    *errnop = EIO;
+    return NSS_STATUS_UNAVAIL;
+  }
+
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d]", __func__, __LINE__);
   }
-  int pack_result = pack_passwd_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen, &con);
+
+  int pack_result = pack_passwd_struct(json_entry, result, buffer, buflen, &con);
 
   if (pack_result == -1) {
     *errnop = ENOENT;
@@ -190,8 +212,8 @@ enum nss_status _nss_octopass_getpwent_r_locked(struct passwd *result, char *buf
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d", __func__, __LINE__, "SUCCESS", result->pw_name,
-           result->pw_uid);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d", 
+           __func__, __LINE__, "SUCCESS", result->pw_name, result->pw_uid);
   }
 
   ent_json_idx++;
@@ -214,18 +236,23 @@ enum nss_status _nss_octopass_getpwent_r(struct passwd *result, char *buffer, si
 enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result, char *buffer, size_t buflen,
                                                 int *errnop)
 {
-  json_t *root;
+  json_t *root = NULL;
   json_error_t error;
+  enum nss_status status = NSS_STATUS_UNAVAIL;
 
   struct config con;
   struct response res;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+
+  if (octopass_config_loading(&con, OCTOPASS_CONFIG_FILE) != 0) {
+    *errnop = EIO;
+    return NSS_STATUS_UNAVAIL;
+  }
+
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- uid: %d", __func__, __LINE__, uid);
   }
-  int status = octopass_members(&con, &res);
 
-  if (status != 0) {
+  if (octopass_members(&con, &res) != 0 || res.data == NULL) {
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
@@ -235,6 +262,8 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
 
   root = json_loads(res.data, 0, &error);
   free(res.data);
+  res.data = NULL;
+
   if (!root) {
     *errnop = ENOENT;
     if (con.syslog) {
@@ -244,42 +273,43 @@ enum nss_status _nss_octopass_getpwuid_r_locked(uid_t uid, struct passwd *result
   }
 
   int gh_id = uid - con.uid_starts;
-
   json_t *data = octopass_github_team_member_by_id(gh_id, root);
 
-  if (json_object_size(data) == 0) {
-    json_decref(root);
+  if (!data || json_object_size(data) == 0) {
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
-
   if (pack_result == -1) {
-    json_decref(root);
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   if (pack_result == -2) {
-    json_decref(root);
+    status = NSS_STATUS_TRYAGAIN;
     *errnop = ERANGE;
-    return NSS_STATUS_TRYAGAIN;
+    goto cleanup;
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d", __func__, __LINE__, "SUCCESS", result->pw_name,
-           result->pw_uid);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d",
+           __func__, __LINE__, "SUCCESS", result->pw_name, result->pw_uid);
   }
 
+  status = NSS_STATUS_SUCCESS;
+
+cleanup:
   json_decref(root);
-  return NSS_STATUS_SUCCESS;
+  return status;
 }
 
 enum nss_status _nss_octopass_getpwuid_r(uid_t uid, struct passwd *result, char *buffer, size_t buflen, int *errnop)
@@ -296,18 +326,23 @@ enum nss_status _nss_octopass_getpwuid_r(uid_t uid, struct passwd *result, char 
 enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd *result, char *buffer, size_t buflen,
                                                 int *errnop)
 {
-  json_t *root;
+  json_t *root = NULL;
   json_error_t error;
+  enum nss_status status = NSS_STATUS_UNAVAIL;
 
   struct config con;
   struct response res;
-  octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+
+  if (octopass_config_loading(&con, OCTOPASS_CONFIG_FILE) != 0) {
+    *errnop = EIO;
+    return NSS_STATUS_UNAVAIL;
+  }
+
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = octopass_members(&con, &res);
 
-  if (status != 0) {
+  if (octopass_members(&con, &res) != 0 || res.data == NULL) {
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
@@ -317,6 +352,8 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
 
   root = json_loads(res.data, 0, &error);
   free(res.data);
+  res.data = NULL;
+
   if (!root) {
     *errnop = ENOENT;
     if (con.syslog) {
@@ -326,43 +363,44 @@ enum nss_status _nss_octopass_getpwnam_r_locked(const char *name, struct passwd 
   }
 
   json_t *data = octopass_github_team_member_by_name((char *)name, root);
-
-  if (!data) {
-    json_decref(root);
+  if (!data || json_object_size(data) == 0) {
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   int pack_result = pack_passwd_struct(data, result, buffer, buflen, &con);
-
   if (pack_result == -1) {
-    json_decref(root);
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   if (pack_result == -2) {
-    json_decref(root);
+    status = NSS_STATUS_TRYAGAIN;
     *errnop = ERANGE;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "TRYAGAIN");
     }
-    return NSS_STATUS_TRYAGAIN;
+    goto cleanup;
   }
 
   if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d", __func__, __LINE__, "SUCCESS", result->pw_name,
-           result->pw_uid);
+    syslog(LOG_INFO, "%s[L%d] -- status: %s, pw_name: %s, pw_uid: %d",
+           __func__, __LINE__, "SUCCESS", result->pw_name, result->pw_uid);
   }
 
+  status = NSS_STATUS_SUCCESS;
+
+cleanup:
   json_decref(root);
-  return NSS_STATUS_SUCCESS;
+  return status;
 }
 
 // Find a passwd by name
