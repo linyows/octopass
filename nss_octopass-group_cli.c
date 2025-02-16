@@ -49,6 +49,8 @@ void call_getgrnam_r(const char *name)
   status = _nss_octopass_getgrnam_r(name, &grent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_grent(&grent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve group entry for %s\n", name);
   }
 
   free(buf);
@@ -69,6 +71,8 @@ void call_getgrgid_r(gid_t gid)
   status = _nss_octopass_getgrgid_r(gid, &grent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_grent(&grent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve group for gid %d\n", gid);
   }
 
   free(buf);

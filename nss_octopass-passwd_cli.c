@@ -70,6 +70,8 @@ void call_getpwuid_r(uid_t uid)
   status = _nss_octopass_getpwuid_r(uid, &pwent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_pwent(&pwent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve passwd for uid %d\n", uid);
   }
 
   free(buf);

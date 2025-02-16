@@ -454,9 +454,9 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
 
   CURLcode result;
   struct curl_slist *headers = NULL;
-  res->data                  = malloc(1);
-  res->size                  = 0;
-  res->httpstatus            = (long *)0;
+  res->data = calloc(1, sizeof(char));
+  res->size = 0;
+  res->httpstatus = 0;
 
   headers = curl_slist_append(headers, auth);
   if (!headers) {
@@ -484,11 +484,11 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
       fprintf(stderr, "cURL failed: %s\n", curl_easy_strerror(result));
     }
   } else {
-    long *code;
-    curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &code);
-    res->httpstatus = code;
+    long http_code = 0;
+    curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &http_code);
+    res->httpstatus = http_code;
     if (con->syslog) {
-      syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", (long)code, (long)res->size);
+      syslog(LOG_INFO, "http status: %ld -- %lu bytes retrieved", http_code, (long)res->size);
     }
   }
 
@@ -498,10 +498,7 @@ void octopass_github_request_without_cache(struct config *con, char *url, struct
   free(auth);
 
   if (!res->data) {
-    res->data = malloc(1);
-    if (res->data) {
-      res->data[0] = '\0';
-    }
+    res->data = calloc(1, sizeof(char));
   }
 }
 
@@ -542,11 +539,10 @@ void octopass_github_request(struct config *con, char *url, struct response *res
 
   curl_free(base);
   FILE *fp = fopen(fpath, "r");
-  long *ok_code = (long *)200;
 
   if (fp == NULL) {
     octopass_github_request_without_cache(con, url, res, token);
-    if (res->httpstatus == ok_code) {
+    if (res->httpstatus == 200) {
       octopass_export_file(con, dpath, fpath, res->data);
     }
   } else {
@@ -558,7 +554,7 @@ void octopass_github_request(struct config *con, char *url, struct response *res
       unsigned long diff = now - statbuf.st_mtime;
       if (diff > con->cache) {
         octopass_github_request_without_cache(con, url, res, token);
-        if (res->httpstatus == ok_code) {
+        if (res->httpstatus == 200) {
           octopass_export_file(con, dpath, fpath, res->data);
         }
         free(dpath);
@@ -801,6 +797,82 @@ int octopass_repository_collaborators(struct config *con, struct response *res)
   return octopass_rebuild_data_with_authorized(con, res);
 }
 
+int is_target_team(const char *name, const char *targets[], size_t target_count) {
+  for (size_t i = 0; i < target_count; i++) {
+    if (strcmp(name, targets[i]) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+json_t *filter_teams(json_t *teams, const char *targets[], size_t target_count) {
+  if (!json_is_array(teams)) {
+    fprintf(stderr, "Error: Input JSON is not an array.\n");
+    return NULL;
+  }
+
+  json_t *filtered_array = json_array();
+
+  size_t index;
+  json_t *team;
+  json_array_foreach(teams, index, team) {
+    json_t *name_json = json_object_get(team, "name");
+    if (!json_is_string(name_json)) continue;
+
+    const char *name = json_string_value(name_json);
+    if (is_target_team(name, targets, target_count)) {
+      json_array_append(filtered_array, team);
+    }
+  }
+
+  return filtered_array;
+}
+
+json_t *octopass_teams(struct config *con)
+{
+  size_t url_size = snprintf(NULL, 0, OCTOPASS_TEAMS_URL, con->endpoint, con->organization) + 1;
+  char *url = malloc(url_size);
+  if (!url) {
+    fprintf(stderr, "Memory allocation failed for teams URL\n");
+    return NULL;
+  }
+  snprintf(url, url_size, OCTOPASS_TEAMS_URL, con->endpoint, con->organization);
+
+  struct response res;
+  octopass_github_request(con, url, &res);
+
+  if (!res.data) {
+    fprintf(stderr, "Request failure\n");
+    if (con->syslog) {
+      closelog();
+    }
+    return NULL;
+  }
+
+  json_t *root;
+  json_error_t error;
+  root = json_loads(res.data, 0, &error);
+  if (!root) {
+    fprintf(stderr, "Error parsing JSON: %s\n", error.text);
+    return NULL;
+  }
+
+  const char *target_teams[] = {con->team};
+  size_t target_count = sizeof(target_teams) / sizeof(target_teams[0]);
+
+  json_t *filtered_json = filter_teams(root, target_teams, target_count);
+  if (!filtered_json) {
+    fprintf(stderr, "Error: Filtering JSON failed.\n");
+    json_decref(root);
+    return NULL;
+  }
+
+  json_decref(root);
+
+  return filtered_json;
+}
+
 int octopass_members(struct config *con, struct response *res)
 {
   if (strlen(con->repository) != 0) {
@@ -825,7 +897,7 @@ int octopass_autentication_with_token(struct config *con, char *user, char *toke
   struct response res;
   octopass_github_request_without_cache(con, url, &res, token);
 
-  if (*res.httpstatus == 200) {
+  if (res.httpstatus == 200) {
     json_error_t error;
     json_t *root = json_loads(res.data, 0, &error);
     if (root) {

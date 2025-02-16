@@ -72,7 +72,7 @@
 struct response {
   char *data;
   size_t size;
-  long *httpstatus;
+  long httpstatus;
 };
 
 struct config {
@@ -102,5 +102,7 @@ int octopass_autentication_with_token(struct config *con, char *user, char *toke
 extern char *express_github_user_keys(struct config *con, char *user);
 extern const char *octopass_github_team_members_keys(struct config *con);
 extern const char *octopass_github_user_keys(struct config *con, char *user);
+extern json_t *octopass_teams(struct config *con);
+extern int octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res);
 
 #endif /* OCTOPASS_H */
