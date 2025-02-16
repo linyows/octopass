@@ -122,7 +122,7 @@ enum nss_status _nss_octopass_setgrent_locked(int stayopen)
     return NSS_STATUS_UNAVAIL;
   }
 
-  if (!json_is_array(root)) {
+  if (!json_is_array(root) || json_array_size(root) == 0) {
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
