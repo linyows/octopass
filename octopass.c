@@ -75,28 +75,33 @@ const char *octopass_masking(const char *token)
   return mask;
 }
 
-const char *octopass_url_normalization(char *url)
+char *octopass_url_normalization(char *url)
 {
-  char *slash = strrchr(url, '/');
-
-  // only if the URL has no slashes and does not end with a slash
-  if (slash != NULL && strcmp(slash, "/") != 0) {
-    size_t url_length = strlen(url);
-    // add a trailing slash and terminator
-    size_t new_length = url_length + 2;
-
-    char *res = malloc(new_length);
-    if (!res) {
-      fprintf(stderr, "Memory allocation failed in octopass_url_normalization\n");
-      exit(1);
-    }
-
-    // add URL and slash to dynamic buffer
-    snprintf(res, new_length, "%s/", url);
-    return res;
+  if (url == NULL) {
+    fprintf(stderr, "Error: NULL URL passed to octopass_url_normalization\n");
+    return NULL;
   }
 
-  return url;
+  size_t url_length = strlen(url);
+
+  // only if the URL has no slashes and does not end with a slash
+  if (url_length > 0 && url[url_length - 1] == '/') {
+    return strdup(url);
+  }
+
+  // add a trailing slash and terminator
+  size_t new_length = url_length + 2;
+  char *res = malloc(new_length);
+  if (!res) {
+    fprintf(stderr, "Memory allocation failed in octopass_url_normalization\n");
+    return NULL;
+  }
+
+  // add URL and slash to dynamic buffer
+  snprintf(res, new_length, "%s/", url);
+
+  // needs free
+  return res;
 }
 
 // Unatched: 0
@@ -156,40 +161,38 @@ int octopass_match(char *str, char *pattern, char **matched)
 
 void octopass_override_config_by_env(struct config *con)
 {
-  char *token = getenv("OCTOPASS_TOKEN");
-  if (token) {
-    sprintf(con->token, "%s", token);
+  if (!con) {
+    fprintf(stderr, "Error: NULL pointer passed to octopass_override_config_by_env\n");
+    return;
+  }
+
+  const char *env_vars[] = {
+    "OCTOPASS_TOKEN", "OCTOPASS_ENDPOINT", "OCTOPASS_ORGANIZATION",
+    "OCTOPASS_TEAM", "OCTOPASS_OWNER", "OCTOPASS_REPOSITORY", "OCTOPASS_PERMISSION"
+  };
+  char *config_vars[] = {
+    con->token, con->endpoint, con->organization,
+    con->team, con->owner, con->repository, con->permission
+  };
+
+  for (size_t i = 0; i < sizeof(env_vars) / sizeof(env_vars[0]); i++) {
+    char *value = getenv(env_vars[i]);
+    if (value && strlen(value) < MAXBUF) {
+      snprintf(config_vars[i], MAXBUF, "%s", value);
+    } else if (value) {
+      fprintf(stderr, "Warning: Environment variable %s is too long and will be truncated.\n", env_vars[i]);
+      strncpy(config_vars[i], value, MAXBUF - 1);
+      config_vars[i][MAXBUF - 1] = '\0';
+    }
   }
 
   char *endpoint = getenv("OCTOPASS_ENDPOINT");
   if (endpoint) {
-    const char *url = octopass_url_normalization(endpoint);
-    sprintf(con->endpoint, "%s", url);
-  }
-
-  char *org = getenv("OCTOPASS_ORGANIZATION");
-  if (org) {
-    sprintf(con->organization, "%s", org);
-  }
-
-  char *team = getenv("OCTOPASS_TEAM");
-  if (team) {
-    sprintf(con->team, "%s", team);
-  }
-
-  char *owner = getenv("OCTOPASS_OWNER");
-  if (owner) {
-    sprintf(con->owner, "%s", owner);
-  }
-
-  char *repository = getenv("OCTOPASS_REPOSITORY");
-  if (repository) {
-    sprintf(con->repository, "%s", repository);
-  }
-
-  char *permission = getenv("OCTOPASS_PERMISSION");
-  if (permission) {
-    sprintf(con->permission, "%s", permission);
+    char *url = octopass_url_normalization(endpoint);
+    if (url) {
+      snprintf(con->endpoint, MAXBUF, "%s", url);
+      free(url);
+    }
   }
 }
 
@@ -257,7 +260,7 @@ int octopass_config_loading(struct config *con, char *filename)
     }
 
     if (strcmp(key, "Endpoint") == 0) {
-      const char *url = octopass_url_normalization(value);
+      char *url = octopass_url_normalization(value);
       snprintf(con->endpoint, sizeof(con->endpoint), "%s", url);
     } else if (strcmp(key, "Token") == 0) {
       snprintf(con->token, sizeof(con->token), "%s", value);

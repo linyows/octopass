@@ -60,7 +60,7 @@
 #define OCTOPASS_COLLABORATORS_URL "%srepos/%s/%s/collaborators?per_page=100"
 #define OCTOPASS_USERS_KEYS_URL "%susers/%s/keys?per_page=100"
 
-#define MAXBUF 1024
+#define MAXBUF 2048
 #define DELIM "= "
 
 // This macro is available with more than 2.5
@@ -81,7 +81,7 @@ struct config {
   char organization[MAXBUF];
   char team[MAXBUF];
   char owner[MAXBUF];
-  char repository[2048];
+  char repository[MAXBUF];
   char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
