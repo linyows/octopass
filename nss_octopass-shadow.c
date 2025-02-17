@@ -33,14 +33,17 @@ static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, s
   if (!json_is_string(j_sp_name)) {
     return -1;
   }
-  const char *login = json_string_value(j_sp_name);
 
+  const char *login = json_string_value(j_sp_name);
   memset(buffer, '\0', buflen);
 
-  if (bufleft <= strlen(login)) {
+  if (bufleft <= strlen(login) + 1) {
     return -2;
   }
-  result->sp_namp = strncpy(next_buf, login, bufleft);
+  result->sp_namp = next_buf;
+  strncpy(next_buf, login, bufleft - 1);
+  next_buf[strlen(login)] = '\0';
+
   next_buf += strlen(result->sp_namp) + 1;
   bufleft -= strlen(result->sp_namp) + 1;
 
@@ -58,18 +61,26 @@ static int pack_shadow_struct(json_t *root, struct spwd *result, char *buffer, s
 
 enum nss_status _nss_octopass_setspent_locked(int stayopen)
 {
-  json_t *root;
+  json_t *root = NULL;
   json_error_t error;
 
   struct config con;
   struct response res;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
-  if (con.syslog) {
-    syslog(LOG_INFO, "%s[L%d] -- stya_open: %d", __func__, __LINE__, stayopen);
-  }
-  int status = octopass_members(&con, &res);
 
+  if (con.syslog) {
+    syslog(LOG_INFO, "%s[L%d] -- stay_open: %d", __func__, __LINE__, stayopen);
+  }
+
+  int status = octopass_members(&con, &res);
   if (status != 0) {
+    if (con.syslog) {
+      syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
+    }
+    return NSS_STATUS_UNAVAIL;
+  }
+
+  if (res.data == NULL) {
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
@@ -78,6 +89,7 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
 
   root = json_loads(res.data, 0, &error);
   free(res.data);
+  res.data = NULL;
 
   if (!root) {
     if (con.syslog) {
@@ -92,6 +104,10 @@ enum nss_status _nss_octopass_setspent_locked(int stayopen)
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
     }
     return NSS_STATUS_UNAVAIL;
+  }
+
+  if (ent_json_root) {
+    json_decref(ent_json_root);
   }
 
   ent_json_root = root;
@@ -115,9 +131,8 @@ enum nss_status _nss_octopass_setspent(int stayopen)
 enum nss_status _nss_octopass_endspent_locked(void)
 {
   if (ent_json_root) {
-    while (ent_json_root->refcount > 0) {
-      json_decref(ent_json_root);
-    }
+    json_decref(ent_json_root);
+    ent_json_root = NULL;
   }
 
   ent_json_root = NULL;
@@ -146,20 +161,28 @@ enum nss_status _nss_octopass_getspent_r_locked(struct spwd *result, char *buffe
     status = _nss_octopass_setspent_locked(0);
   }
 
-  if (status != NSS_STATUS_SUCCESS) {
-    if (status == NSS_STATUS_NOTFOUND) {
+  if (status != NSS_STATUS_SUCCESS || ent_json_root == NULL) {
+    if (status == NSS_STATUS_NOTFOUND || ent_json_root == NULL) {
       *errnop = ENOENT;
     }
-    return status;
+    return NSS_STATUS_NOTFOUND;
   }
 
+  size_t json_size = json_array_size(ent_json_root);
+
   // Return notfound when there's nothing else to read.
-  if (ent_json_idx >= json_array_size(ent_json_root)) {
+  if (ent_json_idx >= json_size) {
     *errnop = ENOENT;
     return NSS_STATUS_NOTFOUND;
   }
 
-  int pack_result = pack_shadow_struct(json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen);
+  json_t *json_entry = json_array_get(ent_json_root, ent_json_idx);
+  if (json_entry == NULL || !json_is_object(json_entry)) {
+    *errnop = ENOENT;
+    return NSS_STATUS_NOTFOUND;
+  }
+
+  int pack_result = pack_shadow_struct(json_entry, result, buffer, buflen);
 
   // A necessary input file cannot be found.
   if (pack_result == -1) {
@@ -192,18 +215,20 @@ enum nss_status _nss_octopass_getspent_r(struct spwd *result, char *buffer, size
 enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *result, char *buffer, size_t buflen,
                                                 int *errnop)
 {
-  json_t *root;
+  json_t *root = NULL;
   json_error_t error;
+  enum nss_status status = NSS_STATUS_UNAVAIL;
 
   struct config con;
   struct response res;
   octopass_config_loading(&con, OCTOPASS_CONFIG_FILE);
+
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- name: %s", __func__, __LINE__, name);
   }
-  int status = octopass_members(&con, &res);
 
-  if (status != 0) {
+  int members_status = octopass_members(&con, &res);
+  if (members_status != 0 || res.data == NULL) {
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "UNAVAIL");
@@ -213,6 +238,8 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
 
   root = json_loads(res.data, 0, &error);
   free(res.data);
+  res.data = NULL;
+
   if (!root) {
     *errnop = ENOENT;
     if (con.syslog) {
@@ -222,42 +249,43 @@ enum nss_status _nss_octopass_getspnam_r_locked(const char *name, struct spwd *r
   }
 
   json_t *data = octopass_github_team_member_by_name((char *)name, root);
-
-  if (json_object_size(data) == 0) {
-    json_decref(root);
+  if (!data || json_object_size(data) == 0) {
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   int pack_result = pack_shadow_struct(data, result, buffer, buflen);
-
   if (pack_result == -1) {
-    json_decref(root);
+    status = NSS_STATUS_NOTFOUND;
     *errnop = ENOENT;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "NOTFOUND");
     }
-    return NSS_STATUS_NOTFOUND;
+    goto cleanup;
   }
 
   if (pack_result == -2) {
-    json_decref(root);
+    status = NSS_STATUS_TRYAGAIN;
     *errnop = ERANGE;
     if (con.syslog) {
       syslog(LOG_INFO, "%s[L%d] -- status: %s", __func__, __LINE__, "TRYAGAIN");
     }
-    return NSS_STATUS_TRYAGAIN;
+    goto cleanup;
   }
 
   if (con.syslog) {
     syslog(LOG_INFO, "%s[L%d] -- status: %s, sp_namp: %s", __func__, __LINE__, "SUCCESS", result->sp_namp);
   }
 
+  status = NSS_STATUS_SUCCESS;
+
+cleanup:
   json_decref(root);
-  return NSS_STATUS_SUCCESS;
+  return status;
 }
 
 // Find a shadow by name

@@ -18,63 +18,93 @@
 
 void show_grent(struct group *grent)
 {
+  if (!grent || !grent->gr_name || !grent->gr_passwd) {
+    fprintf(stderr, "Error: Invalid group entry\n");
+    return;
+  }
+
   printf("%s:%s:%d", grent->gr_name, grent->gr_passwd, grent->gr_gid);
-  const int count = json_array_size(ent_json_root);
-  int i;
 
-  for (i = 0; i < count; i++) {
-    printf(":%s", grent->gr_mem[i]);
+  if (grent->gr_mem) {
+    for (int i = 0; grent->gr_mem[i] != NULL; i++) {
+      printf(":%s", grent->gr_mem[i]);
+    }
   }
 
-  if (count == 0) {
-    printf(":\n");
-  } else {
-    printf("\n");
-  }
+  printf("\n");
 }
 
 void call_getgrnam_r(const char *name)
 {
   enum nss_status status;
   struct group grent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
+  }
+
   status = _nss_octopass_getgrnam_r(name, &grent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_grent(&grent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve group entry for %s\n", name);
   }
+
+  free(buf);
 }
 
 void call_getgrgid_r(gid_t gid)
 {
   enum nss_status status;
   struct group grent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
+  }
+
   status = _nss_octopass_getgrgid_r(gid, &grent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_grent(&grent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve group for gid %d\n", gid);
   }
+
+  free(buf);
 }
 
 void call_grlist(void)
 {
   enum nss_status status;
   struct group grent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
+  }
 
   status = _nss_octopass_setgrent(0);
+  if (status != NSS_STATUS_SUCCESS) {
+    fprintf(stderr, "Error: Failed to initialize group enumeration\n");
+    free(buf);
+    return;
+  }
 
-  while (status == NSS_STATUS_SUCCESS) {
-    status = _nss_octopass_getgrent_r(&grent, buf, buflen, &err);
-    if (status == NSS_STATUS_SUCCESS) {
-      show_grent(&grent);
-    }
+  while ((status = _nss_octopass_getgrent_r(&grent, buf, buflen, &err)) == NSS_STATUS_SUCCESS) {
+    show_grent(&grent);
   }
 
   status = _nss_octopass_endgrent();
+  if (status != NSS_STATUS_SUCCESS) {
+    fprintf(stderr, "Warning: Failed to end group enumeration\n");
+  }
+
+  free(buf);
 }

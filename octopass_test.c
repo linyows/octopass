@@ -244,34 +244,33 @@ Test(octopass, github_request_without_cache, .init = setup)
   char *token;
   octopass_github_request_without_cache(&con, url, &res, token);
 
-  cr_assert_eq((long *)200, res.httpstatus);
-  /*
-  cr_assert_str_eq(
-      "{\"current_user_url\":\"https://api.github.com/user\",\"current_user_authorizations_html_url\":\"https://"
-      "github.com/settings/connections/applications{/client_id}\",\"authorizations_url\":\"https://api.github.com/"
-      "authorizations\",\"code_search_url\":\"https://api.github.com/search/"
-      "code?q={query}{&page,per_page,sort,order}\",\"commit_search_url\":\"https://api.github.com/search/"
-      "commits?q={query}{&page,per_page,sort,order}\",\"emails_url\":\"https://api.github.com/user/"
-      "emails\",\"emojis_url\":\"https://api.github.com/emojis\",\"events_url\":\"https://api.github.com/"
-      "events\",\"feeds_url\":\"https://api.github.com/feeds\",\"followers_url\":\"https://api.github.com/user/"
-      "followers\",\"following_url\":\"https://api.github.com/user/following{/target}\",\"gists_url\":\"https://"
-      "api.github.com/gists{/gist_id}\",\"hub_url\":\"https://api.github.com/hub\",\"issue_search_url\":\"https://"
-      "api.github.com/search/issues?q={query}{&page,per_page,sort,order}\",\"issues_url\":\"https://api.github.com/"
-      "issues\",\"keys_url\":\"https://api.github.com/user/keys\",\"notifications_url\":\"https://api.github.com/"
-      "notifications\",\"organization_repositories_url\":\"https://api.github.com/orgs/{org}/"
-      "repos{?type,page,per_page,sort}\",\"organization_url\":\"https://api.github.com/orgs/"
-      "{org}\",\"public_gists_url\":\"https://api.github.com/gists/public\",\"rate_limit_url\":\"https://"
-      "api.github.com/rate_limit\",\"repository_url\":\"https://api.github.com/repos/{owner}/"
-      "{repo}\",\"repository_search_url\":\"https://api.github.com/search/"
-      "repositories?q={query}{&page,per_page,sort,order}\",\"current_user_repositories_url\":\"https://api.github.com/"
-      "user/repos{?type,page,per_page,sort}\",\"starred_url\":\"https://api.github.com/user/starred{/owner}{/"
-      "repo}\",\"starred_gists_url\":\"https://api.github.com/gists/starred\",\"team_url\":\"https://api.github.com/"
-      "teams\",\"user_url\":\"https://api.github.com/users/{user}\",\"user_organizations_url\":\"https://"
-      "api.github.com/user/orgs\",\"user_repositories_url\":\"https://api.github.com/users/{user}/"
-      "repos{?type,page,per_page,sort}\",\"user_search_url\":\"https://api.github.com/search/"
-      "users?q={query}{&page,per_page,sort,order}\"}",
-      res.data);
-  */
+  cr_assert_eq(200, res.httpstatus);
+
+  //cr_assert_str_eq(
+  //    "{\"current_user_url\":\"https://api.github.com/user\",\"current_user_authorizations_html_url\":\"https://"
+  //    "github.com/settings/connections/applications{/client_id}\",\"authorizations_url\":\"https://api.github.com/"
+  //    "authorizations\",\"code_search_url\":\"https://api.github.com/search/"
+  //    "code?q={query}{&page,per_page,sort,order}\",\"commit_search_url\":\"https://api.github.com/search/"
+  //    "commits?q={query}{&page,per_page,sort,order}\",\"emails_url\":\"https://api.github.com/user/"
+  //    "emails\",\"emojis_url\":\"https://api.github.com/emojis\",\"events_url\":\"https://api.github.com/"
+  //    "events\",\"feeds_url\":\"https://api.github.com/feeds\",\"followers_url\":\"https://api.github.com/user/"
+  //    "followers\",\"following_url\":\"https://api.github.com/user/following{/target}\",\"gists_url\":\"https://"
+  //    "api.github.com/gists{/gist_id}\",\"hub_url\":\"https://api.github.com/hub\",\"issue_search_url\":\"https://"
+  //    "api.github.com/search/issues?q={query}{&page,per_page,sort,order}\",\"issues_url\":\"https://api.github.com/"
+  //    "issues\",\"keys_url\":\"https://api.github.com/user/keys\",\"notifications_url\":\"https://api.github.com/"
+  //    "notifications\",\"organization_repositories_url\":\"https://api.github.com/orgs/{org}/"
+  //    "repos{?type,page,per_page,sort}\",\"organization_url\":\"https://api.github.com/orgs/"
+  //    "{org}\",\"public_gists_url\":\"https://api.github.com/gists/public\",\"rate_limit_url\":\"https://"
+  //    "api.github.com/rate_limit\",\"repository_url\":\"https://api.github.com/repos/{owner}/"
+  //    "{repo}\",\"repository_search_url\":\"https://api.github.com/search/"
+  //    "repositories?q={query}{&page,per_page,sort,order}\",\"current_user_repositories_url\":\"https://api.github.com/"
+  //    "user/repos{?type,page,per_page,sort}\",\"starred_url\":\"https://api.github.com/user/starred{/owner}{/"
+  //    "repo}\",\"starred_gists_url\":\"https://api.github.com/gists/starred\",\"team_url\":\"https://api.github.com/"
+  //    "teams\",\"user_url\":\"https://api.github.com/users/{user}\",\"user_organizations_url\":\"https://"
+  //    "api.github.com/user/orgs\",\"user_repositories_url\":\"https://api.github.com/users/{user}/"
+  //    "repos{?type,page,per_page,sort}\",\"user_search_url\":\"https://api.github.com/search/"
+  //    "users?q={query}{&page,per_page,sort,order}\"}",
+  //    res.data);
 }
 
 Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup)
@@ -284,7 +283,7 @@ Test(octopass, github_request_without_cache__when_use_dummy_token, .init = setup
   char *token = "dummydummydummydummydummydummydummydummy";
   octopass_github_request_without_cache(&con, url, &res, token);
 
-  cr_assert_eq((long *)401, res.httpstatus);
+  cr_assert_eq(401, res.httpstatus);
   cr_assert_str_eq(res.data, "{\"message\":\"Bad credentials\",\"documentation_url\":\"https://docs.github.com/rest\",\"status\":\"401\"}");
 }
 
@@ -337,6 +336,7 @@ Test(octopass, is_authorized_collaborator, .init = setup)
     cr_assert_eq(status2, 1);
   }
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -351,7 +351,7 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   octopass_config_loading(&con, f);
 
   char *stub = "test/collaborators.json";
-  res.httpstatus = (long *)200;
+  res.httpstatus = 200;
   res.data = (char *)octopass_import_file(&con, stub);
   res.size = strlen(res.data);
   octopass_rebuild_data_with_authorized(&con, &res);
@@ -368,6 +368,7 @@ Test(octopass, rebuild_data_with_authorized, .init = setup)
   const char *login = json_string_value(json_object_get(me, "login"));
   cr_assert_str_eq(login, "linyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -383,7 +384,7 @@ Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = se
   octopass_config_loading(&con, f);
 
   char *stub = "test/collaborators.json";
-  res.httpstatus = (long *)200;
+  res.httpstatus = 200;
   res.data = (char *)octopass_import_file(&con, stub);
   res.size = strlen(res.data);
   octopass_rebuild_data_with_authorized(&con, &res);
@@ -404,6 +405,7 @@ Test(octopass, rebuild_data_with_authorized__when_permission_is_read, .init = se
   const char *login2 = json_string_value(json_object_get(other, "login"));
   cr_assert_str_eq(login2, "nolinyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 
@@ -426,6 +428,7 @@ Test(octopass, repository_collaborators, .init = setup)
   const char *login = json_string_value(json_object_get(me, "login"));
   cr_assert_str_eq(login, "linyows");
 
+  json_decref(collaborators);
   clearenv();
 }
 
