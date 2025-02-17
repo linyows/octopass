@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: |
-        0 0 * * *
+        0 0 * * 1
 jobs:
   ubuntu:
     name: Build on ${{matrix.container }}
@@ -30,6 +30,14 @@ jobs:
       run: |
         make build install
         make deb
+    - name: Set Distribution and Name
+      run: |
+        echo "DISTRIBUTION=$(echo '${{ matrix.container }}' | sed 's/:/-/g')" >> $GITHUB_ENV
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: octopass-${{ env.DISTRIBUTION }}
+        path: builds/**
   debian:
     name: Build on ${{matrix.container }}
     runs-on: ubuntu-latest
@@ -51,6 +59,14 @@ jobs:
       run: |
         make build install
         make deb
+    - name: Set Distribution and Name
+      run: |
+        echo "DISTRIBUTION=$(echo '${{ matrix.container }}' | sed 's/:/-/g')" >> $GITHUB_ENV
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: octopass-${{ env.DISTRIBUTION }}
+        path: builds/**
 #  centos:
 #    name: Build on ${{matrix.container }}
 #    runs-on: ubuntu-latest

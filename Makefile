@@ -14,7 +14,10 @@ BINDIR=$(PREFIX)/bin
 BUILD=tmp/libs
 CACHE=/var/cache/octopass
 
-DIST ?= $(shell grep VERSION_CODENAME /etc/os-release | awk -F '=' '{print $$2}' ORS='')
+DIST_CODENAME := $(shell grep VERSION_CODENAME /etc/os-release | awk -F '=' '{print $$2}' ORS='')
+DIST_ID := $(shell grep '^ID=' /etc/os-release | awk -F '=' '{print $$2}' ORS='')
+DIST ?= $(DIST_ID)-$(DIST_CODENAME)
+
 SOURCES_RPM=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING selinux/octopass.pp
 SOURCES=Makefile octopass.h octopass*.c nss_octopass*.c octopass.conf.example COPYING
 VERSION=$(shell awk -F\" '/^\#define OCTOPASS_VERSION / { print $$2; exit }' octopass.h)
@@ -166,29 +169,29 @@ deb: source_for_deb ## Packaging for DEB
 		sed -i -e 's/DIST/$(DIST)/g' debian/changelog && \
 		debuild -uc -us
 	cd tmp.$(DIST) && \
+		ls -las && rm -f *-dbgsym_*.deb && \
 		find . -name "*.deb" ! -name "*-dbgsym_*.deb" | sed -e 's/\(\(.*octopass_.*\).deb\)/mv \1 \2.$(DIST).deb/g' | sh && \
 		cp *.deb ../builds
 	rm -rf tmp.$(DIST)
 
-deps_for_dist:
-	go install github.com/tcnksm/ghr@latest
-	go install github.com/mlafeldt/pkgcloud/cmd/pkgcloud-push@latest
-
-github_release: ## Upload archives to Github Release
-	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
-	rm -rf builds/.keep && ghr v$(VERSION) builds && git checkout builds/.keep
-
-packagecloud_release: ## Upload archives to PackageCloud
+packagecloud: ## Upload archives to PackageCloud
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for PackageCloud$(RESET)"
-	pkgcloud-push linyows/octopass/ubuntu/focal builds/octopass_$(VERSION)-1_amd64.focal.deb
-	pkgcloud-push linyows/octopass/debian/bullseye builds/octopass_$(VERSION)-1_amd64.bullseye.deb
+	@HTTP_CODE=$$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+		-F "package[distro_version_id]=$(shell misc/packagecloud.sh $(DIST_ID) $(DIST_CODENAME))" \
+		-F "package[package_file]=@builds/$(shell find ./builds -maxdepth 1 -name "*.deb" | head -1 | awk -F '/' '{print $$3}' ORS='')" \
+		-H "Authorization: Bearer $(PACKAGECLOUD_TOKEN)" \
+		https://packagecloud.io/api/v1/repos/linyows/octopass/packages.json); \
+	if [ "$$HTTP_CODE" -ne 201 ]; then \
+		echo "Upload failed with HTTP status: $$HTTP_CODE"; \
+		exit 1; \
+	fi
+	@echo "Upload successful with HTTP status: $$HTTP_CODE"
 
 pkg: clean ## Create some distribution packages
 	docker-compose up
 
 dist: ## Upload archives to GitHub and PackageCloud
-	@test -z $(GITHUB_TOKEN) || $(MAKE) github_release
-	@test -z $(PACKAGECLOUD_TOKEN) || $(MAKE) packagecloud_release
+	@test -z $(PACKAGECLOUD_TOKEN) || $(MAKE) packagecloud
 
 clean: ## Delete tmp directory
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Cleaning$(RESET)"

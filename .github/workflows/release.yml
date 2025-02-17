@@ -19,7 +19,7 @@ jobs:
       run: |
         apt update -qq
         apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev jq
     - name: Add octopass user
       run: |
         useradd -m -s /bin/bash octopass
@@ -28,7 +28,7 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Upload binaries to release
+    - name: Upload package to Github Releases
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,6 +36,11 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+    - name: Upload package to PackageCloud
+      env:
+        PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      run: |
+        make dist
 
   debian:
     name: Build on ${{matrix.container }}
@@ -49,7 +54,7 @@ jobs:
     - name: Install packages
       run: |
         apt update -qq
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
+        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils jq
     - name: Set LOGNAME and USER to environment
       run: |
         echo "LOGNAME=root" >> $GITHUB_ENV
@@ -57,7 +62,7 @@ jobs:
     - name: Create package
       run: |
         make deb
-    - name: Upload binaries to release
+    - name: Upload package to Github Releases
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -65,3 +70,8 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+    - name: Upload package to PackageCloud
+      env:
+        PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      run: |
+        make dist
