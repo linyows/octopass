@@ -18,52 +18,88 @@
 
 void show_pwent(struct passwd *pwent)
 {
-  printf("%s:%s:%d:%d:%s:%s:%s\n", pwent->pw_name, pwent->pw_passwd, pwent->pw_uid, pwent->pw_gid, pwent->pw_gecos,
-         pwent->pw_dir, pwent->pw_shell);
+  if (!pwent || !pwent->pw_name || !pwent->pw_passwd || !pwent->pw_gecos || !pwent->pw_dir || !pwent->pw_shell) {
+    fprintf(stderr, "Error: Invalid passwd entry\n");
+    return;
+  }
+
+  printf("%s:%s:%d:%d:%s:%s:%s\n",
+         pwent->pw_name ? pwent->pw_name : "N/A",
+         pwent->pw_passwd ? pwent->pw_passwd : "N/A",
+         pwent->pw_uid,
+         pwent->pw_gid,
+         pwent->pw_gecos ? pwent->pw_gecos : "N/A",
+         pwent->pw_dir ? pwent->pw_dir : "N/A",
+         pwent->pw_shell ? pwent->pw_shell : "N/A");
 }
 
 void call_getpwnam_r(const char *name)
 {
   enum nss_status status;
   struct passwd pwent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
+  }
+
   status = _nss_octopass_getpwnam_r(name, &pwent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_pwent(&pwent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve passwd entry for %s\n", name);
   }
+
+  free(buf);
 }
 
 void call_getpwuid_r(uid_t uid)
 {
   enum nss_status status;
   struct passwd pwent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
+  }
+
   status = _nss_octopass_getpwuid_r(uid, &pwent, buf, buflen, &err);
   if (status == NSS_STATUS_SUCCESS) {
     show_pwent(&pwent);
+  } else {
+    fprintf(stderr, "Error: Failed to retrieve passwd for uid %d\n", uid);
   }
+
+  free(buf);
 }
 
 void call_pwlist(void)
 {
   enum nss_status status;
   struct passwd pwent;
-  int err    = 0;
+  int err = 0;
   int buflen = 2048;
-  char buf[buflen];
-
-  status = _nss_octopass_setpwent(0);
-
-  while (status == NSS_STATUS_SUCCESS) {
-    status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err);
-    if (status == NSS_STATUS_SUCCESS) {
-      show_pwent(&pwent);
-    }
+  char *buf = malloc(buflen);
+  if (!buf) {
+    fprintf(stderr, "Error: Memory allocation failed\n");
+    return;
   }
 
-  status = _nss_octopass_endpwent();
+  status = _nss_octopass_setpwent(0);
+  if (status != NSS_STATUS_SUCCESS) {
+    fprintf(stderr, "Error: Failed to initialize passwd enumeration\n");
+    free(buf);
+    return;
+  }
+
+  while ((status = _nss_octopass_getpwent_r(&pwent, buf, buflen, &err)) == NSS_STATUS_SUCCESS) {
+    show_pwent(&pwent);
+  }
+
+  _nss_octopass_endpwent();
+  free(buf);
 }

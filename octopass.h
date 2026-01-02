@@ -35,7 +35,7 @@
 #include <regex.h>
 #include <unistd.h>
 
-#define OCTOPASS_VERSION "0.8.0"
+#define OCTOPASS_VERSION "0.9.0"
 #define OCTOPASS_VERSION_WITH_NAME "octopass/" OCTOPASS_VERSION
 #ifndef OCTOPASS_CONFIG_FILE
 #define OCTOPASS_CONFIG_FILE "/etc/octopass.conf"
@@ -60,7 +60,7 @@
 #define OCTOPASS_COLLABORATORS_URL "%srepos/%s/%s/collaborators?per_page=100"
 #define OCTOPASS_USERS_KEYS_URL "%susers/%s/keys?per_page=100"
 
-#define MAXBUF 1024
+#define MAXBUF 2048
 #define DELIM "= "
 
 // This macro is available with more than 2.5
@@ -72,7 +72,7 @@
 struct response {
   char *data;
   size_t size;
-  long *httpstatus;
+  long httpstatus;
 };
 
 struct config {
@@ -81,7 +81,7 @@ struct config {
   char organization[MAXBUF];
   char team[MAXBUF];
   char owner[MAXBUF];
-  char repository[2048];
+  char repository[MAXBUF];
   char permission[MAXBUF];
   char group_name[MAXBUF];
   char home[MAXBUF];
@@ -95,10 +95,14 @@ struct config {
 };
 
 extern int octopass_members(struct config *con, struct response *res);
-extern void octopass_config_loading(struct config *con, char *filename);
+extern int octopass_config_loading(struct config *con, char *filename);
 extern json_t *octopass_github_team_member_by_name(char *name, json_t *root);
 extern json_t *octopass_github_team_member_by_id(int gh_id, json_t *root);
 int octopass_autentication_with_token(struct config *con, char *user, char *token);
 extern char *express_github_user_keys(struct config *con, char *user);
+extern const char *octopass_github_team_members_keys(struct config *con);
+extern const char *octopass_github_user_keys(struct config *con, char *user);
+extern json_t *octopass_teams(struct config *con);
+extern int octopass_team_members_by_team_id(struct config *con, int team_id, struct response *res);
 
 #endif /* OCTOPASS_H */
