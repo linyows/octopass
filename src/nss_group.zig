@@ -35,7 +35,7 @@ pub fn packGroupStruct(
     offset += group_name.len + 1;
 
     // gr_passwd (static "x")
-    result.gr_passwd = @constCast(@ptrCast(passwd_str.ptr));
+    result.gr_passwd = @ptrCast(@constCast(passwd_str.ptr));
 
     // gr_gid
     result.gr_gid = @intCast(config.gid);

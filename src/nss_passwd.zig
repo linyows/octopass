@@ -38,14 +38,14 @@ pub fn packPasswdStruct(
     offset += login.len + 1;
 
     // pw_passwd (static "x")
-    result.pw_passwd = @constCast(@ptrCast(passwd_str.ptr));
+    result.pw_passwd = @ptrCast(@constCast(passwd_str.ptr));
 
     // pw_uid and pw_gid
     result.pw_uid = @intCast(config.uid_starts + user.id);
     result.pw_gid = @intCast(config.gid);
 
     // pw_gecos (static)
-    result.pw_gecos = @constCast(@ptrCast(gecos_str.ptr));
+    result.pw_gecos = @ptrCast(@constCast(gecos_str.ptr));
 
     // pw_dir (formatted with username)
     const home_result = common.simpleFormatHomePath(

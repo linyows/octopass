@@ -37,7 +37,7 @@ pub fn packShadowStruct(
     offset += login.len + 1;
 
     // sp_pwdp (locked password)
-    result.sp_pwdp = @constCast(@ptrCast(locked_passwd.ptr));
+    result.sp_pwdp = @ptrCast(@constCast(locked_passwd.ptr));
 
     // All other fields set to -1 (unset)
     result.sp_lstchg = -1;
