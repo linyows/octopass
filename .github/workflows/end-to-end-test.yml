@@ -1,0 +1,71 @@
+name: End-to-end Testing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '**.zig'
+      - '**.zig.zon'
+      - 'packaging/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v2.0.1
+        with:
+          version: 0.15.2
+
+      - name: Build with cross compile
+        run: zig build cross
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zig-out
+          path: zig-out/
+          retention-days: 1
+
+  test:
+    name: Test on ${{ matrix.distro }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu-noble
+          - ubuntu-questing
+          - debian-bookworm
+          - debian-trixie
+          - rockylinux-9
+          - rockylinux-8
+          - almalinux-9
+          - almalinux-8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: zig-out
+          path: zig-out/
+
+      - name: Build and test package
+        working-directory: packaging
+        env:
+          OCTOPASS_TOKEN: ${{ secrets.OCTOPASS_TOKEN }}
+          OCTOPASS_ORGANIZATION: ${{ secrets.OCTOPASS_ORGANIZATION }}
+          OCTOPASS_TEAM: ${{ secrets.OCTOPASS_TEAM }}
+        run: |
+          docker compose build ${{ matrix.distro }}
+          docker compose run --rm ${{ matrix.distro }}
