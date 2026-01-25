@@ -11,6 +11,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -24,6 +25,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -37,6 +39,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -50,6 +53,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -64,6 +68,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -77,6 +82,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -90,6 +96,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
@@ -103,6 +110,7 @@ services:
     volumes:
       - .:/packaging
     environment:
+      - VERSION
       - OCTOPASS_TOKEN
       - OCTOPASS_ORGANIZATION
       - OCTOPASS_TEAM
