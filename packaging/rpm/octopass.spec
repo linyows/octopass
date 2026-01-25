@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          0.10.0
+Version:          1.0.0
 Release:          1%{?dist}
 License:          MIT
 URL:              https://github.com/linyows/octopass
@@ -98,9 +98,52 @@ fi
 %{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %changelog
-* Fri Jan 24 2025 linyows <linyows@gmail.com> - 0.10.0-1
-- Zig rewrite of octopass
+* Sat Jan 25 2025 linyows <linyows@gmail.com> - 1.0.0-1
+- Rewrite octopass from C to Zig
 - Zero external dependencies (no libcurl, no libjansson)
 - Memory safety with compile-time checks
-- Easy cross-compilation
+- Easy cross-compilation for Linux (amd64/arm64)
+- Environment variable support for configuration override
 - SELinux policy included
+
+* Thu Apr 27 2021 linyows <linyows@gmail.com> - 0.7.1-1
+- Bugfixes
+
+* Fri Jun 21 2019 linyows <linyows@gmail.com> - 0.7.0-1
+- Resolve a problem of cache file permission
+
+* Mon Oct 22 2018 linyows <linyows@gmail.com> - 0.6.0-1
+- Add policy for SELinux
+
+* Wed Oct 10 2018 linyows <linyows@gmail.com> - 0.5.1-1
+- Fix for systemd-networkd SEGV
+
+* Thu Oct 02 2018 linyows <linyows@gmail.com> - 0.5.0-1
+- Support slug for GitHub team API
+
+* Mon Apr 02 2018 linyows <linyows@gmail.com> - 0.4.1-1
+- Page size changes to 100 from 30 on Github organization API
+
+* Mon Sep 25 2017 linyows <linyows@gmail.com> - 0.4.0-1
+- Support github repository collaborators as name resolve
+
+* Thu Sep 14 2017 linyows <linyows@gmail.com> - 0.3.5-1
+- Bugfixes
+
+* Sun May 07 2017 linyows <linyows@gmail.com> - 0.3.3-1
+- Fix segmentation fault
+
+* Tue Feb 28 2017 linyows <linyows@gmail.com> - 0.3.2-1
+- Example typo
+
+* Mon Feb 27 2017 linyows <linyows@gmail.com> - 0.3.1-1
+- Bugfixes
+
+* Sun Feb 26 2017 linyows <linyows@gmail.com> - 0.3.0-1
+- Support shared-users option
+
+* Sun Feb 19 2017 linyows <linyows@gmail.com> - 0.2.0-1
+- Change implementation in Go to C
+
+* Fri Feb 03 2017 linyows <linyows@gmail.com> - 0.1.0-1
+- Initial packaging
