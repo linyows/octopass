@@ -1,0 +1,74 @@
+services:
+  # Debian-based distributions
+  ubuntu-noble:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: ubuntu:noble
+    volumes:
+      - .:/packaging
+
+  ubuntu-questing:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: ubuntu:questing
+    volumes:
+      - .:/packaging
+
+  debian-bookworm:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: debian:bookworm
+    volumes:
+      - .:/packaging
+
+  debian-trixie:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: debian:trixie
+    volumes:
+      - .:/packaging
+
+  # RHEL-based distributions
+  rockylinux-9:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: rockylinux:9
+    volumes:
+      - .:/packaging
+
+  rockylinux-8:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: rockylinux:8
+    volumes:
+      - .:/packaging
+
+  almalinux-9:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: almalinux:9
+    volumes:
+      - .:/packaging
+
+  almalinux-8:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: almalinux:8
+    volumes:
+      - .:/packaging

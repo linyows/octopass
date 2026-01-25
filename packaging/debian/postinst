@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        echo ""
+        echo "octopass has been installed."
+        echo ""
+        echo "To complete setup:"
+        echo "1. Edit /etc/octopass.conf with your GitHub token and organization"
+        echo "2. Add 'octopass' to /etc/nsswitch.conf:"
+        echo "   passwd: files octopass"
+        echo "   group:  files octopass"
+        echo "   shadow: files octopass"
+        echo "3. Configure SSH in /etc/ssh/sshd_config:"
+        echo "   AuthorizedKeysCommand /usr/bin/octopass %u"
+        echo "   AuthorizedKeysCommandUser root"
+        echo ""
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

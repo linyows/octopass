@@ -1,0 +1,8 @@
+octopass (0.10.0-1) DIST; urgency=medium
+
+  * Zig rewrite of octopass
+  * Zero external dependencies (no libcurl, no libjansson)
+  * Memory safety with compile-time checks
+  * Easy cross-compilation
+
+ -- linyows <linyows@gmail.com>  Fri, 24 Jan 2025 12:00:00 +0900

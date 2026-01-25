@@ -1,0 +1,25 @@
+# O C T O P A S S
+
+# Required
+Token           = "iad87dih122ce66a1e20a751664c8a9dkoak87g7"
+
+## Use team
+#Organization    = "yourorganization"
+#Team            = "yourteam"
+
+## Use collaborators
+#Owner           = "yourname"
+#Repository      = "yourrepository"
+
+# Default
+#Endpoint        = "https://api.github.com/"
+#Group           = "yourgroup"
+#Home            = "/home/foo/%s"
+#Shell           = "/bin/zsh"
+#UidStarts       = 2000
+#Gid             = 2000
+#Cache           = 300
+#Syslog          = false
+
+# Advanced
+#SharedUsers     = [ "admin", "deploy" ]

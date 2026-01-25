@@ -1,0 +1,20 @@
+Source: octopass
+Section: admin
+Priority: optional
+Maintainer: linyows <linyows@gmail.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.7
+Homepage: https://github.com/linyows/octopass
+Vcs-Browser: https://github.com/linyows/octopass/tree/main/octopass-zig
+Vcs-Git: https://github.com/linyows/octopass -b main
+
+Package: octopass
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}, libc6
+Description: Linux user management with GitHub organization/team (Zig implementation)
+ octopass brings GitHub's team management to your Linux servers. No more
+ manually managing /etc/passwd or distributing SSH keys - just add users
+ to your GitHub team, and they're ready to SSH into your servers.
+ .
+ This is the Zig rewrite of the original C implementation with zero
+ external dependencies beyond libc.

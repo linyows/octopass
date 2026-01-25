@@ -1,0 +1,38 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/default.mk
+
+DESTDIR=$(CURDIR)/debian/octopass
+CONFDIR=$(DESTDIR)/etc
+PREFIX=$(DESTDIR)/usr
+LIBDIR=$(PREFIX)/lib/$(DEB_HOST_MULTIARCH)
+BINDIR=$(PREFIX)/bin
+
+# Map Debian architecture to Zig build directory
+ifeq ($(DEB_HOST_ARCH),amd64)
+  ZIG_ARCH=linux-amd64
+else ifeq ($(DEB_HOST_ARCH),arm64)
+  ZIG_ARCH=linux-arm64
+endif
+
+BUILD_DIR=zig-out/$(ZIG_ARCH)
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	@echo "Skipping clean to preserve pre-built binaries"
+
+override_dh_auto_build:
+	@echo "Using pre-built binaries from $(BUILD_DIR)"
+
+override_dh_auto_install:
+	mkdir -p $(LIBDIR) $(BINDIR) $(CONFDIR)
+	install -m 755 $(BUILD_DIR)/octopass $(BINDIR)/
+	install -m 755 $(BUILD_DIR)/libnss_octopass.so.2.0.0 $(LIBDIR)/
+	ln -sf libnss_octopass.so.2.0.0 $(LIBDIR)/libnss_octopass.so.2
+	ln -sf libnss_octopass.so.2.0.0 $(LIBDIR)/libnss_octopass.so
+	install -m 644 octopass.conf.example $(CONFDIR)/
+	find $(DESTDIR)
+
+override_dh_auto_test:
