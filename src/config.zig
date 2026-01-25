@@ -97,8 +97,8 @@ pub const Config = struct {
         defer allocator.free(content);
 
         try config.parse(content);
-        try config.applyDefaults();
         try config.overrideFromEnv();
+        try config.applyDefaults();
 
         return config;
     }
@@ -231,13 +231,13 @@ pub const Config = struct {
     /// Override config values from environment variables
     fn overrideFromEnv(self: *Self) !void {
         const env_vars = [_]struct { env: []const u8, field: []const u8 }{
-            .{ .env = "OCTOPASS_TOKEN", .field = "token" },
-            .{ .env = "OCTOPASS_ENDPOINT", .field = "endpoint" },
-            .{ .env = "OCTOPASS_ORGANIZATION", .field = "organization" },
-            .{ .env = "OCTOPASS_TEAM", .field = "team" },
-            .{ .env = "OCTOPASS_OWNER", .field = "owner" },
-            .{ .env = "OCTOPASS_REPOSITORY", .field = "repository" },
-            .{ .env = "OCTOPASS_PERMISSION", .field = "permission" },
+            .{ .env = "OCTOPASS_TOKEN", .field = "Token" },
+            .{ .env = "OCTOPASS_ENDPOINT", .field = "Endpoint" },
+            .{ .env = "OCTOPASS_ORGANIZATION", .field = "Organization" },
+            .{ .env = "OCTOPASS_TEAM", .field = "Team" },
+            .{ .env = "OCTOPASS_OWNER", .field = "Owner" },
+            .{ .env = "OCTOPASS_REPOSITORY", .field = "Repository" },
+            .{ .env = "OCTOPASS_PERMISSION", .field = "Permission" },
         };
 
         for (env_vars) |ev| {
