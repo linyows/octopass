@@ -1,6 +1,9 @@
 #!/bin/bash
 # Integration test script for octopass
-# This script tests installed octopass package using /etc/octopass.conf
+# This script tests installed octopass package using environment variables:
+#   OCTOPASS_TOKEN        - GitHub Personal Access Token (required for API tests)
+#   OCTOPASS_ORGANIZATION - GitHub Organization name (required for API tests)
+#   OCTOPASS_TEAM         - GitHub Team slug (required for API tests)
 
 set -e
 
@@ -34,12 +37,38 @@ fi
 OCTOPASS=$(command -v octopass)
 echo "Using octopass: $OCTOPASS"
 
-# Check config file
+# Setup config file for environment variable override
 CONFIG_FILE="/etc/octopass.conf"
 if [ ! -f "$CONFIG_FILE" ]; then
-    fail "Config file not found at $CONFIG_FILE"
+    echo "Creating minimal config file at $CONFIG_FILE"
+    cat > "$CONFIG_FILE" << 'EOF'
+# Minimal config - values are overridden by environment variables
+Token = ""
+Organization = ""
+Team = ""
+EOF
+    chmod 600 "$CONFIG_FILE"
 fi
 echo "Config file: $CONFIG_FILE"
+
+# Check environment variables for API tests
+API_TESTS_ENABLED=true
+if [ -z "$OCTOPASS_TOKEN" ]; then
+    echo -e "${YELLOW}WARNING${NC}: OCTOPASS_TOKEN not set - API tests will be skipped"
+    API_TESTS_ENABLED=false
+fi
+if [ -z "$OCTOPASS_ORGANIZATION" ]; then
+    echo -e "${YELLOW}WARNING${NC}: OCTOPASS_ORGANIZATION not set - API tests will be skipped"
+    API_TESTS_ENABLED=false
+fi
+if [ -z "$OCTOPASS_TEAM" ]; then
+    echo -e "${YELLOW}WARNING${NC}: OCTOPASS_TEAM not set - API tests will be skipped"
+    API_TESTS_ENABLED=false
+fi
+
+if [ "$API_TESTS_ENABLED" = true ]; then
+    echo "API tests enabled for: $OCTOPASS_ORGANIZATION/$OCTOPASS_TEAM"
+fi
 echo ""
 
 # Test CLI version
@@ -114,6 +143,18 @@ fi
 echo ""
 echo "=== API Integration Tests ==="
 echo ""
+
+if [ "$API_TESTS_ENABLED" = false ]; then
+    skip "API tests skipped - environment variables not set"
+    echo ""
+    echo "To run API tests, set the following environment variables:"
+    echo "  export OCTOPASS_TOKEN=<your-github-token>"
+    echo "  export OCTOPASS_ORGANIZATION=<your-org>"
+    echo "  export OCTOPASS_TEAM=<your-team>"
+    echo ""
+    echo "=== Basic Integration Tests Passed (API tests skipped) ==="
+    exit 0
+fi
 
 # Test passwd command (list all users)
 echo "Testing passwd command..."

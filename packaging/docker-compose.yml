@@ -8,6 +8,10 @@ services:
         BASE_IMAGE: ubuntu:noble
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   ubuntu-questing:
     build:
@@ -17,6 +21,10 @@ services:
         BASE_IMAGE: ubuntu:questing
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   debian-bookworm:
     build:
@@ -26,6 +34,10 @@ services:
         BASE_IMAGE: debian:bookworm
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   debian-trixie:
     build:
@@ -35,6 +47,10 @@ services:
         BASE_IMAGE: debian:trixie
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   # RHEL-based distributions
   rockylinux-9:
@@ -45,6 +61,10 @@ services:
         BASE_IMAGE: rockylinux:9
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   rockylinux-8:
     build:
@@ -54,6 +74,10 @@ services:
         BASE_IMAGE: rockylinux:8
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   almalinux-9:
     build:
@@ -63,6 +87,10 @@ services:
         BASE_IMAGE: almalinux:9
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
 
   almalinux-8:
     build:
@@ -72,3 +100,7 @@ services:
         BASE_IMAGE: almalinux:8
     volumes:
       - .:/packaging
+    environment:
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM

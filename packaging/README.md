@@ -84,26 +84,52 @@ dist/
 
 After building packages, integration tests are automatically executed to verify the package works correctly.
 
-### Test Configuration
+### Environment Variables
 
-Create `packaging/octopass.conf` with valid GitHub credentials:
+API integration tests require the following environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `OCTOPASS_TOKEN` | GitHub Personal Access Token |
+| `OCTOPASS_ORGANIZATION` | GitHub Organization name |
+| `OCTOPASS_TEAM` | GitHub Team slug |
+
+If these variables are not set, API tests will be skipped (basic tests still run).
+
+### Running with API Tests
 
 ```bash
-cp packaging/octopass.conf.example packaging/octopass.conf
-# Edit octopass.conf with your GitHub token and organization/team settings
+cd packaging
+
+# Set environment variables
+export OCTOPASS_TOKEN="ghp_xxxxx"
+export OCTOPASS_ORGANIZATION="your-org"
+export OCTOPASS_TEAM="your-team"
+
+# Build and test
+docker compose run --rm ubuntu-noble
 ```
 
-**Note:** `packaging/octopass.conf` contains sensitive credentials and should not be committed to git.
+### Running without API Tests (CI basic mode)
+
+```bash
+cd packaging
+
+# Build and run basic tests only (no API calls)
+docker compose run --rm ubuntu-noble
+```
 
 ### What Tests Verify
 
-1. **CLI commands**: version, help
-2. **NSS library symbols**: All required NSS functions are exported
-3. **API integration**:
-   - `passwd` command returns valid passwd entries
-   - `group` command returns valid group entries
-   - `shadow` command returns valid shadow entries
-   - SSH public keys retrieval works
+**Basic tests (always run):**
+1. CLI commands: version, help
+2. NSS library symbols: All required NSS functions are exported
+
+**API tests (require environment variables):**
+1. `passwd` command returns valid passwd entries
+2. `group` command returns valid group entries
+3. `shadow` command returns valid shadow entries
+4. SSH public keys retrieval works
 
 ### Running Tests Only
 
