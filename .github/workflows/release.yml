@@ -112,6 +112,12 @@ jobs:
       - name: List packages
         run: ls -la packages/
 
+      - name: Generate checksums
+        run: |
+          cd packages
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
       - name: Upload to GitHub Releases
         uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
