@@ -26,8 +26,8 @@ LIBDIR := $(shell \
   fi)
 BINDIR := /usr/bin
 
-# Version from environment variable (set by CI) or extract from build.zig.zon
-VERSION ?= $(shell grep '\.version = ' /build.zig.zon 2>/dev/null | sed 's/.*\.version = "\([^"]*\)".*/\1/' || echo "0.0.0-dev")
+# Version from environment variable (set by CI) or extract from debian/changelog
+VERSION ?= $(shell head -1 /packaging/debian/changelog 2>/dev/null | sed 's/.*(\([^)]*\)).*/\1/' | sed 's/-.*//' || echo "1.0.0")
 
 # Distribution detection
 DIST_ID := $(shell grep '^ID=' /etc/os-release 2>/dev/null | awk -F '=' '{print $$2}' | tr -d '"')
