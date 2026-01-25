@@ -1,31 +1,43 @@
 const std = @import("std");
 
+const version: []const u8 = @import("build.zig.zon").version;
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // Build options for version
+    const options = b.addOptions();
+    options.addOption([]const u8, "version", version);
+
     // NSS shared library
+    const nss_module = b.createModule(.{
+        .root_source_file = b.path("src/nss_exports.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    nss_module.addOptions("build_options", options);
+
     const nss_lib = b.addLibrary(.{
         .name = "nss_octopass",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/nss_exports.zig"),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        }),
+        .root_module = nss_module,
         .linkage = .dynamic,
         .version = .{ .major = 2, .minor = 0, .patch = 0 },
     });
 
     // CLI executable
+    const cli_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    cli_module.addOptions("build_options", options);
+
     const cli_exe = b.addExecutable(.{
         .name = "octopass",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        }),
+        .root_module = cli_module,
     });
 
     // Install artifacts
@@ -116,14 +128,17 @@ pub fn build(b: *std.Build) void {
         const resolved_target = b.resolveTargetQuery(ct.target);
 
         // CLI executable
+        const cross_cli_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = resolved_target,
+            .optimize = .ReleaseSafe,
+            .link_libc = true,
+        });
+        cross_cli_module.addOptions("build_options", options);
+
         const cross_cli = b.addExecutable(.{
             .name = "octopass",
-            .root_module = b.createModule(.{
-                .root_source_file = b.path("src/main.zig"),
-                .target = resolved_target,
-                .optimize = .ReleaseSafe,
-                .link_libc = true,
-            }),
+            .root_module = cross_cli_module,
         });
 
         const cli_install = b.addInstallArtifact(cross_cli, .{
@@ -133,14 +148,17 @@ pub fn build(b: *std.Build) void {
 
         // NSS shared library (Linux only)
         if (ct.build_nss) {
+            const cross_nss_module = b.createModule(.{
+                .root_source_file = b.path("src/nss_exports.zig"),
+                .target = resolved_target,
+                .optimize = .ReleaseSafe,
+                .link_libc = true,
+            });
+            cross_nss_module.addOptions("build_options", options);
+
             const cross_nss = b.addLibrary(.{
                 .name = "nss_octopass",
-                .root_module = b.createModule(.{
-                    .root_source_file = b.path("src/nss_exports.zig"),
-                    .target = resolved_target,
-                    .optimize = .ReleaseSafe,
-                    .link_libc = true,
-                }),
+                .root_module = cross_nss_module,
                 .linkage = .dynamic,
                 .version = .{ .major = 2, .minor = 0, .patch = 0 },
             });

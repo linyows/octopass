@@ -1,7 +1,8 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
+const build_options = @import("build_options");
 
-pub const version = "0.10.0";
+pub const version: []const u8 = if (@hasDecl(build_options, "version")) build_options.version else "0.0.0-dev";
 pub const version_with_name = "octopass/" ++ version;
 
 pub const default_config_file = "/etc/octopass.conf";
