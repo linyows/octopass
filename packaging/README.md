@@ -80,6 +80,45 @@ dist/
 └── ...
 ```
 
+## Integration Testing
+
+After building packages, integration tests are automatically executed to verify the package works correctly.
+
+### Test Configuration
+
+Create `packaging/octopass.conf` with valid GitHub credentials:
+
+```bash
+cp packaging/octopass.conf.example packaging/octopass.conf
+# Edit octopass.conf with your GitHub token and organization/team settings
+```
+
+**Note:** `packaging/octopass.conf` contains sensitive credentials and should not be committed to git.
+
+### What Tests Verify
+
+1. **CLI commands**: version, help
+2. **NSS library symbols**: All required NSS functions are exported
+3. **API integration**:
+   - `passwd` command returns valid passwd entries
+   - `group` command returns valid group entries
+   - `shadow` command returns valid shadow entries
+   - SSH public keys retrieval works
+
+### Running Tests Only
+
+If packages are already built, you can run tests separately:
+
+```bash
+cd packaging
+
+# Test DEB package
+docker compose run --rm ubuntu-noble sh -c "make -f Makefile.container test_deb"
+
+# Test RPM package
+docker compose run --rm rockylinux-9 sh -c "make -f Makefile.container test_rpm"
+```
+
 ## How It Works
 
 1. Docker images are built with:
@@ -94,9 +133,11 @@ dist/
    - Create temporary build directory
    - Run dpkg-buildpackage or rpmbuild
    - Copy output to `/packaging/dist/`
+   - Install the package and run integration tests
 
 ## Notes
 
 - `Makefile.container` is designed to run **inside containers only**. Do not run it on the host.
 - Packages are built for the host's CPU architecture (aarch64 or x86_64)
 - SELinux policy is included in RPM packages (see `selinux/README.md`)
+- Integration tests require `packaging/octopass.conf` with valid credentials

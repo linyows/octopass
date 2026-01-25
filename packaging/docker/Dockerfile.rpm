@@ -5,6 +5,7 @@ RUN dnf install -y \
     rpm-build \
     make \
     selinux-policy-devel \
+    binutils \
     && dnf clean all
 
 # Copy pre-built binaries and config example
@@ -13,4 +14,4 @@ COPY packaging/octopass.conf.example /
 
 WORKDIR /packaging
 
-ENTRYPOINT ["sh", "-c", "make -f Makefile.container info && make -f Makefile.container rpm_pkg"]
+ENTRYPOINT ["sh", "-c", "make -f Makefile.container info && make -f Makefile.container rpm_pkg && make -f Makefile.container test_rpm"]

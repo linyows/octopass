@@ -36,7 +36,7 @@ DIST ?= $(DIST_ID)-$(DIST_VERSION)
 
 BUILD_DIR := /zig-out/$(ZIG_ARCH)
 
-.PHONY: info deb_pkg rpm_pkg clean
+.PHONY: info deb_pkg rpm_pkg test_deb test_rpm clean
 
 info:
 	@echo "Architecture: $(ARCH)"
@@ -92,6 +92,26 @@ rpm_pkg:
 	done
 	rm -rf /tmp/rpm.$(DIST)
 	@echo "Package created in /packaging/dist/"
+
+test_deb:
+	@echo "=== Testing DEB package ($(DIST)) ==="
+	@test -f /packaging/dist/octopass_$(VERSION)-1_*.$(DIST).deb || (echo "Error: DEB package not found" && exit 1)
+	@test -f /packaging/octopass.conf || (echo "Error: Config file not found at /packaging/octopass.conf" && exit 1)
+	dpkg -i /packaging/dist/octopass_$(VERSION)-1_*.$(DIST).deb
+	cp /packaging/octopass.conf /etc/octopass.conf
+	chmod 600 /etc/octopass.conf
+	/packaging/test/integration.sh
+	@echo "=== DEB package test completed ==="
+
+test_rpm:
+	@echo "=== Testing RPM package ($(DIST)) ==="
+	@test -f /packaging/dist/octopass-$(VERSION)-1.*.$(DIST).rpm || (echo "Error: RPM package not found" && exit 1)
+	@test -f /packaging/octopass.conf || (echo "Error: Config file not found at /packaging/octopass.conf" && exit 1)
+	rpm -ivh /packaging/dist/octopass-$(VERSION)-1.*.$(DIST).rpm
+	cp /packaging/octopass.conf /etc/octopass.conf
+	chmod 600 /etc/octopass.conf
+	/packaging/test/integration.sh
+	@echo "=== RPM package test completed ==="
 
 clean:
 	rm -rf dist /tmp/deb.* /tmp/rpm.*
