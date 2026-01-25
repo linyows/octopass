@@ -27,7 +27,7 @@ LIBDIR := $(shell \
 BINDIR := /usr/bin
 
 # Version from environment variable (set by CI) or extract from debian/changelog
-VERSION ?= $(shell head -1 /packaging/debian/changelog 2>/dev/null | sed 's/.*(\([^)]*\)).*/\1/' | sed 's/-.*//' || echo "1.0.0")
+VERSION ?= $(shell awk -F'[()]' 'NR==1 {print $$2}' /packaging/debian/changelog 2>/dev/null | sed 's/-.*//' || echo 1.0.0)
 
 # Distribution detection
 DIST_ID := $(shell grep '^ID=' /etc/os-release 2>/dev/null | awk -F '=' '{print $$2}' | tr -d '"')
