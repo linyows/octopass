@@ -1,3 +1,5 @@
+name: octopass
+
 services:
   # Debian-based distributions
   ubuntu-noble:
