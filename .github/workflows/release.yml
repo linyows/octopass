@@ -1,77 +1,195 @@
-name: Release by matrix
+name: Release
+
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
   workflow_dispatch:
 
 jobs:
-  ubuntu:
-    name: Build on ${{matrix.container }}
+  build:
+    name: Build binaries
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      matrix:
-        container: ['ubuntu:jammy', 'ubuntu:noble']
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Install packages
-      run: |
-        apt update -qq
-        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev jq
-    - name: Add octopass user
-      run: |
-        useradd -m -s /bin/bash octopass
-        echo "LOGNAME=octopass" >> $GITHUB_ENV
-        echo "USER=octopass" >> $GITHUB_ENV
-    - name: Create package
-      run: |
-        make deb
-    - name: Upload package to Github Releases
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: builds/*
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Upload package to PackageCloud
-      env:
-        PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      run: |
-        make dist
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-  debian:
-    name: Build on ${{matrix.container }}
+      - name: Setup Zig
+        uses: mlugg/setup-zig@e7d1537c378b83b8049f65dda471d87a2f7b2df2 # v2.2.0
+        with:
+          version: 0.15.2
+
+      - name: Update version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          sed -i.bak "s/\.version = \"[^\"]*\",/.version = \"${VERSION}\",/" build.zig.zon
+          cat build.zig.zon
+
+      - name: Build with cross compile
+        run: zig build cross
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zig-out
+          path: zig-out/
+          retention-days: 1
+
+  package:
+    name: Package for ${{ matrix.distro }}
+    needs: build
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
     strategy:
+      fail-fast: false
       matrix:
-        container: ['debian:buster', 'debian:bullseye']
+        include:
+          - distro: ubuntu-noble
+            type: deb
+            pc_distro: ubuntu
+            pc_version: noble
+          - distro: ubuntu-questing
+            type: deb
+            pc_distro: ubuntu
+            pc_version: questing
+          - distro: debian-bookworm
+            type: deb
+            pc_distro: debian
+            pc_version: bookworm
+          - distro: debian-trixie
+            type: deb
+            pc_distro: debian
+            pc_version: trixie
+          - distro: rockylinux-9
+            type: rpm
+            pc_distro: el
+            pc_version: "9"
+          - distro: rockylinux-8
+            type: rpm
+            pc_distro: el
+            pc_version: "8"
+          - distro: almalinux-9
+            type: rpm
+            pc_distro: el
+            pc_version: "9"
+          - distro: almalinux-8
+            type: rpm
+            pc_distro: el
+            pc_version: "8"
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Install packages
-      run: |
-        apt update -qq
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils jq
-    - name: Set LOGNAME and USER to environment
-      run: |
-        echo "LOGNAME=root" >> $GITHUB_ENV
-        echo "USER=root" >> $GITHUB_ENV
-    - name: Create package
-      run: |
-        make deb
-    - name: Upload package to Github Releases
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: builds/*
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Upload package to PackageCloud
-      env:
-        PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      run: |
-        make dist
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: zig-out
+          path: zig-out/
+
+      - name: Build package
+        working-directory: packaging
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          docker compose build ${{ matrix.distro }}
+          docker compose run --rm -e VERSION=$VERSION -e OCTOPASS_TOKEN= -e OCTOPASS_ORGANIZATION= -e OCTOPASS_TEAM= ${{ matrix.distro }} \
+            sh -c "make -f Makefile.container info && make -f Makefile.container ${{ matrix.type }}_pkg"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: package-${{ matrix.distro }}
+          path: packaging/dist/*
+          retention-days: 5
+
+  release:
+    name: Release
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download all package artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: packages
+          pattern: package-*
+          merge-multiple: true
+
+      - name: List packages
+        run: ls -la packages/
+
+      - name: Generate checksums
+        run: |
+          cd packages
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Upload to GitHub Releases
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: packages/*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+
+  packagecloud:
+    name: Upload to PackageCloud (${{ matrix.distro }})
+    needs: package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu-noble
+            type: deb
+            pc_distro: ubuntu
+            pc_version: noble
+          - distro: ubuntu-questing
+            type: deb
+            pc_distro: ubuntu
+            pc_version: questing
+          - distro: debian-bookworm
+            type: deb
+            pc_distro: debian
+            pc_version: bookworm
+          - distro: debian-trixie
+            type: deb
+            pc_distro: debian
+            pc_version: trixie
+          - distro: rockylinux-9
+            type: rpm
+            pc_distro: el
+            pc_version: "9"
+          - distro: rockylinux-8
+            type: rpm
+            pc_distro: el
+            pc_version: "8"
+
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: package-${{ matrix.distro }}
+          path: packages
+
+      - name: Install package_cloud CLI
+        run: |
+          sudo gem install package_cloud
+
+      - name: Upload to PackageCloud
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+        run: |
+          for pkg in packages/*.${{ matrix.type }}; do
+            if [ -f "$pkg" ]; then
+              echo "Uploading $pkg to linyows/octopass/${{ matrix.pc_distro }}/${{ matrix.pc_version }}"
+              package_cloud push linyows/octopass/${{ matrix.pc_distro }}/${{ matrix.pc_version }} "$pkg" || true
+            fi
+          done

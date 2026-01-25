@@ -1,86 +1,56 @@
-name: Build by matrix
+name: Build
+
 on:
   push:
+    branches: [main]
   pull_request:
+    paths:
+      - '**.zig'
+      - '**.zig.zon'
   workflow_dispatch:
   schedule:
     - cron: |
         0 0 * * 1
+
 jobs:
-  ubuntu:
-    name: Build on ${{matrix.container }}
-    runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        container: ['ubuntu:jammy', 'ubuntu:noble']
+        os: [ubuntu-latest, macos-latest]
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Install packages
-      run: |
-        apt update -qq
-        apt install -qqy build-essential libcurl4-openssl-dev libjansson-dev linux-libc-dev libtool autoconf git bzip2 clang-format
-        apt install -qqy glibc-source gcc make libcurl4-gnutls-dev unzip debhelper dh-make devscripts cdbs clang libcriterion-dev
-    - name: Add octopass user
-      run: |
-        useradd -m -s /bin/bash octopass
-        echo "LOGNAME=octopass" >> $GITHUB_ENV
-        echo "USER=octopass" >> $GITHUB_ENV
-    - name: Build and Install
-      run: |
-        make build install
-        make deb
-    - name: Set Distribution and Name
-      run: |
-        echo "DISTRIBUTION=$(echo '${{ matrix.container }}' | sed 's/:/-/g')" >> $GITHUB_ENV
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: octopass-${{ env.DISTRIBUTION }}
-        path: builds/**
-  debian:
-    name: Build on ${{matrix.container }}
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@e7d1537c378b83b8049f65dda471d87a2f7b2df2 # v2.2.0
+        with:
+          version: 0.15.2
+
+      - name: Run tests
+        run: zig build test
+
+      - name: Build
+        run: zig build --release=fast
+
+      - name: Verify binary
+        run: ./zig-out/bin/octopass --version
+
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      matrix:
-        container: ['debian:buster', 'debian:bullseye']
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Install packages
-      run: |
-        apt-get update -qq
-        apt-get install -qqy glibc-source gcc make libcurl4-gnutls-dev libjansson-dev bzip2 unzip debhelper dh-make devscripts cdbs clang apt-utils
-    - name: Set LOGNAME and USER to environment
-      run: |
-        echo "LOGNAME=root" >> $GITHUB_ENV
-        echo "USER=root" >> $GITHUB_ENV
-    - name: Build and Install
-      run: |
-        make build install
-        make deb
-    - name: Set Distribution and Name
-      run: |
-        echo "DISTRIBUTION=$(echo '${{ matrix.container }}' | sed 's/:/-/g')" >> $GITHUB_ENV
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: octopass-${{ env.DISTRIBUTION }}
-        path: builds/**
-#  centos:
-#    name: Build on ${{matrix.container }}
-#    runs-on: ubuntu-latest
-#    container: ${{ matrix.container }}
-#    strategy:
-#      matrix:
-#        container: ['centos:7']
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Install packages
-#      run: |
-#        grep "8." /etc/centos-release && \
-#          sed -i -e 's/^mirrorlist/#mirrorlist/g' -e 's/^#baseurl=http:\/\/mirror/baseurl=http:\/\/vault/g' /etc/yum.repos.d/CentOS-*repo
-#        yum install -y gcc make libcurl-devel jansson-devel bzip2 unzip rpmdevtools epel-release selinux-policy-devel
-#    - name: Build and Install
-#      run: |
-#        make build install
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@e7d1537c378b83b8049f65dda471d87a2f7b2df2 # v2.2.0
+        with:
+          version: 0.15.2
+
+      - name: Check formatting
+        run: zig fmt --check src/

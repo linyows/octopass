@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=ubuntu:noble
+FROM ${BASE_IMAGE}
+
+RUN apt-get update && apt-get install -y \
+    dpkg-dev \
+    debhelper \
+    make \
+    binutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy pre-built binaries and config example
+COPY zig-out/ /zig-out/
+COPY packaging/octopass.conf.example /
+
+WORKDIR /packaging
+
+ENTRYPOINT ["sh", "-c", "make -f Makefile.container info && make -f Makefile.container deb_pkg && make -f Makefile.container test_deb"]

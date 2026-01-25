@@ -1,0 +1,116 @@
+name: octopass
+
+services:
+  # Debian-based distributions
+  ubuntu-noble:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: ubuntu:noble
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  ubuntu-questing:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: ubuntu:questing
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  debian-bookworm:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: debian:bookworm
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  debian-trixie:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: debian:trixie
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  # RHEL-based distributions
+  rockylinux-9:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: rockylinux:9
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  rockylinux-8:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: rockylinux:8
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  almalinux-9:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: almalinux:9
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
+  almalinux-8:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.rpm
+      args:
+        BASE_IMAGE: almalinux:8
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM

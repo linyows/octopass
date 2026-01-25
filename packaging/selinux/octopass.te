@@ -1,0 +1,51 @@
+
+module octopass 1.0.0;
+
+require {
+	type chkpwd_t;
+	type oddjob_mkhomedir_t;
+	type sshd_t;
+	type admin_home_t;
+	type var_t;
+	type http_port_t;
+	type cert_t;
+	class tcp_socket name_connect;
+	class dir { add_name create remove_name write };
+	class file { create getattr open read setattr unlink write };
+}
+
+#============= chkpwd_t ==============
+
+#!!!! This avc can be allowed using the boolean 'nis_enabled'
+allow chkpwd_t http_port_t:tcp_socket name_connect;
+
+#!!!! WARNING: 'var_t' is a base type.
+allow chkpwd_t var_t:file read;
+
+#!!!! This avc is allowed in the current policy
+allow chkpwd_t var_t:file { getattr open };
+
+#============= oddjob_mkhomedir_t ==============
+
+#!!!! WARNING: 'var_t' is a base type.
+allow oddjob_mkhomedir_t var_t:file read;
+
+#!!!! This avc is allowed in the current policy
+allow oddjob_mkhomedir_t var_t:file { getattr open };
+
+#============= sshd_t ==============
+
+#!!!! This avc is allowed in the current policy
+allow sshd_t admin_home_t:dir create;
+
+#!!!! This avc is allowed in the current policy
+allow sshd_t cert_t:dir { add_name remove_name write };
+
+#!!!! This avc is allowed in the current policy
+allow sshd_t cert_t:file { create setattr unlink };
+
+#!!!! This avc is allowed in the current policy
+allow sshd_t http_port_t:tcp_socket name_connect;
+
+#!!!! This avc is allowed in the current policy
+allow sshd_t var_t:file { create getattr open read write };

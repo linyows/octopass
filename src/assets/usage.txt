@@ -1,0 +1,24 @@
+Usage: octopass [options] <command> [arguments]
+
+Commands:
+  <user>               Get SSH public keys for a user
+  passwd [name|uid]    Display passwd entries as octopass nss module
+  group [name|gid]     Display group entries as octopass nss module
+  shadow [name]        Display shadow entries as octopass nss module
+  pam [user]           Authenticate user with personal access token from stdin
+
+Options:
+  -c, --config <file>  Specify config file (default: /etc/octopass.conf)
+  -v, --version        Show version information
+  -h, --help           Show this help message
+
+Configuration:
+  Config file: /etc/octopass.conf
+
+Examples:
+  octopass alice                  # Get SSH keys for alice
+  octopass passwd                 # List all passwd entries
+  octopass passwd alice           # Get passwd entry for alice
+  octopass group                  # List group entry
+  echo $TOKEN | octopass pam bob  # Authenticate bob with token
+  octopass -c ./test.conf passwd  # Use custom config file

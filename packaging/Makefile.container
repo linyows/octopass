@@ -1,0 +1,111 @@
+# Detect architecture
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+  ZIG_ARCH := linux-amd64
+  DEBIAN_ARCH := x86_64-linux-gnu
+else ifeq ($(ARCH),aarch64)
+  ZIG_ARCH := linux-arm64
+  DEBIAN_ARCH := aarch64-linux-gnu
+else
+  $(error Unsupported architecture: $(ARCH))
+endif
+
+# Library path by distribution
+LIBDIR := $(shell \
+  if [ -f /etc/os-release ]; then \
+    . /etc/os-release; \
+    if echo "$$ID $$ID_LIKE" | grep -qE 'debian|ubuntu'; then \
+      echo "/usr/lib/$(DEBIAN_ARCH)"; \
+    elif echo "$$ID $$ID_LIKE" | grep -qE 'rhel|centos|fedora'; then \
+      if [ "$(ARCH)" = "x86_64" ]; then echo "/usr/lib64"; else echo "/usr/lib"; fi; \
+    else \
+      echo "/usr/lib"; \
+    fi; \
+  else \
+    echo "/usr/lib"; \
+  fi)
+BINDIR := /usr/bin
+
+# Version from environment variable (set by CI) or extract from debian/changelog
+VERSION ?= $(shell awk -F'[()]' 'NR==1 {print $$2}' /packaging/debian/changelog 2>/dev/null | sed 's/-.*//' || echo 1.0.0)
+
+# Distribution detection
+DIST_ID := $(shell grep '^ID=' /etc/os-release 2>/dev/null | awk -F '=' '{print $$2}' | tr -d '"')
+DIST_VERSION := $(shell (grep VERSION_CODENAME /etc/os-release 2>/dev/null || grep VERSION_ID /etc/os-release 2>/dev/null) | head -1 | awk -F '=' '{print $$2}' | tr -d '"')
+DIST ?= $(DIST_ID)-$(DIST_VERSION)
+
+BUILD_DIR := /zig-out/$(ZIG_ARCH)
+
+.PHONY: info deb_pkg rpm_pkg test_deb test_rpm clean
+
+info:
+	@echo "Architecture: $(ARCH)"
+	@echo "Zig build dir: $(ZIG_ARCH)"
+	@echo "Library dir: $(LIBDIR)"
+	@echo "Binary dir: $(BINDIR)"
+	@echo "Version: $(VERSION)"
+	@echo "Distribution: $(DIST)"
+
+deb_pkg:
+	@test -f $(BUILD_DIR)/octopass || (echo "Error: Pre-built binaries not found" && exit 1)
+	@echo "Packaging for DEB ($(DIST))"
+	rm -rf /tmp/deb.$(DIST)
+	mkdir -p /tmp/deb.$(DIST)/octopass-$(VERSION)/debian
+	mkdir -p /tmp/deb.$(DIST)/octopass-$(VERSION)/zig-out
+	cp -r /packaging/debian/* /tmp/deb.$(DIST)/octopass-$(VERSION)/debian/
+	cp -r /zig-out/* /tmp/deb.$(DIST)/octopass-$(VERSION)/zig-out/
+	cp /octopass.conf.example /tmp/deb.$(DIST)/octopass-$(VERSION)/
+	cd /tmp/deb.$(DIST) && \
+		tar cf octopass_$(VERSION).orig.tar octopass-$(VERSION) && \
+		xz -v octopass_$(VERSION).orig.tar
+	cd /tmp/deb.$(DIST)/octopass-$(VERSION) && \
+		sed -i 's/DIST/$(DIST)/g' debian/changelog && \
+		chmod +x debian/rules debian/postinst && \
+		dpkg-buildpackage -us -uc -b
+	mkdir -p /packaging/dist
+	cd /tmp/deb.$(DIST) && \
+		rm -f *-dbgsym_*.deb && \
+		for f in *.deb; do mv "$$f" "$${f%.deb}.$(DIST).deb"; done && \
+		cp *.deb /packaging/dist/
+	rm -rf /tmp/deb.$(DIST)
+	@echo "Package created in /packaging/dist/"
+
+rpm_pkg:
+	@test -f $(BUILD_DIR)/octopass || (echo "Error: Pre-built binaries not found" && exit 1)
+	@echo "Packaging for RPM ($(DIST))"
+	rm -rf /tmp/rpm.$(DIST)
+	mkdir -p /tmp/rpm.$(DIST)/octopass-$(VERSION)
+	cp -r /packaging/rpm /packaging/selinux /tmp/rpm.$(DIST)/octopass-$(VERSION)/
+	cp -r /zig-out /tmp/rpm.$(DIST)/octopass-$(VERSION)/
+	cp /octopass.conf.example /tmp/rpm.$(DIST)/octopass-$(VERSION)/
+	cd /tmp/rpm.$(DIST) && \
+		tar cf octopass-$(VERSION).tar octopass-$(VERSION) && \
+		gzip -9 octopass-$(VERSION).tar
+	mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+	cp /tmp/rpm.$(DIST)/octopass-$(VERSION).tar.gz ~/rpmbuild/SOURCES/
+	cp /packaging/rpm/octopass.spec ~/rpmbuild/SPECS/
+	rpmbuild -bb ~/rpmbuild/SPECS/octopass.spec
+	mkdir -p /packaging/dist
+	for f in ~/rpmbuild/RPMS/*/octopass-*.rpm; do \
+		base=$$(basename "$$f" .rpm); \
+		cp "$$f" /packaging/dist/$${base}.$(DIST).rpm 2>/dev/null || true; \
+	done
+	rm -rf /tmp/rpm.$(DIST)
+	@echo "Package created in /packaging/dist/"
+
+test_deb:
+	@echo "=== Testing DEB package ($(DIST)) ==="
+	@test -f /packaging/dist/octopass_$(VERSION)-1_*.$(DIST).deb || (echo "Error: DEB package not found" && exit 1)
+	dpkg -i /packaging/dist/octopass_$(VERSION)-1_*.$(DIST).deb
+	/packaging/test/integration.sh
+	@echo "=== DEB package test completed ==="
+
+test_rpm:
+	@echo "=== Testing RPM package ($(DIST)) ==="
+	@test -f /packaging/dist/octopass-$(VERSION)-1.*.$(DIST).rpm || (echo "Error: RPM package not found" && exit 1)
+	rpm -ivh /packaging/dist/octopass-$(VERSION)-1.*.$(DIST).rpm
+	/packaging/test/integration.sh
+	@echo "=== RPM package test completed ==="
+
+clean:
+	rm -rf dist /tmp/deb.* /tmp/rpm.*

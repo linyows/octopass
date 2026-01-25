@@ -1,0 +1,105 @@
+octopass (1.0.0-1) DIST; urgency=medium
+
+  * Rewrite octopass from C to Zig
+  * Zero external dependencies (no libcurl, no libjansson)
+  * Memory safety with compile-time checks
+  * Easy cross-compilation for Linux (amd64/arm64)
+  * Environment variable support for configuration override
+
+ -- linyows <linyows@gmail.com>  Sat, 25 Jan 2025 15:00:00 +0900
+
+octopass (0.9.0-1) DIST; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Mon, 17 Feb 2025 14:00:00 +0900
+
+octopass (0.8.0-1) DIST; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Mon, 13 Jun 2025 23:00:00 +0900
+
+octopass (0.7.1-1) DIST; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Thu, 27 Apr 2021 15:30:00 +0900
+
+octopass (0.7.0-1) DIST; urgency=medium
+
+  * Resolve a problem of cache file permission
+
+ -- linyows <linyows@gmail.com>  Fri, 21 Jun 2019 17:10:00 +0900
+
+octopass (0.6.0-1) DIST; urgency=medium
+
+  * Support SELinux policy
+
+ -- linyows <linyows@gmail.com>  Mon, 22 Oct 2018 16:50:00 +0900
+
+octopass (0.5.1-1) DIST; urgency=medium
+
+  * Fix for systemd-networkd SEGV
+
+ -- linyows <linyows@gmail.com>  Wed, 10 Oct 2018 00:20:00 +0900
+
+octopass (0.5.0-1) DIST; urgency=medium
+
+  * Support slug for GitHub team API
+
+ -- linyows <linyows@gmail.com>  Thu, 02 Oct 2018 14:40:00 +0900
+
+octopass (0.4.1-1) DIST; urgency=medium
+
+  * Page size changes to 100 from 30 on Github organization API
+
+ -- linyows <linyows@gmail.com>  Mon, 02 Apr 2018 14:50:00 +0900
+
+octopass (0.4.0-1) DIST; urgency=medium
+
+  * Support github repository collaborators as name resolve
+
+ -- linyows <linyows@gmail.com>  Mon, 25 Sep 2017 00:30:00 +0900
+
+octopass (0.3.5-1) DIST; urgency=medium
+
+  * Bugfixes
+
+ -- linyows <linyows@gmail.com>  Thu, 14 Sep 2017 19:00:00 +0900
+
+octopass (0.3.3-1) DIST; urgency=medium
+
+  * Fix segmentation fault
+
+ -- linyows <linyows@gmail.com>  Sun, 07 May 2017 23:00:00 +0900
+
+octopass (0.3.2-1) DIST; urgency=medium
+
+  * Example Typo
+
+ -- linyows <linyows@gmail.com>  Tue, 28 Feb 2017 17:20:00 +0900
+
+octopass (0.3.1-1) DIST; urgency=medium
+
+  * Bug fixes
+
+ -- linyows <linyows@gmail.com>  Mon, 27 Feb 2017 23:00:00 +0900
+
+octopass (0.3.0-1) DIST; urgency=medium
+
+  * Support shared-users option
+
+ -- linyows <linyows@gmail.com>  Sun, 26 Feb 2017 23:00:00 +0900
+
+octopass (0.2.0-1) DIST; urgency=medium
+
+  * Change implementation in Go to C.
+
+ -- linyows <linyows@gmail.com>  Mon, 20 Feb 2017 23:00:00 +0900
+
+octopass (0.1.0-1) DIST; urgency=medium
+
+  * Initial release.
+
+ -- linyows <linyows@gmail.com>  Tue, 07 Feb 2017 16:00:00 +0900
