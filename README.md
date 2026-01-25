@@ -1,6 +1,6 @@
 <p align="center"><br><br><br>
   <a href="https://octopass.linyo.ws">
-    <img alt="OCTOPASS" src="https://github.com/linyows/octopass/blob/main/misc/octopass-logo-plain-2021.svg?raw=true" width="500">
+    <img alt="OCTOPASS" src="https://raw.githubusercontent.com/linyows/octopass/main/misc/octopass-logo.svg" width="500">
   </a><br><br><br>
 </p>
 
