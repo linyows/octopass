@@ -28,17 +28,7 @@ octopass brings GitHub's team management to your Linux servers. No more manually
 
 ## How it works
 
-```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│   GitHub    │      │   Server    │      │    User     │
-│ Organization│◄────►│  (octopass) │◄────►│  SSH Client │
-└─────────────┘      └─────────────┘      └─────────────┘
-       │                    │                    │
-       │  Team members      │  NSS module        │  SSH key
-       │  SSH keys          │  provides user     │  authentication
-       │  API responses     │  information       │
-       └────────────────────┴────────────────────┘
-```
+![Architecture](https://github.com/linyows/octopass/blob/main/misc/architecture.png)
 
 octopass works as a **NSS (Name Service Switch) module**, seamlessly integrating GitHub teams into Linux user management:
 
@@ -187,43 +177,6 @@ Configuration can be overridden with environment variables:
 - `OCTOPASS_TEAM`
 - `OCTOPASS_OWNER`
 - `OCTOPASS_REPOSITORY`
-
-## Building from Source
-
-```bash
-# Debug build
-zig build
-
-# Release build
-zig build -Doptimize=ReleaseSafe
-
-# Run tests
-zig build test
-
-# Cross-compile for Linux (from macOS)
-zig build -Dtarget=x86_64-linux-gnu -Doptimize=ReleaseSafe
-```
-
-## Architecture
-
-```
-src/
-├── main.zig          # CLI entry point
-├── config.zig        # Configuration parser
-├── github.zig        # GitHub API client
-├── cache.zig         # Response caching
-├── types.zig         # Shared type definitions
-├── log.zig           # Syslog wrapper
-├── nss_exports.zig   # NSS C ABI exports
-├── nss_passwd.zig    # passwd database
-├── nss_group.zig     # group database
-├── nss_shadow.zig    # shadow database
-├── nss_common.zig    # NSS shared utilities
-└── assets/
-    ├── logo.txt
-    ├── desc.txt
-    └── usage.txt
-```
 
 ## Why Zig?
 
