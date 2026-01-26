@@ -1,3 +1,11 @@
+octopass (1.1.0-1) DIST; urgency=medium
+
+  * Add HMAC-SHA256 signed shared cache
+  * Share cache across all users to improve cache hit rate
+  * Add signature verification to prevent cache tampering
+
+ -- linyows <linyows@gmail.com>  Sun, 26 Jan 2025 12:00:00 +0900
+
 octopass (1.0.0-1) DIST; urgency=medium
 
   * Rewrite octopass from C to Zig

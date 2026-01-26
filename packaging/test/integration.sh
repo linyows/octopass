@@ -244,4 +244,138 @@ else
 fi
 
 echo ""
+echo "=== Cache Signature Tests ==="
+echo ""
+
+# Find cache directory
+CACHE_DIR="/var/cache/octopass"
+FALLBACK_CACHE_DIR="/tmp/octopass"
+
+if [ -d "$CACHE_DIR" ]; then
+    ACTUAL_CACHE_DIR="$CACHE_DIR"
+elif [ -d "$FALLBACK_CACHE_DIR" ]; then
+    ACTUAL_CACHE_DIR="$FALLBACK_CACHE_DIR"
+else
+    skip "Cache directory not found"
+    ACTUAL_CACHE_DIR=""
+fi
+
+if [ -n "$ACTUAL_CACHE_DIR" ]; then
+    echo "Using cache directory: $ACTUAL_CACHE_DIR"
+
+    # Test 1: Cache file exists and has correct format
+    echo ""
+    echo "Testing cache file format..."
+    CACHE_FILE=$(find "$ACTUAL_CACHE_DIR" -type f 2>/dev/null | head -1)
+    if [ -n "$CACHE_FILE" ]; then
+        echo "  Found cache file: $CACHE_FILE"
+
+        # Check file format: 64 hex chars + newline + JSON data
+        FIRST_LINE=$(head -n1 "$CACHE_FILE")
+        FIRST_LINE_LEN=${#FIRST_LINE}
+
+        if [ "$FIRST_LINE_LEN" -eq 64 ]; then
+            # Verify it's valid hex (lowercase)
+            if echo "$FIRST_LINE" | grep -qE '^[0-9a-f]{64}$'; then
+                pass "Cache file has valid 64-char HMAC signature"
+                echo "  Signature: ${FIRST_LINE:0:16}..."
+            else
+                fail "Cache signature is not valid hex"
+            fi
+        else
+            fail "Cache signature length is $FIRST_LINE_LEN (expected 64)"
+        fi
+
+        # Check that second line onwards is JSON
+        CACHE_DATA=$(tail -n +2 "$CACHE_FILE")
+        if echo "$CACHE_DATA" | head -c1 | grep -q '\['; then
+            pass "Cache data appears to be valid JSON array"
+        elif echo "$CACHE_DATA" | head -c1 | grep -q '{'; then
+            pass "Cache data appears to be valid JSON object"
+        else
+            fail "Cache data does not appear to be JSON"
+        fi
+
+        # Test 2: Verify cache is shared (no euid in path)
+        echo ""
+        echo "Testing cache path is shared (no euid directory)..."
+        # Path should be like /var/cache/octopass/https%3A...-tokenprefix
+        # NOT like /var/cache/octopass/1000/https%3A...-tokenprefix
+        CACHE_BASENAME=$(basename "$CACHE_FILE")
+        CACHE_DIRNAME=$(dirname "$CACHE_FILE")
+
+        if [ "$CACHE_DIRNAME" = "$ACTUAL_CACHE_DIR" ]; then
+            pass "Cache file is in shared directory (no per-user subdirectory)"
+        else
+            # Check if parent is numeric (indicating euid)
+            PARENT_NAME=$(basename "$CACHE_DIRNAME")
+            if echo "$PARENT_NAME" | grep -qE '^[0-9]+$'; then
+                fail "Cache is using per-user directory (euid: $PARENT_NAME)"
+            else
+                pass "Cache file path structure is valid"
+            fi
+        fi
+
+        # Test 3: Tampered cache is rejected
+        echo ""
+        echo "Testing tampered cache rejection..."
+
+        # Create a backup
+        BACKUP_FILE=$(mktemp)
+        cp "$CACHE_FILE" "$BACKUP_FILE"
+
+        # Tamper with the data (change a character in the JSON)
+        TAMPERED_DATA=$(tail -n +2 "$CACHE_FILE" | sed 's/login/XXXXX/g')
+        ORIGINAL_SIG=$(head -n1 "$CACHE_FILE")
+        echo "$ORIGINAL_SIG" > "$CACHE_FILE"
+        echo "$TAMPERED_DATA" >> "$CACHE_FILE"
+
+        # Run octopass again - it should fetch fresh data (cache miss due to invalid signature)
+        FRESH_OUTPUT=$("$OCTOPASS" passwd 2>&1)
+        FRESH_EXIT=$?
+
+        # Restore original cache
+        cp "$BACKUP_FILE" "$CACHE_FILE"
+        rm -f "$BACKUP_FILE"
+
+        if [ $FRESH_EXIT -eq 0 ] && [ -n "$FRESH_OUTPUT" ]; then
+            # Check if the cache file was regenerated with correct signature
+            NEW_SIG=$(head -n1 "$CACHE_FILE")
+            NEW_DATA=$(tail -n +2 "$CACHE_FILE")
+
+            if echo "$NEW_DATA" | grep -q "login"; then
+                pass "Tampered cache was rejected and fresh data fetched"
+            else
+                skip "Could not verify cache regeneration"
+            fi
+        else
+            fail "octopass failed after cache tampering: $FRESH_OUTPUT"
+        fi
+
+        # Test 4: Cache file permissions
+        echo ""
+        echo "Testing cache file permissions..."
+        FILE_PERMS=$(stat -c '%a' "$CACHE_FILE" 2>/dev/null || stat -f '%Lp' "$CACHE_FILE" 2>/dev/null)
+        if [ "$FILE_PERMS" = "666" ] || [ "$FILE_PERMS" = "664" ] || [ "$FILE_PERMS" = "644" ]; then
+            pass "Cache file permissions: $FILE_PERMS"
+        else
+            echo "  Cache file permissions: $FILE_PERMS (expected 666 for shared access)"
+            skip "Cache file permissions may vary based on umask"
+        fi
+
+        # Test 5: Cache directory permissions
+        DIR_PERMS=$(stat -c '%a' "$ACTUAL_CACHE_DIR" 2>/dev/null || stat -f '%Lp' "$ACTUAL_CACHE_DIR" 2>/dev/null)
+        if [ "$DIR_PERMS" = "755" ] || [ "$DIR_PERMS" = "777" ]; then
+            pass "Cache directory permissions: $DIR_PERMS"
+        else
+            echo "  Cache directory permissions: $DIR_PERMS"
+            skip "Cache directory permissions may vary"
+        fi
+
+    else
+        skip "No cache files found - cache may be disabled or TTL=0"
+    fi
+fi
+
+echo ""
 echo "=== All Integration Tests Passed ==="

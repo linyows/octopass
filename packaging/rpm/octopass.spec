@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          1.0.0
+Version:          1.1.0
 Release:          1%{?dist}
 License:          MIT
 URL:              https://github.com/linyows/octopass
@@ -98,6 +98,11 @@ fi
 %{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %changelog
+* Sun Jan 26 2025 linyows <linyows@gmail.com> - 1.1.0-1
+- Add HMAC-SHA256 signed shared cache
+- Share cache across all users to improve cache hit rate
+- Add signature verification to prevent cache tampering
+
 * Sat Jan 25 2025 linyows <linyows@gmail.com> - 1.0.0-1
 - Rewrite octopass from C to Zig
 - Zero external dependencies (no libcurl, no libjansson)
