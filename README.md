@@ -10,7 +10,7 @@
   Manage Linux users with your GitHub Organization/Team
 </p>
 
-<br><br><br><br>
+<br><br><br><br><br>
 
 octopass brings GitHub's team management to your Linux servers. No more manually managing `/etc/passwd` or distributing SSH keys — just add users to your GitHub team, and they're ready to SSH into your servers.
 
