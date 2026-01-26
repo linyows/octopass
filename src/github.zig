@@ -26,7 +26,7 @@ pub const GitHubProvider = struct {
         return .{
             .allocator = allocator,
             .config = config,
-            .cache = cache_mod.Cache.init(allocator, types.default_cache_dir, config.cache),
+            .cache = cache_mod.Cache.init(allocator, types.default_cache_dir, config.cache, config.token),
             .logger = logger,
         };
     }
