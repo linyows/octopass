@@ -1,17 +1,24 @@
-<p align="center"><br><br><br>
+<p align="right">English | <a href="https://github.com/linyows/octopass/blob/main/README.ja.md">日本語</a></p>
+
+<br><br><br><br><br><br>
+
+<p align="center">
   <a href="https://octopass.linyo.ws">
-    <img alt="OCTOPASS" src="https://raw.githubusercontent.com/linyows/octopass/main/misc/octopass-logo.svg" width="500">
-  </a><br><br><br>
+    <img alt="OCTOPASS" src="https://raw.githubusercontent.com/linyows/octopass/main/misc/octopass-logo.svg" width="400">
+  </a>
+  <br><br>
+  Manage Linux users with your GitHub Organization/Team
 </p>
 
-**Manage Linux users with your GitHub Organization/Team**
+<br><br><br><br>
 
 octopass brings GitHub's team management to your Linux servers. No more manually managing `/etc/passwd` or distributing SSH keys — just add users to your GitHub team, and they're ready to SSH into your servers.
 
 <br>
+
 <p align="center">
   <a href="https://github.com/linyows/octopass/actions/workflows/build.yml" title="Build"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/linyows/octopass/build.yml?branch=main&style=for-the-badge"></a>
-  <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=for-the-badge"></a>
+  <a href="https://github.com/linyows/octopass/releases" title="GitHub release"><img src="http://img.shields.io/github/release/linyows/octopass.svg?style=for-the-badge&labelColor=666666&color=DDDDDD" alt="GitHub Release"></a>
 </p>
 
 ## Why octopass?
@@ -38,16 +45,28 @@ octopass works as a **NSS (Name Service Switch) module**, seamlessly integrating
 
 ## Quick Start
 
-### 1. Build
+### 1. Install
+
+**For RHEL/CentOS/Amazon Linux:**
+
+```bash
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.rpm.sh | sudo bash
+sudo yum install octopass
+```
+
+**For Debian/Ubuntu:**
+
+```bash
+curl -s https://packagecloud.io/install/repositories/linyows/octopass/script.deb.sh | sudo bash
+sudo apt-get install octopass
+```
+
+**Build from source:**
 
 ```bash
 # Requires Zig 0.15+
 zig build -Doptimize=ReleaseSafe
-```
 
-### 2. Install
-
-```bash
 # Install the NSS library
 sudo cp zig-out/lib/libnss_octopass.so.2.0.0 /usr/lib/x86_64-linux-gnu/
 sudo ln -sf libnss_octopass.so.2.0.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.so.2
@@ -56,7 +75,7 @@ sudo ln -sf libnss_octopass.so.2.0.0 /usr/lib/x86_64-linux-gnu/libnss_octopass.s
 sudo cp zig-out/bin/octopass /usr/bin/
 ```
 
-### 3. Configure
+### 2. Configure
 
 Create `/etc/octopass.conf`:
 
@@ -80,7 +99,7 @@ Shell = "/bin/bash"
 Cache = 300
 ```
 
-### 4. Enable NSS module
+### 3. Enable NSS module
 
 Edit `/etc/nsswitch.conf`:
 
@@ -90,7 +109,7 @@ group:  files octopass
 shadow: files octopass
 ```
 
-### 5. Configure SSH
+### 4. Configure SSH
 
 Edit `/etc/ssh/sshd_config`:
 
