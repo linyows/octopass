@@ -16,10 +16,13 @@ pub const Config = struct {
     organization: ?[]const u8 = null,
     team: ?[]const u8 = null,
 
-    // Repository collaborator mode
+    // Repository collaborator mode (GitHub) / Project mode (GitLab)
     owner: ?[]const u8 = null,
     repository: ?[]const u8 = null,
     permission: types.Permission = .write,
+
+    // GitLab specific: subgroup (mapped from Subgroup config key)
+    subgroup: ?[]const u8 = null,
 
     // User settings
     group_name: ?[]const u8 = null,
@@ -44,6 +47,7 @@ pub const Config = struct {
     team_allocated: bool = false,
     owner_allocated: bool = false,
     repository_allocated: bool = false,
+    subgroup_allocated: bool = false,
     group_name_allocated: bool = false,
     home_allocated: bool = false,
     shell_allocated: bool = false,
@@ -69,6 +73,7 @@ pub const Config = struct {
         if (self.team_allocated) if (self.team) |t| self.allocator.free(t);
         if (self.owner_allocated) if (self.owner) |o| self.allocator.free(o);
         if (self.repository_allocated) if (self.repository) |r| self.allocator.free(r);
+        if (self.subgroup_allocated) if (self.subgroup) |s| self.allocator.free(s);
         if (self.group_name_allocated) if (self.group_name) |g| self.allocator.free(g);
         if (self.home_allocated) self.allocator.free(self.home);
         if (self.shell_allocated) self.allocator.free(self.shell);
@@ -158,7 +163,20 @@ pub const Config = struct {
             self.repository_allocated = true;
         } else if (std.mem.eql(u8, key, "Permission")) {
             self.permission = types.Permission.fromString(value) orelse .write;
+        } else if (std.mem.eql(u8, key, "Subgroup")) {
+            // GitLab: Subgroup maps to subgroup field
+            self.subgroup = try self.allocator.dupe(u8, value);
+            self.subgroup_allocated = true;
+        } else if (std.mem.eql(u8, key, "Project")) {
+            // GitLab: Project maps to repository field
+            self.repository = try self.allocator.dupe(u8, value);
+            self.repository_allocated = true;
         } else if (std.mem.eql(u8, key, "Group")) {
+            // "Group" key has dual meaning:
+            // - For GitHub: Linux group name (backward compatible)
+            // - For GitLab: GitLab group (organization)
+            // We handle this in applyDefaults() after provider is known.
+            // Store in group_name for now (backward compatible), applyDefaults will adjust.
             self.group_name = try self.allocator.dupe(u8, value);
             self.group_name_allocated = true;
         } else if (std.mem.eql(u8, key, "Home")) {
@@ -210,18 +228,50 @@ pub const Config = struct {
 
     /// Apply default values
     fn applyDefaults(self: *Self) !void {
-        // Set group_name to team or repository if not set
-        if (self.group_name == null) {
-            if (self.repository) |repo| {
-                self.group_name = try self.allocator.dupe(u8, repo);
-                self.group_name_allocated = true;
-            } else if (self.team) |team| {
-                self.group_name = try self.allocator.dupe(u8, team);
-                self.group_name_allocated = true;
+        // Set default endpoint based on provider if not explicitly set
+        if (!self.endpoint_allocated) {
+            self.endpoint = self.provider.defaultEndpoint();
+        }
+
+        // Handle GitLab-specific "Group" key mapping
+        // For GitLab, if "Group" was specified (stored in group_name) and
+        // organization is not set, move it to organization
+        if (self.provider == .gitlab) {
+            if (self.organization == null and self.group_name != null) {
+                self.organization = self.group_name;
+                self.organization_allocated = self.group_name_allocated;
+                self.group_name = null;
+                self.group_name_allocated = false;
             }
         }
 
-        // Set owner to organization if not set
+        // Set group_name (Linux group) defaults
+        if (self.group_name == null) {
+            if (self.provider == .gitlab) {
+                // For GitLab: use subgroup, project (repository), or organization
+                if (self.subgroup) |sg| {
+                    self.group_name = try self.allocator.dupe(u8, sg);
+                    self.group_name_allocated = true;
+                } else if (self.repository) |repo| {
+                    self.group_name = try self.allocator.dupe(u8, repo);
+                    self.group_name_allocated = true;
+                } else if (self.organization) |org| {
+                    self.group_name = try self.allocator.dupe(u8, org);
+                    self.group_name_allocated = true;
+                }
+            } else {
+                // For GitHub: use repository or team
+                if (self.repository) |repo| {
+                    self.group_name = try self.allocator.dupe(u8, repo);
+                    self.group_name_allocated = true;
+                } else if (self.team) |team| {
+                    self.group_name = try self.allocator.dupe(u8, team);
+                    self.group_name_allocated = true;
+                }
+            }
+        }
+
+        // Set owner to organization if not set (GitHub)
         if (self.owner == null and self.organization != null) {
             self.owner = try self.allocator.dupe(u8, self.organization.?);
             self.owner_allocated = true;
@@ -230,6 +280,11 @@ pub const Config = struct {
 
     /// Override config values from environment variables
     fn overrideFromEnv(self: *Self) !void {
+        // Provider must be set first as it affects how other env vars are interpreted
+        if (std.posix.getenv("OCTOPASS_PROVIDER")) |value| {
+            try self.setValue("Provider", value);
+        }
+
         const env_vars = [_]struct { env: []const u8, field: []const u8 }{
             .{ .env = "OCTOPASS_TOKEN", .field = "Token" },
             .{ .env = "OCTOPASS_ENDPOINT", .field = "Endpoint" },
@@ -238,6 +293,10 @@ pub const Config = struct {
             .{ .env = "OCTOPASS_OWNER", .field = "Owner" },
             .{ .env = "OCTOPASS_REPOSITORY", .field = "Repository" },
             .{ .env = "OCTOPASS_PERMISSION", .field = "Permission" },
+            // GitLab-specific environment variables
+            .{ .env = "OCTOPASS_GROUP", .field = "Group" },
+            .{ .env = "OCTOPASS_SUBGROUP", .field = "Subgroup" },
+            .{ .env = "OCTOPASS_PROJECT", .field = "Project" },
         };
 
         for (env_vars) |ev| {
@@ -251,21 +310,46 @@ pub const Config = struct {
     pub fn validate(self: *const Self) bool {
         if (self.token.len == 0) return false;
 
-        // Must have either team or repository mode
+        return switch (self.provider) {
+            .github => self.validateGitHub(),
+            .gitlab => self.validateGitLab(),
+        };
+    }
+
+    /// Validate GitHub-specific configuration
+    fn validateGitHub(self: *const Self) bool {
+        // Must have either team mode (organization + team) or repository mode (owner + repository)
         const has_team = self.organization != null and self.team != null;
         const has_repo = self.owner != null and self.repository != null;
-
         return has_team or has_repo;
     }
 
-    /// Check if using team mode
-    pub fn isTeamMode(self: *const Self) bool {
-        return self.organization != null and self.team != null;
+    /// Validate GitLab-specific configuration
+    fn validateGitLab(self: *const Self) bool {
+        // Must have group (organization field)
+        // Optionally can have subgroup or project (repository field)
+        return self.organization != null;
     }
 
-    /// Check if using repository collaborator mode
+    /// Check if using team mode (GitHub: org+team, GitLab: group+subgroup)
+    pub fn isTeamMode(self: *const Self) bool {
+        return switch (self.provider) {
+            .github => self.organization != null and self.team != null,
+            .gitlab => self.organization != null and self.subgroup != null,
+        };
+    }
+
+    /// Check if using repository/project collaborator mode
     pub fn isRepositoryMode(self: *const Self) bool {
         return self.repository != null;
+    }
+
+    /// Check if using group-only mode (GitLab specific)
+    pub fn isGroupMode(self: *const Self) bool {
+        return self.provider == .gitlab and
+            self.organization != null and
+            self.subgroup == null and
+            self.repository == null;
     }
 
     /// Mask token for logging
@@ -397,5 +481,93 @@ test "Config validate" {
     // With organization and team is valid
     config.organization = "org";
     config.team = "team";
+    try std.testing.expect(config.validate());
+}
+
+test "Config parse GitLab group only" {
+    const allocator = std.testing.allocator;
+
+    const content =
+        \\Provider = "gitlab"
+        \\Token = "glpat-test123"
+        \\Group = "mygroup"
+    ;
+
+    var config = Config.init(allocator);
+    defer config.deinit();
+
+    try config.parse(content);
+    try config.applyDefaults();
+
+    try std.testing.expectEqual(types.ProviderType.gitlab, config.provider);
+    try std.testing.expectEqualStrings("glpat-test123", config.token);
+    try std.testing.expectEqualStrings("mygroup", config.organization.?);
+    try std.testing.expectEqualStrings(types.default_gitlab_endpoint, config.endpoint);
+    try std.testing.expect(config.validate());
+    try std.testing.expect(config.isGroupMode());
+}
+
+test "Config parse GitLab group and subgroup" {
+    const allocator = std.testing.allocator;
+
+    const content =
+        \\Provider = "gitlab"
+        \\Token = "glpat-test123"
+        \\Group = "mygroup"
+        \\Subgroup = "mysubgroup"
+    ;
+
+    var config = Config.init(allocator);
+    defer config.deinit();
+
+    try config.parse(content);
+    try config.applyDefaults();
+
+    try std.testing.expectEqual(types.ProviderType.gitlab, config.provider);
+    try std.testing.expectEqualStrings("mygroup", config.organization.?);
+    try std.testing.expectEqualStrings("mysubgroup", config.subgroup.?);
+    try std.testing.expect(config.validate());
+    try std.testing.expect(config.isTeamMode());
+}
+
+test "Config parse GitLab group and project" {
+    const allocator = std.testing.allocator;
+
+    const content =
+        \\Provider = "gitlab"
+        \\Token = "glpat-test123"
+        \\Group = "mygroup"
+        \\Project = "myproject"
+        \\Permission = "write"
+    ;
+
+    var config = Config.init(allocator);
+    defer config.deinit();
+
+    try config.parse(content);
+    try config.applyDefaults();
+
+    try std.testing.expectEqual(types.ProviderType.gitlab, config.provider);
+    try std.testing.expectEqualStrings("mygroup", config.organization.?);
+    try std.testing.expectEqualStrings("myproject", config.repository.?);
+    try std.testing.expectEqual(types.Permission.write, config.permission);
+    try std.testing.expect(config.validate());
+    try std.testing.expect(config.isRepositoryMode());
+}
+
+test "Config validate GitLab" {
+    const allocator = std.testing.allocator;
+
+    var config = Config.init(allocator);
+    defer config.deinit();
+
+    config.provider = .gitlab;
+    config.token = "test";
+
+    // GitLab with only token is invalid (needs group)
+    try std.testing.expect(!config.validate());
+
+    // With group (organization) is valid
+    config.organization = "mygroup";
     try std.testing.expect(config.validate());
 }
