@@ -90,16 +90,38 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    const gitlab_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/gitlab.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+
+    const provider_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/provider.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+
     const run_types_tests = b.addRunArtifact(types_tests);
     const run_config_tests = b.addRunArtifact(config_tests);
     const run_cache_tests = b.addRunArtifact(cache_tests);
     const run_github_tests = b.addRunArtifact(github_tests);
+    const run_gitlab_tests = b.addRunArtifact(gitlab_tests);
+    const run_provider_tests = b.addRunArtifact(provider_tests);
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_types_tests.step);
     test_step.dependOn(&run_config_tests.step);
     test_step.dependOn(&run_cache_tests.step);
     test_step.dependOn(&run_github_tests.step);
+    test_step.dependOn(&run_gitlab_tests.step);
+    test_step.dependOn(&run_provider_tests.step);
 
     // Format check
     const fmt_step = b.step("fmt", "Format source code");

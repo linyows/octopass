@@ -4,7 +4,7 @@ const Allocator = std.mem.Allocator;
 const config_mod = @import("config.zig");
 const types = @import("types.zig");
 const log = @import("log.zig");
-const github_mod = @import("github.zig");
+const provider_mod = @import("provider.zig");
 
 pub const NssStatus = types.NssStatus;
 
@@ -63,10 +63,10 @@ pub const GlobalState = struct {
 
         try self.loadConfig();
 
-        var github = github_mod.GitHubProvider.init(self.allocator, &self.config.?, &self.logger);
-        defer github.deinit();
+        var provider = provider_mod.Provider.init(self.allocator, &self.config.?, &self.logger);
+        defer provider.deinit();
 
-        self.users = github.getMembers(self.allocator) catch |err| {
+        self.users = provider.getMembers(self.allocator) catch |err| {
             self.logger.err("getMembers failed: {}", .{err});
             return error.NetworkError;
         };

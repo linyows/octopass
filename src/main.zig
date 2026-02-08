@@ -2,7 +2,7 @@ const std = @import("std");
 const config_mod = @import("config.zig");
 const types = @import("types.zig");
 const log = @import("log.zig");
-const github_mod = @import("github.zig");
+const provider_mod = @import("provider.zig");
 const nss_common = @import("nss_common.zig");
 
 const Allocator = std.mem.Allocator;
@@ -157,21 +157,21 @@ fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var github = github_mod.GitHubProvider.init(allocator, &config, &logger);
-    defer github.deinit();
+    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    defer provider.deinit();
 
     // Check if user is a shared user
     for (config.shared_users) |shared_user| {
         if (std.mem.eql(u8, username, shared_user)) {
             // Get all team members' keys for shared users
-            const users = github.getMembers(allocator) catch |err| {
+            const users = provider.getMembers(allocator) catch |err| {
                 writeError("Failed to get members: {}\n", .{err});
                 std.process.exit(1);
             };
             defer types.freeUsers(allocator, users);
 
             for (users) |user| {
-                const keys = github.getUserKeys(allocator, user.login) catch continue;
+                const keys = provider.getUserKeys(allocator, user.login) catch continue;
                 defer allocator.free(keys);
                 _ = std.posix.write(std.posix.STDOUT_FILENO, keys) catch {};
             }
@@ -180,7 +180,7 @@ fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) 
     }
 
     // Get keys for specific user
-    const keys = github.getUserKeys(allocator, username) catch |err| {
+    const keys = provider.getUserKeys(allocator, username) catch |err| {
         writeError("Failed to get keys for {s}: {}\n", .{ username, err });
         std.process.exit(1);
     };
@@ -227,11 +227,11 @@ fn runPam(allocator: Allocator, config_path: []const u8, username: []const u8) !
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var github = github_mod.GitHubProvider.init(allocator, &config, &logger);
-    defer github.deinit();
+    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    defer provider.deinit();
 
     // Authenticate with token
-    const authenticated = github.authenticate(username, token) catch {
+    const authenticated = provider.authenticate(username, token) catch {
         return 1;
     };
 
@@ -250,10 +250,10 @@ fn runPasswd(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !v
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var github = github_mod.GitHubProvider.init(allocator, &config, &logger);
-    defer github.deinit();
+    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    defer provider.deinit();
 
-    const users = github.getMembers(allocator) catch |err| {
+    const users = provider.getMembers(allocator) catch |err| {
         writeError("Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };
@@ -310,10 +310,10 @@ fn runGroup(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !vo
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var github = github_mod.GitHubProvider.init(allocator, &config, &logger);
-    defer github.deinit();
+    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    defer provider.deinit();
 
-    const users = github.getMembers(allocator) catch |err| {
+    const users = provider.getMembers(allocator) catch |err| {
         writeError("Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };
@@ -351,10 +351,10 @@ fn runShadow(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !v
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var github = github_mod.GitHubProvider.init(allocator, &config, &logger);
-    defer github.deinit();
+    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    defer provider.deinit();
 
-    const users = github.getMembers(allocator) catch |err| {
+    const users = provider.getMembers(allocator) catch |err| {
         writeError("Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };

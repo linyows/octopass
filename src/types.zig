@@ -7,7 +7,9 @@ pub const version_with_name = "octopass/" ++ version;
 
 pub const default_config_file = "/etc/octopass.conf";
 pub const default_cache_dir = "/var/cache/octopass";
-pub const default_api_endpoint = "https://api.github.com/";
+pub const default_github_endpoint = "https://api.github.com/";
+pub const default_gitlab_endpoint = "https://gitlab.com/api/v4/";
+pub const default_api_endpoint = default_github_endpoint; // For backward compatibility
 pub const max_buffer_size: usize = 10 * 1024 * 1024; // 10MB
 
 /// GitHub/Provider user representation
@@ -50,16 +52,25 @@ pub const Response = struct {
 /// Provider type enumeration
 pub const ProviderType = enum {
     github,
-    // Future: sakura, gitlab, etc.
+    gitlab,
 
     pub fn fromString(s: []const u8) ?ProviderType {
         if (std.mem.eql(u8, s, "github")) return .github;
+        if (std.mem.eql(u8, s, "gitlab")) return .gitlab;
         return null;
     }
 
     pub fn toString(self: ProviderType) []const u8 {
         return switch (self) {
             .github => "github",
+            .gitlab => "gitlab",
+        };
+    }
+
+    pub fn defaultEndpoint(self: ProviderType) []const u8 {
+        return switch (self) {
+            .github => default_github_endpoint,
+            .gitlab => default_gitlab_endpoint,
         };
     }
 };
@@ -77,11 +88,22 @@ pub const Permission = enum {
         return null;
     }
 
+    /// Returns GitHub permission string (admin, push, pull)
     pub fn toString(self: Permission) []const u8 {
         return switch (self) {
             .admin => "admin",
             .write => "push",
             .read => "pull",
+        };
+    }
+
+    /// Convert to GitLab access level
+    /// GitLab access levels: 10=Guest, 20=Reporter, 30=Developer, 40=Maintainer, 50=Owner
+    pub fn toGitLabAccessLevel(self: Permission) i64 {
+        return switch (self) {
+            .admin => 40, // Maintainer
+            .write => 30, // Developer
+            .read => 20, // Reporter
         };
     }
 };
@@ -165,7 +187,13 @@ pub fn freeTeams(allocator: Allocator, teams: []Team) void {
 
 test "ProviderType fromString" {
     try std.testing.expectEqual(ProviderType.github, ProviderType.fromString("github").?);
+    try std.testing.expectEqual(ProviderType.gitlab, ProviderType.fromString("gitlab").?);
     try std.testing.expectEqual(@as(?ProviderType, null), ProviderType.fromString("unknown"));
+}
+
+test "ProviderType defaultEndpoint" {
+    try std.testing.expectEqualStrings(default_github_endpoint, ProviderType.github.defaultEndpoint());
+    try std.testing.expectEqualStrings(default_gitlab_endpoint, ProviderType.gitlab.defaultEndpoint());
 }
 
 test "Permission fromString" {
@@ -179,6 +207,12 @@ test "Permission toString" {
     try std.testing.expectEqualStrings("admin", Permission.admin.toString());
     try std.testing.expectEqualStrings("push", Permission.write.toString());
     try std.testing.expectEqualStrings("pull", Permission.read.toString());
+}
+
+test "Permission toGitLabAccessLevel" {
+    try std.testing.expectEqual(@as(i64, 40), Permission.admin.toGitLabAccessLevel());
+    try std.testing.expectEqual(@as(i64, 30), Permission.write.toGitLabAccessLevel());
+    try std.testing.expectEqual(@as(i64, 20), Permission.read.toGitLabAccessLevel());
 }
 
 test "findUserByLogin" {
