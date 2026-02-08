@@ -3,12 +3,13 @@ name: End-to-end Testing
 on:
   push:
     branches: [main]
-  pull_request:
     paths:
       - '**.zig'
       - '**.zig.zon'
       - 'packaging/**'
   workflow_dispatch:
+  issue_comment:
+    types: [created]
 
 jobs:
   build:
@@ -49,6 +50,18 @@ jobs:
           - rockylinux-8
           - almalinux-9
           - almalinux-8
+    # Run if:
+    # 1. push to main or workflow_dispatch
+    # 2. issue_comment with '/run-e2e' from maintainer on a PR
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/run-e2e') &&
+       (github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'COLLABORATOR'))
 
     steps:
       - name: Checkout
@@ -69,3 +82,27 @@ jobs:
         run: |
           docker compose build ${{ matrix.distro }}
           docker compose run --rm ${{ matrix.distro }}
+
+      - name: Comment on success
+        if: success() && github.event_name == 'issue_comment'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ E2E test passed successfully!'
+            });
+      - name: Comment on failure
+        if: failure() && github.event_name == 'issue_comment'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `❌ E2E test failed. [View logs](${runUrl})`
+            });
