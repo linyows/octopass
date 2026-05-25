@@ -47,6 +47,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - distro: ubuntu-resolute
+            type: deb
+            pc_distro: ubuntu
+            pc_version: resolute
           - distro: ubuntu-noble
             type: deb
             pc_distro: ubuntu
@@ -147,6 +151,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - distro: ubuntu-resolute
+            type: deb
+            pc_distro: ubuntu
+            pc_version: resolute
           - distro: ubuntu-noble
             type: deb
             pc_distro: ubuntu

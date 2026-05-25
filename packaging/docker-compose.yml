@@ -2,6 +2,20 @@ name: octopass
 
 services:
   # Debian-based distributions
+  ubuntu-resolute:
+    build:
+      context: ..
+      dockerfile: packaging/docker/Dockerfile.deb
+      args:
+        BASE_IMAGE: ubuntu:resolute
+    volumes:
+      - .:/packaging
+    environment:
+      - VERSION
+      - OCTOPASS_TOKEN
+      - OCTOPASS_ORGANIZATION
+      - OCTOPASS_TEAM
+
   ubuntu-noble:
     build:
       context: ..

@@ -42,6 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
+          - ubuntu-resolute
           - ubuntu-noble
           - ubuntu-questing
           - debian-bookworm

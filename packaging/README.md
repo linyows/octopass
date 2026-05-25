@@ -26,10 +26,11 @@ packaging/
 
 | Distribution | Version | Package Type |
 |--------------|---------|--------------|
+| Ubuntu Resolute | 26.04 LTS | deb |
 | Ubuntu Noble | 24.04 LTS | deb |
-| Ubuntu Questing | 25.04 | deb |
-| Debian Bookworm | 12 (stable) | deb |
-| Debian Trixie | 13 (testing) | deb |
+| Ubuntu Questing | 25.10 | deb |
+| Debian Bookworm | 12 (oldstable) | deb |
+| Debian Trixie | 13 (stable) | deb |
 | Rocky Linux | 9.x | rpm |
 | Rocky Linux | 8.x | rpm |
 | AlmaLinux | 9.x | rpm |
@@ -50,6 +51,7 @@ docker compose up
 cd packaging
 
 # Debian/Ubuntu
+docker compose run --rm ubuntu-resolute
 docker compose run --rm ubuntu-noble
 docker compose run --rm ubuntu-questing
 docker compose run --rm debian-bookworm
