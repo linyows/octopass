@@ -1,3 +1,11 @@
+octopass (1.2.0-1) DIST; urgency=medium
+
+  * Add GitLab provider support
+  * Change license from GPL-3.0 to MIT
+  * Add Ubuntu 26.04 LTS (Resolute) package support
+
+ -- linyows <linyows@gmail.com>  Mon, 25 May 2026 22:00:00 +0900
+
 octopass (1.1.0-1) DIST; urgency=medium
 
   * Add HMAC-SHA256 signed shared cache
