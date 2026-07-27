@@ -16,17 +16,19 @@ const user_url = "{s}user";
 
 pub const GitHubProvider = struct {
     allocator: Allocator,
+    io: std.Io,
     config: *const config_mod.Config,
     cache: cache_mod.Cache,
     logger: *log.Logger,
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator, config: *const config_mod.Config, logger: *log.Logger) Self {
+    pub fn init(allocator: Allocator, io: std.Io, config: *const config_mod.Config, logger: *log.Logger) Self {
         return .{
             .allocator = allocator,
+            .io = io,
             .config = config,
-            .cache = cache_mod.Cache.init(allocator, types.default_cache_dir, config.cache, config.token),
+            .cache = cache_mod.Cache.init(allocator, io, types.default_cache_dir, config.cache, config.token),
             .logger = logger,
         };
     }
@@ -173,7 +175,7 @@ pub const GitHubProvider = struct {
     fn httpGetNoCache(self: *Self, allocator: Allocator, url: []const u8, custom_token: ?[]const u8) types.ProviderError![]const u8 {
         self.logger.info("http get: {s}", .{url});
 
-        var client = http.Client{ .allocator = allocator };
+        var client = http.Client{ .allocator = allocator, .io = self.io };
         defer client.deinit();
 
         const token = custom_token orelse self.config.token;
@@ -214,7 +216,7 @@ pub const GitHubProvider = struct {
         var decompress: http.Decompress = undefined;
         var decompress_buf: [std.compress.flate.max_window_len]u8 = undefined;
         const reader = response.readerDecompressing(&transfer_buf, &decompress, &decompress_buf);
-        const body = reader.allocRemaining(allocator, std.io.Limit.limited(types.max_buffer_size)) catch {
+        const body = reader.allocRemaining(allocator, std.Io.Limit.limited(types.max_buffer_size)) catch {
             return types.ProviderError.NetworkError;
         };
 
@@ -234,7 +236,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -272,7 +274,7 @@ pub const GitHubProvider = struct {
 
         const required_permission = self.config.permission.toString();
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -318,7 +320,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var teams = std.ArrayListUnmanaged(types.Team){};
+        var teams = std.ArrayList(types.Team).empty;
         errdefer {
             for (teams.items) |*team| {
                 team.deinit(allocator);
@@ -358,7 +360,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var keys = std.ArrayListUnmanaged(u8){};
+        var keys = std.ArrayList(u8).empty;
         errdefer keys.deinit(allocator);
 
         for (root.array.items) |item| {
@@ -383,7 +385,7 @@ test "GitHubProvider init" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var github = GitHubProvider.init(allocator, &config, &logger);
+    var github = GitHubProvider.init(allocator, std.testing.io, &config, &logger);
     defer github.deinit();
 }
 
@@ -394,7 +396,7 @@ test "parseUsersJson" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var github = GitHubProvider.init(allocator, &config, &logger);
+    var github = GitHubProvider.init(allocator, std.testing.io, &config, &logger);
     defer github.deinit();
 
     const json_data =
@@ -421,7 +423,7 @@ test "parseTeamsJson" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var github = GitHubProvider.init(allocator, &config, &logger);
+    var github = GitHubProvider.init(allocator, std.testing.io, &config, &logger);
     defer github.deinit();
 
     const json_data =
@@ -447,7 +449,7 @@ test "extractKeys" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var github = GitHubProvider.init(allocator, &config, &logger);
+    var github = GitHubProvider.init(allocator, std.testing.io, &config, &logger);
     defer github.deinit();
 
     const json_data =

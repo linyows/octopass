@@ -28,27 +28,30 @@ const Command = enum {
     keys, // Default: get public keys for a user
 };
 
+/// Write raw bytes to stdout
+fn writeOut(io: std.Io, bytes: []const u8) void {
+    std.Io.File.stdout().writeStreamingAll(io, bytes) catch return;
+}
+
 /// Write formatted output to stdout
-fn writeStdout(comptime fmt: []const u8, args: anytype) void {
+fn writeStdout(io: std.Io, comptime fmt: []const u8, args: anytype) void {
     var buf: [4096]u8 = undefined;
     const result = std.fmt.bufPrint(&buf, fmt, args) catch return;
-    _ = std.posix.write(std.posix.STDOUT_FILENO, result) catch return;
+    writeOut(io, result);
 }
 
 /// Write error message to stderr
-fn writeError(comptime fmt: []const u8, args: anytype) void {
+fn writeError(io: std.Io, comptime fmt: []const u8, args: anytype) void {
     var buf: [4096]u8 = undefined;
     const result = std.fmt.bufPrint(&buf, ANSI_RED ++ "Error: " ++ ANSI_RESET ++ fmt, args) catch return;
-    _ = std.posix.write(std.posix.STDERR_FILENO, result) catch return;
+    std.Io.File.stderr().writeStreamingAll(io, result) catch return;
 }
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
+    const io = init.io;
 
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
+    const args = try init.minimal.args.toSlice(init.arena.allocator());
 
     // Parse global options first
     var config_path: []const u8 = types.default_config_file;
@@ -59,17 +62,17 @@ pub fn main() !void {
         const arg = args[arg_index];
         if (std.mem.eql(u8, arg, "-c") or std.mem.eql(u8, arg, "--config")) {
             if (arg_index + 1 >= args.len) {
-                writeError("Missing argument for {s}\n", .{arg});
+                writeError(io, "Missing argument for {s}\n", .{arg});
                 std.process.exit(2);
             }
             const path_arg = args[arg_index + 1];
             // Convert relative path to absolute path
             if (!std.fs.path.isAbsolute(path_arg)) {
-                const cwd = std.fs.cwd();
-                config_path = cwd.realpath(path_arg, &config_path_buf) catch |err| {
-                    writeError("Failed to resolve config path '{s}': {}\n", .{ path_arg, err });
+                const len = std.Io.Dir.cwd().realPathFile(io, path_arg, &config_path_buf) catch |err| {
+                    writeError(io, "Failed to resolve config path '{s}': {}\n", .{ path_arg, err });
                     std.process.exit(2);
                 };
+                config_path = config_path_buf[0..len];
             } else {
                 config_path = path_arg;
             }
@@ -80,7 +83,7 @@ pub fn main() !void {
     }
 
     if (arg_index >= args.len) {
-        printUsage();
+        printUsage(io);
         std.process.exit(2);
     }
 
@@ -88,76 +91,76 @@ pub fn main() !void {
 
     // Check for help/version flags
     if (std.mem.eql(u8, arg1, "--help") or std.mem.eql(u8, arg1, "-h")) {
-        printUsage();
+        printUsage(io);
         std.process.exit(2);
     }
 
     if (std.mem.eql(u8, arg1, "--version") or std.mem.eql(u8, arg1, "-v")) {
-        printVersion();
+        printVersion(io);
         return;
     }
 
     // Parse command
     if (std.mem.eql(u8, arg1, "passwd")) {
         const key = if (arg_index + 1 < args.len) args[arg_index + 1] else null;
-        try runPasswd(allocator, config_path, key);
+        try runPasswd(allocator, io, config_path, key);
     } else if (std.mem.eql(u8, arg1, "group")) {
         const key = if (arg_index + 1 < args.len) args[arg_index + 1] else null;
-        try runGroup(allocator, config_path, key);
+        try runGroup(allocator, io, config_path, key);
     } else if (std.mem.eql(u8, arg1, "shadow")) {
         const key = if (arg_index + 1 < args.len) args[arg_index + 1] else null;
-        try runShadow(allocator, config_path, key);
+        try runShadow(allocator, io, config_path, key);
     } else if (std.mem.eql(u8, arg1, "pam")) {
-        const user = if (arg_index + 1 < args.len) args[arg_index + 1] else std.posix.getenv("PAM_USER");
+        const user = if (arg_index + 1 < args.len) args[arg_index + 1] else init.environ_map.get("PAM_USER");
         if (user == null) {
-            writeError("User is required\n", .{});
+            writeError(io, "User is required\n", .{});
             std.process.exit(2);
         }
-        const exit_code = try runPam(allocator, config_path, user.?);
+        const exit_code = try runPam(allocator, io, config_path, user.?);
         std.process.exit(exit_code);
     } else {
         // Default: treat as username and get public keys
-        try runKeys(allocator, config_path, arg1);
+        try runKeys(allocator, io, config_path, arg1);
     }
 }
 
-fn printVersion() void {
-    writeStdout("{s}\n", .{types.version_with_name});
+fn printVersion(io: std.Io) void {
+    writeStdout(io, "{s}\n", .{types.version_with_name});
 }
 
-fn printUsage() void {
+fn printUsage(io: std.Io) void {
     // Logo with green color
-    _ = std.posix.write(std.posix.STDOUT_FILENO, ANSI_GREEN) catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, logo) catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, ANSI_RESET) catch {};
+    writeOut(io, ANSI_GREEN);
+    writeOut(io, logo);
+    writeOut(io, ANSI_RESET);
 
     // Description with dim color
-    _ = std.posix.write(std.posix.STDOUT_FILENO, "\n") catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, ANSI_DIM) catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, desc) catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, ANSI_RESET) catch {};
+    writeOut(io, "\n");
+    writeOut(io, ANSI_DIM);
+    writeOut(io, desc);
+    writeOut(io, ANSI_RESET);
 
     // Usage
-    _ = std.posix.write(std.posix.STDOUT_FILENO, "\n") catch {};
-    _ = std.posix.write(std.posix.STDOUT_FILENO, usage) catch {};
+    writeOut(io, "\n");
+    writeOut(io, usage);
 }
 
-fn loadConfig(allocator: Allocator, config_path: []const u8) !config_mod.Config {
-    return config_mod.Config.load(allocator, config_path) catch |err| {
-        writeError("Failed to load config: {}\n", .{err});
+fn loadConfig(allocator: Allocator, io: std.Io, config_path: []const u8) !config_mod.Config {
+    return config_mod.Config.load(allocator, io, config_path) catch |err| {
+        writeError(io, "Failed to load config: {}\n", .{err});
         return err;
     };
 }
 
 /// Get public keys for a user (default command)
-fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) !void {
-    var config = try loadConfig(allocator, config_path);
+fn runKeys(allocator: Allocator, io: std.Io, config_path: []const u8, username: []const u8) !void {
+    var config = try loadConfig(allocator, io, config_path);
     defer config.deinit();
 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    var provider = provider_mod.Provider.init(allocator, io, &config, &logger);
     defer provider.deinit();
 
     // Check if user is a shared user
@@ -165,7 +168,7 @@ fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) 
         if (std.mem.eql(u8, username, shared_user)) {
             // Get all team members' keys for shared users
             const users = provider.getMembers(allocator) catch |err| {
-                writeError("Failed to get members: {}\n", .{err});
+                writeError(io, "Failed to get members: {}\n", .{err});
                 std.process.exit(1);
             };
             defer types.freeUsers(allocator, users);
@@ -173,7 +176,7 @@ fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) 
             for (users) |user| {
                 const keys = provider.getUserKeys(allocator, user.login) catch continue;
                 defer allocator.free(keys);
-                _ = std.posix.write(std.posix.STDOUT_FILENO, keys) catch {};
+                writeOut(io, keys);
             }
             return;
         }
@@ -181,53 +184,47 @@ fn runKeys(allocator: Allocator, config_path: []const u8, username: []const u8) 
 
     // Get keys for specific user
     const keys = provider.getUserKeys(allocator, username) catch |err| {
-        writeError("Failed to get keys for {s}: {}\n", .{ username, err });
+        writeError(io, "Failed to get keys for {s}: {}\n", .{ username, err });
         std.process.exit(1);
     };
     defer allocator.free(keys);
 
-    _ = std.posix.write(std.posix.STDOUT_FILENO, keys) catch return;
+    writeOut(io, keys);
 }
 
 /// PAM authentication - read token from stdin
-fn runPam(allocator: Allocator, config_path: []const u8, username: []const u8) !u8 {
+fn runPam(allocator: Allocator, io: std.Io, config_path: []const u8, username: []const u8) !u8 {
     // Read token from stdin
-    const stdin = std.fs.File{ .handle = std.posix.STDIN_FILENO };
     var buf: [4096]u8 = undefined;
+    var stdin_reader = std.Io.File.stdin().readerStreaming(io, &buf);
 
-    var token_buf = std.ArrayListUnmanaged(u8){};
-    defer token_buf.deinit(allocator);
-
-    while (true) {
-        const n = stdin.read(&buf) catch {
-            writeError("Failed to read token from stdin\n", .{});
-            return 2;
-        };
-        if (n == 0) break;
-        token_buf.appendSlice(allocator, buf[0..n]) catch {
-            writeError("Out of memory\n", .{});
-            return 2;
-        };
-    }
+    const token_buf = stdin_reader.interface.allocRemaining(
+        allocator,
+        .limited(types.max_buffer_size),
+    ) catch {
+        writeError(io, "Failed to read token from stdin\n", .{});
+        return 2;
+    };
+    defer allocator.free(token_buf);
 
     // Trim newline
-    var token = token_buf.items;
+    var token = token_buf;
     if (token.len > 0 and token[token.len - 1] == '\n') {
         token = token[0 .. token.len - 1];
     }
 
     if (token.len == 0) {
-        writeError("Token is required\n", .{});
+        writeError(io, "Token is required\n", .{});
         return 2;
     }
 
-    var config = loadConfig(allocator, config_path) catch return 2;
+    var config = loadConfig(allocator, io, config_path) catch return 2;
     defer config.deinit();
 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    var provider = provider_mod.Provider.init(allocator, io, &config, &logger);
     defer provider.deinit();
 
     // Authenticate with token
@@ -243,18 +240,18 @@ fn runPam(allocator: Allocator, config_path: []const u8, username: []const u8) !
 }
 
 /// Display passwd entries
-fn runPasswd(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !void {
-    var config = try loadConfig(allocator, config_path);
+fn runPasswd(allocator: Allocator, io: std.Io, config_path: []const u8, key: ?[]const u8) !void {
+    var config = try loadConfig(allocator, io, config_path);
     defer config.deinit();
 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    var provider = provider_mod.Provider.init(allocator, io, &config, &logger);
     defer provider.deinit();
 
     const users = provider.getMembers(allocator) catch |err| {
-        writeError("Failed to get members: {}\n", .{err});
+        writeError(io, "Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };
     defer types.freeUsers(allocator, users);
@@ -268,32 +265,32 @@ fn runPasswd(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !v
             for (users) |user| {
                 const user_uid = config.uid_starts + user.id;
                 if (user_uid == uid) {
-                    printPasswdEntry(&config, user);
+                    printPasswdEntry(io, &config, user);
                     return;
                 }
             }
         } else {
             // Find by name
             if (types.findUserByLogin(users, k)) |user| {
-                printPasswdEntry(&config, user.*);
+                printPasswdEntry(io, &config, user.*);
                 return;
             }
         }
     } else {
         // List all
         for (users) |user| {
-            printPasswdEntry(&config, user);
+            printPasswdEntry(io, &config, user);
         }
     }
 }
 
-fn printPasswdEntry(config: *const config_mod.Config, user: types.User) void {
+fn printPasswdEntry(io: std.Io, config: *const config_mod.Config, user: types.User) void {
     const uid = config.uid_starts + user.id;
 
     var home_buf: [256]u8 = undefined;
     const home = if (nss_common.simpleFormatHomePath(&home_buf, config.home, user.login)) |h| h else "/home/user";
 
-    writeStdout("{s}:x:{d}:{d}:managed by octopass:{s}:{s}\n", .{
+    writeStdout(io, "{s}:x:{d}:{d}:managed by octopass:{s}:{s}\n", .{
         user.login,
         uid,
         config.gid,
@@ -303,18 +300,18 @@ fn printPasswdEntry(config: *const config_mod.Config, user: types.User) void {
 }
 
 /// Display group entries
-fn runGroup(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !void {
-    var config = try loadConfig(allocator, config_path);
+fn runGroup(allocator: Allocator, io: std.Io, config_path: []const u8, key: ?[]const u8) !void {
+    var config = try loadConfig(allocator, io, config_path);
     defer config.deinit();
 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    var provider = provider_mod.Provider.init(allocator, io, &config, &logger);
     defer provider.deinit();
 
     const users = provider.getMembers(allocator) catch |err| {
-        writeError("Failed to get members: {}\n", .{err});
+        writeError(io, "Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };
     defer types.freeUsers(allocator, users);
@@ -333,29 +330,29 @@ fn runGroup(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !vo
     }
 
     // Print group entry
-    writeStdout("{s}:x:{d}:", .{ group_name, config.gid });
+    writeStdout(io, "{s}:x:{d}:", .{ group_name, config.gid });
 
     // Print members
     for (users, 0..) |user, i| {
-        if (i > 0) writeStdout(",", .{});
-        writeStdout("{s}", .{user.login});
+        if (i > 0) writeStdout(io, ",", .{});
+        writeStdout(io, "{s}", .{user.login});
     }
-    writeStdout("\n", .{});
+    writeStdout(io, "\n", .{});
 }
 
 /// Display shadow entries
-fn runShadow(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !void {
-    var config = try loadConfig(allocator, config_path);
+fn runShadow(allocator: Allocator, io: std.Io, config_path: []const u8, key: ?[]const u8) !void {
+    var config = try loadConfig(allocator, io, config_path);
     defer config.deinit();
 
     var logger = log.Logger.init("octopass", config.syslog);
     defer logger.close();
 
-    var provider = provider_mod.Provider.init(allocator, &config, &logger);
+    var provider = provider_mod.Provider.init(allocator, io, &config, &logger);
     defer provider.deinit();
 
     const users = provider.getMembers(allocator) catch |err| {
-        writeError("Failed to get members: {}\n", .{err});
+        writeError(io, "Failed to get members: {}\n", .{err});
         std.process.exit(1);
     };
     defer types.freeUsers(allocator, users);
@@ -365,25 +362,25 @@ fn runShadow(allocator: Allocator, config_path: []const u8, key: ?[]const u8) !v
         const is_number = std.fmt.parseInt(i64, k, 10) catch null;
 
         if (is_number != null) {
-            writeError("Invalid arguments: {s}\n", .{k});
+            writeError(io, "Invalid arguments: {s}\n", .{k});
             return;
         }
 
         // Find by name
         if (types.findUserByLogin(users, k)) |user| {
-            printShadowEntry(user.*);
+            printShadowEntry(io, user.*);
             return;
         }
     } else {
         // List all
         for (users) |user| {
-            printShadowEntry(user);
+            printShadowEntry(io, user);
         }
     }
 }
 
-fn printShadowEntry(user: types.User) void {
+fn printShadowEntry(io: std.Io, user: types.User) void {
     // Format: name:password:lastchg:min:max:warn:inactive:expire:reserved
     // Using !! for locked password and -1 for unset values
-    writeStdout("{s}:!!:-1:-1:-1:-1:-1:-1:\n", .{user.login});
+    writeStdout(io, "{s}:!!:-1:-1:-1:-1:-1:-1:\n", .{user.login});
 }

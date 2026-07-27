@@ -47,7 +47,7 @@ pub const GlobalState = struct {
     pub fn loadConfig(self: *Self) !void {
         if (self.config != null) return;
 
-        self.config = config_mod.Config.load(self.allocator, types.default_config_file) catch |err| {
+        self.config = config_mod.Config.load(self.allocator, getIo(), types.default_config_file) catch |err| {
             self.logger.err("config load failed: {}", .{err});
             return error.ConfigNotFound;
         };
@@ -63,7 +63,7 @@ pub const GlobalState = struct {
 
         try self.loadConfig();
 
-        var provider = provider_mod.Provider.init(self.allocator, &self.config.?, &self.logger);
+        var provider = provider_mod.Provider.init(self.allocator, getIo(), &self.config.?, &self.logger);
         defer provider.deinit();
 
         self.users = provider.getMembers(self.allocator) catch |err| {
@@ -76,10 +76,30 @@ pub const GlobalState = struct {
 };
 
 /// Thread-safe mutex for NSS operations
-pub var nss_mutex: std.Thread.Mutex = .{};
+pub var nss_mutex: std.Io.Mutex = .init;
+
+pub fn lockNss() void {
+    nss_mutex.lockUncancelable(getIo());
+}
+
+pub fn unlockNss() void {
+    nss_mutex.unlock(getIo());
+}
 
 /// Global allocator for NSS (using C allocator for compatibility)
 pub const nss_allocator = std.heap.c_allocator;
+
+/// NSS entry points are called from libc, so they cannot receive an `Io` from
+/// `std.process.Init` the way `main` does.
+///
+/// This library is dlopened into other people's processes, so it must not
+/// spawn threads or touch signal dispositions the way `Io.Threaded.init`
+/// does. The static instance does neither, and everything used here (config
+/// file reads, `std.http.Client`) is sequential, so the missing async and
+/// cancelation support costs nothing.
+pub fn getIo() std.Io {
+    return std.Io.Threaded.global_single_threaded.io();
+}
 
 /// Global state instance
 var global_state: ?GlobalState = null;

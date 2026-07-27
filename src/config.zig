@@ -86,19 +86,21 @@ pub const Config = struct {
     }
 
     /// Load configuration from file
-    pub fn load(allocator: Allocator, filename: []const u8) !Self {
+    pub fn load(allocator: Allocator, io: std.Io, filename: []const u8) !Self {
         var config = Self.init(allocator);
         errdefer config.deinit();
 
-        const file = std.fs.openFileAbsolute(filename, .{}) catch |err| {
+        const content = std.Io.Dir.cwd().readFileAlloc(
+            io,
+            filename,
+            allocator,
+            .limited(types.max_buffer_size),
+        ) catch |err| {
             if (err == error.FileNotFound) {
                 return error.ConfigNotFound;
             }
             return err;
         };
-        defer file.close();
-
-        const content = try file.readToEndAlloc(allocator, types.max_buffer_size);
         defer allocator.free(content);
 
         try config.parse(content);
@@ -198,7 +200,7 @@ pub const Config = struct {
 
     /// Parse SharedUsers array format: [ "user1", "user2" ]
     fn parseSharedUsers(self: *Self, value: []const u8) !void {
-        var users = std.ArrayListUnmanaged([]const u8){};
+        var users = std.ArrayList([]const u8).empty;
         errdefer {
             for (users.items) |user| {
                 self.allocator.free(user);
@@ -278,10 +280,19 @@ pub const Config = struct {
         }
     }
 
+    /// Read the process environment through libc.
+    ///
+    /// `std.posix.getenv` is gone in Zig 0.16, and the NSS entry points have no
+    /// `std.process.Init` to take an environment from, so go to libc directly.
+    /// Every artifact here links libc.
+    fn processEnviron() std.process.Environ {
+        return .{ .block = .{ .slice = @ptrCast(std.mem.sliceTo(std.c.environ, null)) } };
+    }
+
     /// Override config values from environment variables
     fn overrideFromEnv(self: *Self) !void {
         // Provider must be set first as it affects how other env vars are interpreted
-        if (std.posix.getenv("OCTOPASS_PROVIDER")) |value| {
+        if (processEnviron().getPosix("OCTOPASS_PROVIDER")) |value| {
             try self.setValue("Provider", value);
         }
 
@@ -300,7 +311,7 @@ pub const Config = struct {
         };
 
         for (env_vars) |ev| {
-            if (std.posix.getenv(ev.env)) |value| {
+            if (processEnviron().getPosix(ev.env)) |value| {
                 try self.setValue(ev.field, value);
             }
         }

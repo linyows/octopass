@@ -67,8 +67,8 @@ pub fn packGroupStruct(
 
 /// setgrent - Initialize group enumeration
 pub fn setgrent(stayopen: c_int) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     _ = stayopen;
 
@@ -85,8 +85,8 @@ pub fn setgrent(stayopen: c_int) NssStatus {
 
 /// endgrent - End group enumeration
 pub fn endgrent() NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
     state.reset();
@@ -101,8 +101,8 @@ pub fn getgrent_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
@@ -146,8 +146,8 @@ pub fn getgrnam_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
@@ -191,8 +191,8 @@ pub fn getgrgid_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
