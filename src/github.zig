@@ -234,7 +234,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -272,7 +272,7 @@ pub const GitHubProvider = struct {
 
         const required_permission = self.config.permission.toString();
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -318,7 +318,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var teams = std.ArrayListUnmanaged(types.Team){};
+        var teams = std.ArrayList(types.Team).empty;
         errdefer {
             for (teams.items) |*team| {
                 team.deinit(allocator);
@@ -358,7 +358,7 @@ pub const GitHubProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var keys = std.ArrayListUnmanaged(u8){};
+        var keys = std.ArrayList(u8).empty;
         errdefer keys.deinit(allocator);
 
         for (root.array.items) |item| {

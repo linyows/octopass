@@ -64,7 +64,7 @@ sudo apt-get install octopass
 **ソースからビルド：**
 
 ```bash
-# Zig 0.15+ が必要
+# Zig 0.16+ が必要
 zig build -Doptimize=ReleaseSafe
 
 # NSS ライブラリをインストール

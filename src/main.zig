@@ -195,7 +195,7 @@ fn runPam(allocator: Allocator, config_path: []const u8, username: []const u8) !
     const stdin = std.fs.File{ .handle = std.posix.STDIN_FILENO };
     var buf: [4096]u8 = undefined;
 
-    var token_buf = std.ArrayListUnmanaged(u8){};
+    var token_buf = std.ArrayList(u8).empty;
     defer token_buf.deinit(allocator);
 
     while (true) {

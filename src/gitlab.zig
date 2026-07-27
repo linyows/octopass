@@ -285,7 +285,7 @@ pub const GitLabProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -323,7 +323,7 @@ pub const GitLabProvider = struct {
 
         const required_access_level = self.config.permission.toGitLabAccessLevel();
 
-        var users = std.ArrayListUnmanaged(types.User){};
+        var users = std.ArrayList(types.User).empty;
         errdefer {
             for (users.items) |*user| {
                 user.deinit(allocator);
@@ -369,7 +369,7 @@ pub const GitLabProvider = struct {
         const root = parsed.value;
         if (root != .array) return types.ProviderError.JsonParseError;
 
-        var keys = std.ArrayListUnmanaged(u8){};
+        var keys = std.ArrayList(u8).empty;
         errdefer keys.deinit(allocator);
 
         for (root.array.items) |item| {
@@ -388,7 +388,7 @@ pub const GitLabProvider = struct {
 
 /// URL encode path segments (replace '/' with '%2F')
 fn urlEncodePath(allocator: Allocator, path: []const u8) ![]const u8 {
-    var result = std.ArrayListUnmanaged(u8){};
+    var result = std.ArrayList(u8).empty;
     errdefer result.deinit(allocator);
 
     for (path) |c| {

@@ -198,7 +198,7 @@ pub const Config = struct {
 
     /// Parse SharedUsers array format: [ "user1", "user2" ]
     fn parseSharedUsers(self: *Self, value: []const u8) !void {
-        var users = std.ArrayListUnmanaged([]const u8){};
+        var users = std.ArrayList([]const u8).empty;
         errdefer {
             for (users.items) |user| {
                 self.allocator.free(user);

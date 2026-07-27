@@ -202,7 +202,7 @@ fn ensureDirectory(path: []const u8) !void {
 
 /// URL encode a string for safe filename
 fn urlEncode(allocator: Allocator, input: []const u8) ![]const u8 {
-    var result = std.ArrayListUnmanaged(u8){};
+    var result = std.ArrayList(u8).empty;
     errdefer result.deinit(allocator);
 
     for (input) |char| {
