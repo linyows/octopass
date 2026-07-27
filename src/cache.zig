@@ -15,6 +15,7 @@ pub const fallback_cache_dir = "/tmp/octopass";
 
 pub const Cache = struct {
     allocator: Allocator,
+    io: std.Io,
     cache_dir: []const u8,
     ttl_seconds: i64,
     enabled: bool,
@@ -23,10 +24,10 @@ pub const Cache = struct {
     const Self = @This();
     const HmacSha256 = std.crypto.auth.hmac.sha2.HmacSha256;
 
-    pub fn init(allocator: Allocator, cache_dir: []const u8, ttl_seconds: i64, token: []const u8) Self {
+    pub fn init(allocator: Allocator, io: std.Io, cache_dir: []const u8, ttl_seconds: i64, token: []const u8) Self {
         // Check if cache_dir exists, fallback to /tmp/octopass if not
         const actual_cache_dir = blk: {
-            std.fs.accessAbsolute(cache_dir, .{}) catch {
+            std.Io.Dir.accessAbsolute(io, cache_dir, .{}) catch {
                 break :blk fallback_cache_dir;
             };
             break :blk cache_dir;
@@ -34,6 +35,7 @@ pub const Cache = struct {
 
         return .{
             .allocator = allocator,
+            .io = io,
             .cache_dir = actual_cache_dir,
             .ttl_seconds = ttl_seconds,
             .enabled = ttl_seconds > 0,
@@ -59,13 +61,13 @@ pub const Cache = struct {
     pub fn get(self: *Self, key: []const u8) ?[]const u8 {
         if (!self.enabled) return null;
 
-        const file = std.fs.openFileAbsolute(key, .{}) catch return null;
-        defer file.close();
+        const file = std.Io.Dir.openFileAbsolute(self.io, key, .{}) catch return null;
+        defer file.close(self.io);
 
         // Check file modification time
-        const stat = file.stat() catch return null;
-        const mtime_sec = @divFloor(stat.mtime, std.time.ns_per_s);
-        const now = std.time.timestamp();
+        const stat = file.stat(self.io) catch return null;
+        const mtime_sec = stat.mtime.toSeconds();
+        const now = std.Io.Timestamp.now(self.io, .real).toSeconds();
 
         if (now - mtime_sec > self.ttl_seconds) {
             // Cache expired
@@ -73,7 +75,12 @@ pub const Cache = struct {
         }
 
         // Read file content
-        const content = file.readToEndAlloc(self.allocator, types.max_buffer_size) catch return null;
+        var read_buf: [4096]u8 = undefined;
+        var file_reader = file.reader(self.io, &read_buf);
+        const content = file_reader.interface.allocRemaining(
+            self.allocator,
+            .limited(types.max_buffer_size),
+        ) catch return null;
 
         // Verify signature: first 64 chars are hex signature, then newline, then data
         if (content.len < 66) { // 64 hex chars + newline + at least 1 byte data
@@ -113,19 +120,21 @@ pub const Cache = struct {
         const dir_path = key[0..dir_end];
 
         // Create directory structure with 0o755 permissions
-        try ensureDirectory(dir_path);
+        try ensureDirectory(self.io, dir_path);
 
         // Compute HMAC signature
         const signature = self.computeHmac(data);
 
         // Write file with 0o666 permissions
-        const file = std.fs.createFileAbsolute(key, .{ .mode = 0o666 }) catch return error.WriteFileFailed;
-        defer file.close();
+        const file = std.Io.Dir.createFileAbsolute(self.io, key, .{
+            .permissions = .default_file,
+        }) catch return error.WriteFileFailed;
+        defer file.close(self.io);
 
         // Write signature + newline + data
-        file.writeAll(&signature) catch return error.WriteFileFailed;
-        file.writeAll("\n") catch return error.WriteFileFailed;
-        file.writeAll(data) catch return error.WriteFileFailed;
+        file.writeStreamingAll(self.io, &signature) catch return error.WriteFileFailed;
+        file.writeStreamingAll(self.io, "\n") catch return error.WriteFileFailed;
+        file.writeStreamingAll(self.io, data) catch return error.WriteFileFailed;
     }
 
     /// Compute HMAC-SHA256 signature and return as hex string
@@ -151,13 +160,12 @@ pub const Cache = struct {
 
     /// Invalidate cache entry
     pub fn invalidate(self: *Self, key: []const u8) void {
-        _ = self;
-        std.fs.deleteFileAbsolute(key) catch {};
+        std.Io.Dir.deleteFileAbsolute(self.io, key) catch {};
     }
 
     /// Clear all cache
     pub fn clear(self: *Self) void {
-        std.fs.deleteTreeAbsolute(self.cache_dir) catch {};
+        std.Io.Dir.cwd().deleteTree(self.io, self.cache_dir) catch {};
     }
 };
 
@@ -172,8 +180,8 @@ fn setPermissions(path: []const u8, mode: std.c.mode_t) void {
 }
 
 /// Ensure directory exists with 0o755 permissions
-fn ensureDirectory(path: []const u8) !void {
-    std.fs.makeDirAbsolute(path) catch |err| {
+fn ensureDirectory(io: std.Io, path: []const u8) !void {
+    std.Io.Dir.createDirAbsolute(io, path, .default_dir) catch |err| {
         switch (err) {
             error.PathAlreadyExists => {
                 // Ensure permissions are correct
@@ -184,8 +192,8 @@ fn ensureDirectory(path: []const u8) !void {
                 // Parent directory doesn't exist, create recursively
                 if (std.mem.lastIndexOf(u8, path, "/")) |parent_end| {
                     if (parent_end > 0) {
-                        try ensureDirectory(path[0..parent_end]);
-                        std.fs.makeDirAbsolute(path) catch |e| {
+                        try ensureDirectory(io, path[0..parent_end]);
+                        std.Io.Dir.createDirAbsolute(io, path, .default_dir) catch |e| {
                             if (e != error.PathAlreadyExists) return e;
                         };
                         setPermissions(path, 0o755);
@@ -240,7 +248,7 @@ test "urlEncode safe chars" {
 
 test "Cache init" {
     const allocator = std.testing.allocator;
-    const cache = Cache.init(allocator, "/tmp/cache", 300, "test_token");
+    const cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 300, "test_token");
 
     try std.testing.expect(cache.enabled);
     try std.testing.expectEqual(@as(i64, 300), cache.ttl_seconds);
@@ -249,14 +257,14 @@ test "Cache init" {
 
 test "Cache disabled when ttl is 0" {
     const allocator = std.testing.allocator;
-    const cache = Cache.init(allocator, "/tmp/cache", 0, "test_token");
+    const cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 0, "test_token");
 
     try std.testing.expect(!cache.enabled);
 }
 
 test "computeHmac produces correct hex output" {
     const allocator = std.testing.allocator;
-    var cache = Cache.init(allocator, "/tmp/cache", 300, "secret_key");
+    var cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 300, "secret_key");
 
     const signature = cache.computeHmac("test data");
     try std.testing.expectEqual(@as(usize, 64), signature.len);
@@ -269,7 +277,7 @@ test "computeHmac produces correct hex output" {
 
 test "verifyHmac validates correct signature" {
     const allocator = std.testing.allocator;
-    var cache = Cache.init(allocator, "/tmp/cache", 300, "secret_key");
+    var cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 300, "secret_key");
 
     const data = "test data";
     const signature = cache.computeHmac(data);
@@ -279,7 +287,7 @@ test "verifyHmac validates correct signature" {
 
 test "verifyHmac rejects incorrect signature" {
     const allocator = std.testing.allocator;
-    var cache = Cache.init(allocator, "/tmp/cache", 300, "secret_key");
+    var cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 300, "secret_key");
 
     const data = "test data";
     const wrong_signature = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -289,7 +297,7 @@ test "verifyHmac rejects incorrect signature" {
 
 test "verifyHmac rejects tampered data" {
     const allocator = std.testing.allocator;
-    var cache = Cache.init(allocator, "/tmp/cache", 300, "secret_key");
+    var cache = Cache.init(allocator, std.testing.io, "/tmp/cache", 300, "secret_key");
 
     const original_data = "test data";
     const signature = cache.computeHmac(original_data);
@@ -301,7 +309,7 @@ test "verifyHmac rejects tampered data" {
 test "generateKey produces shared path without euid" {
     const allocator = std.testing.allocator;
     // Use /tmp which always exists
-    var cache = Cache.init(allocator, "/tmp", 300, "test_token");
+    var cache = Cache.init(allocator, std.testing.io, "/tmp", 300, "test_token");
 
     const key = try cache.generateKey("https://api.github.com/test", "abc123");
     defer allocator.free(key);

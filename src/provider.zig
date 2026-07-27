@@ -15,10 +15,10 @@ pub const Provider = union(types.ProviderType) {
     const Self = @This();
 
     /// Initialize provider based on config
-    pub fn init(allocator: Allocator, config: *const config_mod.Config, logger: *log.Logger) Self {
+    pub fn init(allocator: Allocator, io: std.Io, config: *const config_mod.Config, logger: *log.Logger) Self {
         return switch (config.provider) {
-            .github => .{ .github = github_mod.GitHubProvider.init(allocator, config, logger) },
-            .gitlab => .{ .gitlab = gitlab_mod.GitLabProvider.init(allocator, config, logger) },
+            .github => .{ .github = github_mod.GitHubProvider.init(allocator, io, config, logger) },
+            .gitlab => .{ .gitlab = gitlab_mod.GitLabProvider.init(allocator, io, config, logger) },
         };
     }
 
@@ -63,7 +63,7 @@ test "Provider init GitHub" {
     config.provider = .github;
 
     var logger = log.Logger.init("test", false);
-    var provider = Provider.init(allocator, &config, &logger);
+    var provider = Provider.init(allocator, std.testing.io, &config, &logger);
     defer provider.deinit();
 
     try std.testing.expectEqual(types.ProviderType.github, @as(types.ProviderType, provider));
@@ -77,7 +77,7 @@ test "Provider init GitLab" {
     config.provider = .gitlab;
 
     var logger = log.Logger.init("test", false);
-    var provider = Provider.init(allocator, &config, &logger);
+    var provider = Provider.init(allocator, std.testing.io, &config, &logger);
     defer provider.deinit();
 
     try std.testing.expectEqual(types.ProviderType.gitlab, @as(types.ProviderType, provider));

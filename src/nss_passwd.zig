@@ -71,8 +71,8 @@ pub fn packPasswdStruct(
 
 /// setpwent - Initialize passwd enumeration
 pub fn setpwent(stayopen: c_int) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     _ = stayopen;
 
@@ -91,8 +91,8 @@ pub fn setpwent(stayopen: c_int) NssStatus {
 
 /// endpwent - End passwd enumeration
 pub fn endpwent() NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
     state.reset();
@@ -107,8 +107,8 @@ pub fn getpwent_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
@@ -152,8 +152,8 @@ pub fn getpwnam_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
@@ -196,8 +196,8 @@ pub fn getpwuid_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 

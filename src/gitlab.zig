@@ -17,17 +17,19 @@ const current_user_url = "{s}user";
 
 pub const GitLabProvider = struct {
     allocator: Allocator,
+    io: std.Io,
     config: *const config_mod.Config,
     cache: cache_mod.Cache,
     logger: *log.Logger,
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator, config: *const config_mod.Config, logger: *log.Logger) Self {
+    pub fn init(allocator: Allocator, io: std.Io, config: *const config_mod.Config, logger: *log.Logger) Self {
         return .{
             .allocator = allocator,
+            .io = io,
             .config = config,
-            .cache = cache_mod.Cache.init(allocator, types.default_cache_dir, config.cache, config.token),
+            .cache = cache_mod.Cache.init(allocator, io, types.default_cache_dir, config.cache, config.token),
             .logger = logger,
         };
     }
@@ -227,7 +229,7 @@ pub const GitLabProvider = struct {
     fn httpGetNoCache(self: *Self, allocator: Allocator, url: []const u8, custom_token: ?[]const u8) types.ProviderError![]const u8 {
         self.logger.info("http get: {s}", .{url});
 
-        var client = http.Client{ .allocator = allocator };
+        var client = http.Client{ .allocator = allocator, .io = self.io };
         defer client.deinit();
 
         const token = custom_token orelse self.config.token;
@@ -265,7 +267,7 @@ pub const GitLabProvider = struct {
         var decompress: http.Decompress = undefined;
         var decompress_buf: [std.compress.flate.max_window_len]u8 = undefined;
         const reader = response.readerDecompressing(&transfer_buf, &decompress, &decompress_buf);
-        const body = reader.allocRemaining(allocator, std.io.Limit.limited(types.max_buffer_size)) catch {
+        const body = reader.allocRemaining(allocator, std.Io.Limit.limited(types.max_buffer_size)) catch {
             return types.ProviderError.NetworkError;
         };
 
@@ -410,7 +412,7 @@ test "GitLabProvider init" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var gitlab = GitLabProvider.init(allocator, &config, &logger);
+    var gitlab = GitLabProvider.init(allocator, std.testing.io, &config, &logger);
     defer gitlab.deinit();
 }
 
@@ -437,7 +439,7 @@ test "parseUsersJson" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var gitlab = GitLabProvider.init(allocator, &config, &logger);
+    var gitlab = GitLabProvider.init(allocator, std.testing.io, &config, &logger);
     defer gitlab.deinit();
 
     const json_data =
@@ -465,7 +467,7 @@ test "parseMembersWithPermission" {
     config.permission = .write; // access_level >= 30
 
     var logger = log.Logger.init("test", false);
-    var gitlab = GitLabProvider.init(allocator, &config, &logger);
+    var gitlab = GitLabProvider.init(allocator, std.testing.io, &config, &logger);
     defer gitlab.deinit();
 
     const json_data =
@@ -493,7 +495,7 @@ test "extractKeys" {
     defer config.deinit();
 
     var logger = log.Logger.init("test", false);
-    var gitlab = GitLabProvider.init(allocator, &config, &logger);
+    var gitlab = GitLabProvider.init(allocator, std.testing.io, &config, &logger);
     defer gitlab.deinit();
 
     const json_data =

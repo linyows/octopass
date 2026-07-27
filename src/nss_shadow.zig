@@ -53,8 +53,8 @@ pub fn packShadowStruct(
 
 /// setspent - Initialize shadow enumeration
 pub fn setspent(stayopen: c_int) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     _ = stayopen;
 
@@ -71,8 +71,8 @@ pub fn setspent(stayopen: c_int) NssStatus {
 
 /// endspent - End shadow enumeration
 pub fn endspent() NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
     state.reset();
@@ -87,8 +87,8 @@ pub fn getspent_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
@@ -127,8 +127,8 @@ pub fn getspnam_r(
     buflen: usize,
     errnop: *c_int,
 ) NssStatus {
-    common.nss_mutex.lock();
-    defer common.nss_mutex.unlock();
+    common.lockNss();
+    defer common.unlockNss();
 
     const state = common.getGlobalState();
 
