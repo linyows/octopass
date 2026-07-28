@@ -1,6 +1,6 @@
 Summary:          Management linux user and authentication with team or collaborator on Github.
 Name:             octopass
-Version:          1.2.0
+Version:          1.3.0
 Release:          1%{?dist}
 License:          MIT
 URL:              https://github.com/linyows/octopass
@@ -98,6 +98,10 @@ fi
 %{_datadir}/selinux/packages/%{name}/%{name}.pp
 
 %changelog
+* Tue Jul 28 2026 linyows <linyows@gmail.com> - 1.3.0-1
+- Build with Zig 0.16.0
+- Fix the macOS build broken by the Xcode 26.4+ SDK
+
 * Mon May 25 2026 linyows <linyows@gmail.com> - 1.2.0-1
 - Add GitLab provider support
 - Change license from GPL-3.0 to MIT

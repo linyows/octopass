@@ -1,3 +1,10 @@
+octopass (1.3.0-1) DIST; urgency=medium
+
+  * Build with Zig 0.16.0
+  * Fix the macOS build broken by the Xcode 26.4+ SDK
+
+ -- linyows <linyows@gmail.com>  Tue, 28 Jul 2026 08:30:00 +0900
+
 octopass (1.2.0-1) DIST; urgency=medium
 
   * Add GitLab provider support
