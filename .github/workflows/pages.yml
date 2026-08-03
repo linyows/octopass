@@ -27,7 +27,7 @@ jobs:
           cache: npm
           cache-dependency-path: website/package-lock.json
       - name: Setup pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         with:
           static_site_generator: next
       - name: Restore next cache
