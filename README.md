@@ -23,15 +23,17 @@ octopass brings GitHub's team management to your Linux servers. No more manually
 
 ## Why octopass?
 
-🔑 **SSH keys from GitHub** — Users authenticate with their GitHub SSH keys. No key distribution needed.
+**SSH keys from GitHub** — Users authenticate with their GitHub SSH keys. No key distribution needed.
 
-👥 **Team-based access** — Grant server access by GitHub team membership. Add to team = server access.
+**Team-based access** — Grant server access by GitHub team membership. Add to team = server access.
 
-🔄 **Always in sync** — User lists and keys are fetched from GitHub API. Remove from team = access revoked.
+**Always in sync** — User lists and keys are fetched from GitHub API. Remove from team = access revoked.
 
-🛡️ **Secure by design** — No passwords stored on servers. Authentication via GitHub personal access tokens.
+**Secure by design** — No passwords stored on servers. Authentication via GitHub personal access tokens.
 
-📦 **Zero dependencies** — Single static binary. No runtime dependencies beyond libc.
+**GitLab support** — Use GitLab groups, subgroups or projects instead of GitHub teams.
+
+**Zero dependencies** — Single static binary. No runtime dependencies beyond libc.
 
 ## How it works
 
@@ -149,8 +151,9 @@ echo $GITHUB_TOKEN | octopass pam alice
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `Token` | GitHub personal access token | (required) |
-| `Organization` | GitHub organization name | (required) |
+| `Provider` | `github` or `gitlab` | `github` |
+| `Token` | GitHub or GitLab personal access token | (required) |
+| `Organization` | GitHub organization name | (required for GitHub team mode) |
 | `Team` | GitHub team slug | (required for team mode) |
 | `Owner` | Repository owner (for collaborator mode) | - |
 | `Repository` | Repository name (for collaborator mode) | - |
@@ -158,7 +161,9 @@ echo $GITHUB_TOKEN | octopass pam alice
 | `Endpoint` | GitHub API endpoint | `https://api.github.com/` |
 | `UidStarts` | Starting UID for GitHub users | `2000` |
 | `Gid` | GID for the team group | `2000` |
-| `Group` | Linux group name | team name |
+| `Group` | Linux group name (GitLab: group path) | team name |
+| `Subgroup` | GitLab subgroup (for GitLab) | - |
+| `Project` | GitLab project (for GitLab) | - |
 | `Home` | Home directory pattern (`%s` = username) | `/home/%s` |
 | `Shell` | Default shell | `/bin/bash` |
 | `Cache` | Cache TTL in seconds (0 = disabled) | `500` |
@@ -176,6 +181,29 @@ Repository = "your-repo"
 Permission = "write"  # Only collaborators with write access
 ```
 
+## GitLab
+
+Set `Provider` to `gitlab` to use GitLab instead of GitHub. The token needs the `read_api` scope, and `Endpoint` defaults to `https://gitlab.com/api/v4/` (set it for self-managed GitLab). With GitLab, `Group` is the GitLab group path, and members are taken from one of the following:
+
+```ini
+Provider = "gitlab"
+Token = "glpat-xxxxxxxxxxxxxxxxxxxx"
+
+# Members of a group
+Group = "your-group"
+
+# Members of a subgroup (your-group/your-subgroup)
+Group = "your-group"
+Subgroup = "your-subgroup"
+
+# Members of a project (your-group/your-project)
+Group = "your-group"
+Project = "your-project"
+Permission = "write"  # read = Reporter, write = Developer, admin = Maintainer
+```
+
+`Permission` applies to project members, and maps to GitLab access levels. The Linux group name defaults to the subgroup, project or group name.
+
 ## Shared Users
 
 For shared accounts (like `deploy` or `admin`), you can allow any team member to authenticate:
@@ -190,12 +218,17 @@ When someone SSHs as `deploy`, all team members' SSH keys are accepted.
 
 Configuration can be overridden with environment variables:
 
+- `OCTOPASS_PROVIDER`
 - `OCTOPASS_TOKEN`
 - `OCTOPASS_ENDPOINT`
 - `OCTOPASS_ORGANIZATION`
 - `OCTOPASS_TEAM`
 - `OCTOPASS_OWNER`
 - `OCTOPASS_REPOSITORY`
+- `OCTOPASS_PERMISSION`
+- `OCTOPASS_GROUP` (GitLab)
+- `OCTOPASS_SUBGROUP` (GitLab)
+- `OCTOPASS_PROJECT` (GitLab)
 
 ## Why Zig?
 
