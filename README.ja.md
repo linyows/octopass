@@ -31,6 +31,8 @@ octopass は GitHub のチーム管理を Linux サーバーに持ち込みま�
 
 🛡️ **セキュアな設計** — サーバーにパスワードを保存しません。GitHub パーソナルアクセストークンで認証。
 
+🦊 **GitLab 対応** — GitHub チームの代わりに、GitLab のグループ、サブグループ、プロジェクトも使えます。
+
 📦 **依存関係ゼロ** — 単一の静的バイナリ。libc 以外のランタイム依存なし。
 
 ## 仕組み
@@ -149,8 +151,9 @@ echo $GITHUB_TOKEN | octopass pam alice
 
 | オプション | 説明 | デフォルト |
 |-----------|------|-----------|
-| `Token` | GitHub パーソナルアクセストークン | (必須) |
-| `Organization` | GitHub Organization 名 | (必須) |
+| `Provider` | `github` または `gitlab` | `github` |
+| `Token` | GitHub または GitLab のパーソナルアクセストークン | (必須) |
+| `Organization` | GitHub Organization 名 | (GitHub のチームモードでは必須) |
 | `Team` | GitHub チームスラッグ | (チームモードでは必須) |
 | `Owner` | リポジトリオーナー（コラボレーターモード用） | - |
 | `Repository` | リポジトリ名（コラボレーターモード用） | - |
@@ -158,7 +161,9 @@ echo $GITHUB_TOKEN | octopass pam alice
 | `Endpoint` | GitHub API エンドポイント | `https://api.github.com/` |
 | `UidStarts` | GitHub ユーザーの開始 UID | `2000` |
 | `Gid` | チームグループの GID | `2000` |
-| `Group` | Linux グループ名 | チーム名 |
+| `Group` | Linux グループ名（GitLab ではグループのパス） | チーム名 |
+| `Subgroup` | GitLab のサブグループ（GitLab 用） | - |
+| `Project` | GitLab のプロジェクト（GitLab 用） | - |
 | `Home` | ホームディレクトリパターン（`%s` = ユーザー名） | `/home/%s` |
 | `Shell` | デフォルトシェル | `/bin/bash` |
 | `Cache` | キャッシュ TTL（秒、0 = 無効） | `500` |
@@ -176,6 +181,29 @@ Repository = "your-repo"
 Permission = "write"  # write 権限を持つコラボレーターのみ
 ```
 
+## GitLab
+
+`Provider` を `gitlab` にすると、GitHub の代わりに GitLab を使えます。トークンには `read_api` スコープが必要です。`Endpoint` のデフォルトは `https://gitlab.com/api/v4/` で、セルフマネージドの GitLab ではこれを設定します。GitLab では `Group` が GitLab のグループのパスを表し、メンバーは次のいずれかから取得します：
+
+```ini
+Provider = "gitlab"
+Token = "glpat-xxxxxxxxxxxxxxxxxxxx"
+
+# グループのメンバー
+Group = "your-group"
+
+# サブグループのメンバー（your-group/your-subgroup）
+Group = "your-group"
+Subgroup = "your-subgroup"
+
+# プロジェクトのメンバー（your-group/your-project）
+Group = "your-group"
+Project = "your-project"
+Permission = "write"  # read = Reporter, write = Developer, admin = Maintainer
+```
+
+`Permission` はプロジェクトのメンバーに適用され、GitLab のアクセスレベルに対応します。Linux グループ名のデフォルトは、サブグループ名、プロジェクト名、グループ名の順で決まります。
+
 ## 共有ユーザー
 
 共有アカウント（`deploy` や `admin` など）では、チームメンバー全員が認証できるようにできます：
@@ -190,12 +218,17 @@ SharedUsers = ["deploy", "admin"]
 
 設定は環境変数で上書きできます：
 
+- `OCTOPASS_PROVIDER`
 - `OCTOPASS_TOKEN`
 - `OCTOPASS_ENDPOINT`
 - `OCTOPASS_ORGANIZATION`
 - `OCTOPASS_TEAM`
 - `OCTOPASS_OWNER`
 - `OCTOPASS_REPOSITORY`
+- `OCTOPASS_PERMISSION`
+- `OCTOPASS_GROUP`（GitLab）
+- `OCTOPASS_SUBGROUP`（GitLab）
+- `OCTOPASS_PROJECT`（GitLab）
 
 ## なぜ Zig？
 
