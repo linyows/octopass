@@ -23,17 +23,17 @@ octopass brings GitHub's team management to your Linux servers. No more manually
 
 ## Why octopass?
 
-🔑 **SSH keys from GitHub** — Users authenticate with their GitHub SSH keys. No key distribution needed.
+**SSH keys from GitHub** — Users authenticate with their GitHub SSH keys. No key distribution needed.
 
-👥 **Team-based access** — Grant server access by GitHub team membership. Add to team = server access.
+**Team-based access** — Grant server access by GitHub team membership. Add to team = server access.
 
-🔄 **Always in sync** — User lists and keys are fetched from GitHub API. Remove from team = access revoked.
+**Always in sync** — User lists and keys are fetched from GitHub API. Remove from team = access revoked.
 
-🛡️ **Secure by design** — No passwords stored on servers. Authentication via GitHub personal access tokens.
+**Secure by design** — No passwords stored on servers. Authentication via GitHub personal access tokens.
 
-🦊 **GitLab support** — Use GitLab groups, subgroups or projects instead of GitHub teams.
+**GitLab support** — Use GitLab groups, subgroups or projects instead of GitHub teams.
 
-📦 **Zero dependencies** — Single static binary. No runtime dependencies beyond libc.
+**Zero dependencies** — Single static binary. No runtime dependencies beyond libc.
 
 ## How it works
 
