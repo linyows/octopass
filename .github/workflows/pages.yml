@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: 0 0 * * *
 
 concurrency:
   group: "pages"
@@ -15,8 +13,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +21,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: website/package-lock.json
+          cache-dependency-path: docs/package-lock.json
       - name: Setup pages
         uses: actions/configure-pages@v5
         with:
@@ -34,30 +30,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            website/.next/cache
+            docs/.next/cache
           key: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
-      - name: Restore rotion cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            website/.cache
-            website/public/images
-          key: rotion
-          restore-keys: rotion
       - name: Install dependencies
-        working-directory: website
+        working-directory: docs
         run: npm ci
       - name: Build and Export
-        working-directory: website
+        working-directory: docs
         run: |
           npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./website/out
+          path: ./docs/out
 
   deploy:
     environment:

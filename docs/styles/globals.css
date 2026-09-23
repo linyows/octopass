@@ -1,0 +1,221 @@
+:root {
+  --border-radius: 8px;
+  --side-padding: 4rem;
+  --font-size: 1.1rem;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --background-color: rgb(255, 255, 255);
+  --foreground-color: rgb(94, 73, 85);
+  --primary-color: rgb(153, 104, 136);
+  --secondary-color: rgb(201, 157, 163);
+  --accent-color: rgb(198, 221, 240);
+  --code-background: rgb(246, 244, 245);
+  --rule-color: rgb(221, 221, 221);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: rgb(42, 43, 42);
+    --foreground-color: rgb(255, 255, 255);
+    --primary-color: rgb(201, 157, 163);
+    --secondary-color: rgb(153, 104, 136);
+    --code-background: rgb(30, 31, 30);
+    --rule-color: rgba(100, 100, 100, 0.4);
+  }
+  html {
+    color-scheme: dark;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --side-padding: 1rem;
+    --font-size: 1rem;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-size: var(--font-size);
+}
+
+body {
+  color: var(--foreground-color);
+  background-color: var(--background-color);
+  font-family: var(--font-sans), var(--font-ja), system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+html[lang='ja'] body {
+  line-height: 1.9;
+}
+
+b,
+strong,
+th,
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Markdown */
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  color: var(--primary-color);
+  line-height: 1.3;
+  margin: 2.5rem 0 1rem;
+}
+
+.markdown h1 {
+  font-size: 2rem;
+}
+
+.markdown h2 {
+  font-size: 1.6rem;
+}
+
+.markdown h3 {
+  font-size: 1.25rem;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown pre,
+.markdown table,
+.markdown blockquote {
+  margin: 0 0 1.2rem;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.5rem;
+}
+
+.markdown li + li {
+  margin-top: 0.3rem;
+}
+
+.markdown p a,
+.markdown li a,
+.markdown td a {
+  background-color: var(--accent-color);
+  padding: 0 0.2em;
+  border-radius: 3px;
+}
+
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown blockquote {
+  border-left: 3px solid var(--secondary-color);
+  padding-left: 1rem;
+}
+
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--code-background);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+
+.markdown pre {
+  background: var(--code-background);
+  border: 1px solid var(--rule-color);
+  border-radius: var(--border-radius);
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.markdown pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.markdown .shiki,
+.markdown .shiki span {
+  color: var(--shiki-light);
+}
+
+.markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.markdown th,
+.markdown td {
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown th {
+  border-bottom: 1px solid var(--foreground-color);
+}
+
+.markdown tbody tr:nth-child(even) {
+  background: var(--code-background);
+}
+
+.markdown tbody tr:nth-child(even) code {
+  background: var(--background-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown p a,
+  .markdown li a,
+  .markdown td a {
+    color: var(--accent-color);
+    background: none;
+    border-bottom: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 0;
+  }
+  .markdown .shiki,
+  .markdown .shiki span {
+    color: var(--shiki-dark);
+  }
+}
+
+.markdown pre.mermaid {
+  font-family: var(--font-sans), var(--font-ja), system-ui, sans-serif;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
+  color: transparent;
+}
+
+.markdown pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
