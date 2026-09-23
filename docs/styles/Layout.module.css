@@ -1,0 +1,107 @@
+.box {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav {
+  position: absolute;
+  top: 2rem;
+  right: var(--side-padding);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.github {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.github svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.github:hover {
+  color: var(--primary-color);
+}
+
+.header {
+  padding: 4rem var(--side-padding) 6rem;
+}
+
+.icon {
+  width: 100px;
+  margin-bottom: 1.5rem;
+}
+
+.logo {
+  width: 240px;
+}
+
+.icon img,
+.logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.columns {
+  flex: 1;
+  padding: 0 var(--side-padding) 8rem;
+  max-width: 2400px;
+  column-width: 30rem;
+  column-gap: 6rem;
+  column-rule: 1px solid var(--rule-color);
+}
+
+.columns :global(h2) {
+  break-after: avoid;
+}
+
+.columns :global(pre),
+.columns :global(table) {
+  break-inside: avoid;
+}
+
+.article {
+  flex: 1;
+  padding: 0 var(--side-padding) 8rem;
+  max-width: calc(50rem + var(--side-padding) * 2);
+}
+
+.footer {
+  padding: 2rem var(--side-padding) 6rem;
+  background: var(--secondary-color);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .icon {
+    width: 80px;
+  }
+  .logo {
+    width: 180px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .icon img,
+  .logo img {
+    filter: invert(100%);
+  }
+  .footer {
+    background: var(--primary-color);
+  }
+}

@@ -1,0 +1,58 @@
+.menu {
+  position: relative;
+  font-size: 0.85rem;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--foreground-color);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.menu[open] .chevron {
+  transform: translateY(25%) rotate(-135deg);
+}
+
+.list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 100%;
+  margin-top: -1px;
+  list-style: none;
+  border: 1px solid var(--foreground-color);
+  background: var(--background-color);
+}
+
+.item {
+  display: block;
+  padding: 0.35rem 0.9rem;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--code-background);
+}
+
+.item[aria-current='page'] {
+  color: var(--primary-color);
+  font-weight: 600;
+}

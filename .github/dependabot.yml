@@ -6,10 +6,10 @@ updates:
       interval: weekly
 
   # Dependabot has no zig ecosystem, so build.zig.zon is not covered here.
-  # The website is managed by hand; only security updates are wanted, and
+  # The docs site is managed by hand; only security updates are wanted, and
   # those are delivered regardless of this file.
   - package-ecosystem: npm
-    directory: /website
+    directory: /docs
     schedule:
       interval: weekly
     open-pull-requests-limit: 0
