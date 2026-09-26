@@ -50,13 +50,23 @@ body {
 body {
   color: var(--foreground-color);
   background-color: var(--background-color);
-  font-family: var(--font-sans), var(--font-ja), system-ui, sans-serif;
   font-weight: 300;
   line-height: 1.7;
 }
 
 html[lang='ja'] body {
   line-height: 1.9;
+}
+
+/* Use a single typeface per language so Latin glyphs in Japanese text are not
+   rendered with the English font. Elements with their own lang attribute (e.g.
+   the language menu items) switch to the matching typeface. */
+[lang='en'] {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+[lang='ja'] {
+  font-family: var(--font-ja), system-ui, sans-serif;
 }
 
 b,
@@ -207,7 +217,7 @@ a {
 }
 
 .markdown pre.mermaid {
-  font-family: var(--font-sans), var(--font-ja), system-ui, sans-serif;
+  font-family: inherit;
   background: none;
   border: none;
   padding: 0;
